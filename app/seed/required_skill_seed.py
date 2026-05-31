@@ -9,11 +9,11 @@ COMPANY_REQUIRED = [
     (13, 2, 0),   # Project Planning & Coordination
 ]
 
-# 팀별 Core 5 + Required 10 (총 15)
-# Core는 is_core=1, 일반 Required는 is_core=0
+# 팀별 Core 5 + Non-Core 3 = 8건 (HR이 화면에서 자유롭게 추가·삭제 가능)
+# Core는 is_core=1, Non-Core는 is_core=0
 TEAM_REQUIRED: dict[str, list[tuple[int, int, int]]] = {
-    # HR기획팀 (사무직) - Skill 카탈로그가 R&D/공정 위주라 사무직 매핑은 최소
-    # 추후 사용자가 화면에서 자유롭게 추가
+    # HR기획팀 (사무직) - 130 Skill 카탈로그가 R&D/공정 위주라 사무직 매핑은 제한적
+    # Core 3 + Non-Core 0 (사용자가 화면에서 추가 가능)
     "HR기획팀": [
         (13, 3, 1),  # Project Planning & Coordination - Core
         (17, 2, 1),  # 투자·유지보수 예산 계획 수립 및 통제 - Core
@@ -27,16 +27,9 @@ TEAM_REQUIRED: dict[str, list[tuple[int, int, int]]] = {
         (28, 3, 1),  # OLED 소재 분자 설계
         (30, 3, 1),  # 합성 Recipe 도출·실행
         (49, 2, 1),  # VOC-to-CTQ Translation
-        # Required 10
-        (4,  2, 0),  # 유기화학의 이해
-        (8,  2, 0),  # 고객 공정·소재의 기술적 이해
+        # Non-Core 3
         (22, 2, 0),  # 시험법 설계
         (24, 2, 0),  # DoE 기반 최적화
-        (27, 2, 0),  # Simulation 기반 설계
-        (29, 2, 0),  # 분자 설계 Parameter Targeting
-        (31, 2, 0),  # 승화 정제 조건 최적화
-        (50, 2, 0),  # Technical Feasibility 평가
-        (61, 2, 0),  # OLED 소자 측정·분석
         (63, 2, 0),  # 성능 평가 결과 분석/해석
     ],
     # 공정기술팀 (기술직) - Planning + Design + Analysis + Management 중심
@@ -47,17 +40,10 @@ TEAM_REQUIRED: dict[str, list[tuple[int, int, int]]] = {
         (26, 3, 1),  # 양산공정 설계·최적화
         (66, 2, 1),  # 생산공정 최적화
         (68, 2, 1),  # 통계적 공정관리(SPC)
-        # Required 10
-        (10, 2, 0),  # 분석 장비에 대한 이해
+        # Non-Core 3
         (12, 2, 0),  # Application CTQ 평가 Protocol 정의
-        (15, 2, 0),  # 측정 계획 수립 및 표준화
-        (18, 2, 0),  # 유지보수전략 수립 및 실행
-        (38, 2, 0),  # Process 설계
-        (64, 2, 0),  # 공정 Simulation
         (70, 2, 0),  # 공정 이상 원인분석-CAPA 이행
         (73, 2, 0),  # 측정 시스템 분석(MSA)
-        (78, 2, 0),  # Process 관리
-        (84, 2, 0),  # 공정/설비 엔지니어 문서 관리
     ],
 }
 

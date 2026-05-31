@@ -123,7 +123,11 @@ def _editor(df: pd.DataFrame, skills_df: pd.DataFrame, *, editable: bool, key: s
                 "target_level": st.column_config.NumberColumn(
                     "Target Level", min_value=1, max_value=4, step=1, required=True, width="small",
                 ),
-                "is_core":     st.column_config.CheckboxColumn("Core", width="small"),
+                "is_core":     st.column_config.CheckboxColumn(
+                    "Core",
+                    width="small",
+                    help="체크 = Core (필수), 비활성 = Non-Core (권장)",
+                ),
             },
         )
         # skill_id를 바꾸면 skill_name 자동 갱신 (저장 시점에 다시 표시되도록)
@@ -221,10 +225,13 @@ with tab_org:
         team_req = _enrich(_load_required("department", sel_team), skills_df)
 
         # KPI 카드
-        kcol1, kcol2, kcol3 = st.columns(3)
-        kcol1.metric("매핑 Skill 수", len(team_req))
-        kcol2.metric("Core Skill", int(team_req["is_core"].sum()) if not team_req.empty else 0)
-        kcol3.metric("평균 Target Level", f"L{team_req['target_level'].mean():.1f}" if not team_req.empty else "—")
+        kcol1, kcol2, kcol3, kcol4 = st.columns(4)
+        n_core = int(team_req["is_core"].sum()) if not team_req.empty else 0
+        n_total = len(team_req)
+        kcol1.metric("매핑 Skill 수", n_total)
+        kcol2.metric("Core", n_core)
+        kcol3.metric("Non-Core", n_total - n_core)
+        kcol4.metric("평균 Target Level", f"L{team_req['target_level'].mean():.1f}" if not team_req.empty else "—")
 
         edited_org = _editor(
             team_req, skills_df,
