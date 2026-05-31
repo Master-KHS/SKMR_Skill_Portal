@@ -62,6 +62,10 @@ def sync_members_from_xlsx() -> dict:
     conn = get_connection()
     try:
         cur = conn.cursor()
+        # 외래키 제약 임시 비활성화 — DELETE FROM member가
+        # skill_profile/assessment/evidence의 FK로 차단되는 것을 우회.
+        # 같은 connection 안에서만 적용되므로 안전.
+        cur.execute("PRAGMA foreign_keys = OFF")
         cur.execute("DELETE FROM member")
         cur.executemany(
             """INSERT INTO member
@@ -70,6 +74,7 @@ def sync_members_from_xlsx() -> dict:
                VALUES (?,?,?,?,?,?,?,?,?,?)""",
             rows,
         )
+        cur.execute("PRAGMA foreign_keys = ON")
         conn.commit()
     finally:
         conn.close()
