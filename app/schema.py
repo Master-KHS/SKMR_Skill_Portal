@@ -55,12 +55,14 @@ CREATE TABLE IF NOT EXISTS member (
 );
 
 -- 요구 스킬 (전사·조직·개인 단위)
+-- status: 'approved'(기본·자동 활성) / 'pending'(개인 신청, 팀장 승인 대기)
 CREATE TABLE IF NOT EXISTS required_skill (
     org_or_individual TEXT,        -- 'company' / 'department' / 'individual'
     target_id         TEXT,        -- 회사='ALL' / 부서명 / member_id
     skill_id          INTEGER,
     target_level      INTEGER,
     is_core           INTEGER DEFAULT 0,
+    status            TEXT    DEFAULT 'approved',  -- 'approved' / 'pending'
     PRIMARY KEY (org_or_individual, target_id, skill_id),
     FOREIGN KEY (skill_id) REFERENCES skill(skill_id)
 );
@@ -118,10 +120,20 @@ CREATE TABLE IF NOT EXISTS evidence_skill_link (
 
 
 def init_db() -> None:
-    """DB가 없으면 생성하고 모든 테이블을 만든다. 이미 있으면 무해 (IF NOT EXISTS)."""
+    """DB가 없으면 생성하고 모든 테이블을 만든다. 이미 있으면 무해 (IF NOT EXISTS).
+    스키마 변경 시 멱등 마이그레이션도 여기서 처리 (ALTER TABLE try-except)."""
+    import sqlite3 as _sqlite3
     conn = get_connection()
     try:
         conn.executescript(SCHEMA_SQL)
+        # 기존 DB에 status 컬럼이 없다면 추가 (멱등성 보장)
+        try:
+            conn.execute(
+                "ALTER TABLE required_skill ADD COLUMN status TEXT DEFAULT 'approved'"
+            )
+            # 기존 individual 행은 모두 approved로 간주 (DEFAULT가 적용됨)
+        except _sqlite3.OperationalError:
+            pass  # 이미 있는 컬럼이면 무시
         conn.commit()
     finally:
         conn.close()

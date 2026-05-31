@@ -115,7 +115,7 @@ def get_skill_workflow_state(member_id: str, team: str | None = None) -> pd.Data
             """SELECT skill_id, target_level, is_core FROM required_skill
                WHERE (org_or_individual='company' AND target_id='ALL')
                   OR (org_or_individual='department' AND target_id=?)
-                  OR (org_or_individual='individual' AND target_id=?)""",
+                  OR (org_or_individual='individual' AND target_id=? AND status='approved')""",
             conn, params=(team or "", member_id),
         )
         # 보유 Skill

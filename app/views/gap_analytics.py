@@ -76,7 +76,7 @@ def _load_required_for_member(member_id: str, team: str) -> pd.DataFrame:
                JOIN sub_skill_family sf ON s.sub_family_id = sf.sub_family_id
                WHERE (r.org_or_individual='company' AND r.target_id='ALL')
                   OR (r.org_or_individual='department' AND r.target_id=?)
-                  OR (r.org_or_individual='individual' AND r.target_id=?)""",
+                  OR (r.org_or_individual='individual' AND r.target_id=? AND r.status='approved')""",
             conn, params=(team, member_id),
         )
     finally:

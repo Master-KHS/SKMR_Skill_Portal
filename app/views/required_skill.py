@@ -28,18 +28,91 @@ def _load_skills() -> pd.DataFrame:
         conn.close()
 
 
-def _load_required(org_kind: str, target_id: str | None = None) -> pd.DataFrame:
+def _load_required(org_kind: str, target_id: str | None = None,
+                    status: str | None = None) -> pd.DataFrame:
+    """status=None이면 전체, 'approved'/'pending' 지정하면 해당 status만."""
     conn = get_connection()
     try:
-        if target_id is None:
-            return pd.read_sql_query(
-                "SELECT * FROM required_skill WHERE org_or_individual = ?",
-                conn, params=(org_kind,),
-            )
-        return pd.read_sql_query(
-            "SELECT * FROM required_skill WHERE org_or_individual = ? AND target_id = ?",
-            conn, params=(org_kind, target_id),
+        where = ["org_or_individual = ?"]
+        params: list = [org_kind]
+        if target_id is not None:
+            where.append("target_id = ?")
+            params.append(target_id)
+        if status is not None:
+            where.append("status = ?")
+            params.append(status)
+        sql = f"SELECT * FROM required_skill WHERE {' AND '.join(where)}"
+        return pd.read_sql_query(sql, conn, params=tuple(params))
+    finally:
+        conn.close()
+
+
+def _request_individual_skill(member_id: str, skill_id: int, target_level: int) -> bool:
+    """개인 Skill 신청 — status=pending으로 추가. 이미 같은 행 있으면 False."""
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        existing = cur.execute(
+            """SELECT status FROM required_skill
+               WHERE org_or_individual='individual' AND target_id=? AND skill_id=?""",
+            (member_id, skill_id),
+        ).fetchone()
+        if existing:
+            return False
+        cur.execute(
+            """INSERT INTO required_skill
+               (org_or_individual, target_id, skill_id, target_level, is_core, status)
+               VALUES ('individual', ?, ?, ?, 0, 'pending')""",
+            (member_id, skill_id, target_level),
         )
+        conn.commit()
+        return True
+    finally:
+        conn.close()
+
+
+def _approve_individual(member_id: str, skill_id: int) -> None:
+    conn = get_connection()
+    try:
+        conn.execute(
+            """UPDATE required_skill SET status='approved'
+               WHERE org_or_individual='individual' AND target_id=? AND skill_id=?""",
+            (member_id, skill_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _reject_individual(member_id: str, skill_id: int) -> None:
+    """반려 = 행 삭제 (이력 보관 필요해지면 추후 status='rejected'로 전환)."""
+    conn = get_connection()
+    try:
+        conn.execute(
+            """DELETE FROM required_skill
+               WHERE org_or_individual='individual' AND target_id=? AND skill_id=? AND status='pending'""",
+            (member_id, skill_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _cancel_pending(member_id: str, skill_id: int) -> None:
+    """본인이 자기 pending 신청 취소."""
+    _reject_individual(member_id, skill_id)
+
+
+def _remove_approved(member_id: str, skill_id: int) -> None:
+    """승인된 개인 Skill 제거 (팀장·HR Admin 권한)."""
+    conn = get_connection()
+    try:
+        conn.execute(
+            """DELETE FROM required_skill
+               WHERE org_or_individual='individual' AND target_id=? AND skill_id=? AND status='approved'""",
+            (member_id, skill_id),
+        )
+        conn.commit()
     finally:
         conn.close()
 
@@ -248,7 +321,7 @@ with tab_org:
                     st.error(f"저장 실패: {e}")
 
 
-# ---------- 개인별 ----------
+# ---------- 개인별 (신청 · 승인 워크플로) ----------
 with tab_indv:
     # 인원 목록
     conn = get_connection()
@@ -263,13 +336,82 @@ with tab_indv:
     finally:
         conn.close()
 
-    # 페르소나별 보이는 인원
+    # ===== 팀장 승인 대기 박스 (team_leader / hr_admin) =====
+    if persona in ("team_leader", "hr_admin"):
+        if persona == "team_leader" and member:
+            team_pending_filter = members_df["team"] == member.get("team", "")
+            scope_label = f"본인 팀 ({member.get('team','')})"
+        else:
+            team_pending_filter = pd.Series([True] * len(members_df))
+            scope_label = "전사 (HR Admin)"
+
+        pending_members = members_df[team_pending_filter]["employee_id"].tolist()
+        pending_rows = []
+        if pending_members:
+            placeholders = ",".join("?" for _ in pending_members)
+            conn = get_connection()
+            try:
+                pending_rows = conn.execute(
+                    f"""SELECT r.target_id, r.skill_id, r.target_level,
+                               m.name, m.team, m.role_level,
+                               s.skill_name, sf.sub_family_name, f.family_name
+                        FROM required_skill r
+                        JOIN member m ON r.target_id = m.employee_id
+                        JOIN skill s  ON r.skill_id = s.skill_id
+                        JOIN sub_skill_family sf ON s.sub_family_id = sf.sub_family_id
+                        JOIN skill_family f      ON sf.family_id    = f.family_id
+                        WHERE r.org_or_individual='individual' AND r.status='pending'
+                          AND r.target_id IN ({placeholders})
+                        ORDER BY r.target_id, r.skill_id""",
+                    pending_members,
+                ).fetchall()
+            finally:
+                conn.close()
+
+        with st.container(border=True):
+            head = st.columns([4, 1])
+            head[0].markdown(
+                f"<h5 style='color:{COLOR_NAVY}; margin:0;'>승인 대기 — {scope_label}</h5>",
+                unsafe_allow_html=True,
+            )
+            head[1].metric("Pending", len(pending_rows))
+
+            if not pending_rows:
+                st.caption("승인 대기 중인 개인 Skill 신청이 없습니다.")
+            else:
+                for r in pending_rows:
+                    pcols = st.columns([3, 1, 1, 1])
+                    pcols[0].markdown(
+                        f"<b>{r['name']}</b> <span style='color:{COLOR_TEXT_MED};'>"
+                        f"({r['team']} · {r['role_level']})</span><br>"
+                        f"<span style='color:{COLOR_TEXT_MED}; font-size:12px;'>"
+                        f"{r['family_name']} · {r['sub_family_name']}</span><br>"
+                        f"#{int(r['skill_id']):03d} {r['skill_name']}",
+                        unsafe_allow_html=True,
+                    )
+                    pcols[1].markdown(
+                        f"<div style='padding-top:12px;'>요구 <b>L{int(r['target_level'])}</b></div>",
+                        unsafe_allow_html=True,
+                    )
+                    if pcols[2].button("승인", key=f"approve_{r['target_id']}_{r['skill_id']}",
+                                        type="primary", use_container_width=True):
+                        _approve_individual(r["target_id"], int(r["skill_id"]))
+                        st.success(f"승인됨: {r['name']} #{int(r['skill_id']):03d}")
+                        st.rerun()
+                    if pcols[3].button("반려", key=f"reject_{r['target_id']}_{r['skill_id']}",
+                                        use_container_width=True):
+                        _reject_individual(r["target_id"], int(r["skill_id"]))
+                        st.warning(f"반려됨: {r['name']} #{int(r['skill_id']):03d}")
+                        st.rerun()
+        st.markdown("<br>", unsafe_allow_html=True)
+
+    # ===== 구성원 선택 =====
     if persona == "employee" and member:
         visible = members_df[members_df["employee_id"] == member["employee_id"]]
     elif persona == "team_leader" and member:
         visible = members_df[members_df["team"] == member.get("team", "")]
     else:
-        visible = members_df  # HR Admin·HR Viewer·Calibration·Committee는 전체
+        visible = members_df
 
     if visible.empty:
         st.warning("조회 가능한 인원이 없습니다.")
@@ -291,14 +433,13 @@ with tab_indv:
             key="indv_select",
         )
 
-        # 본인이 아닌데 employee 권한이면 편집 막기
-        editable_indv = can_edit_individual
-        if persona == "employee" and member and sel_emp != member["employee_id"]:
-            editable_indv = False
-
         sel_row = members_df[members_df["employee_id"] == sel_emp].iloc[0]
+        is_self = bool(member and sel_emp == member["employee_id"])
+        is_leader_of_target = (persona == "team_leader" and member and
+                                sel_row["team"] == member.get("team", ""))
+        is_admin = persona == "hr_admin"
 
-        # 조직 상속 Required + 개인 Required 통합 표시
+        # ----- 조직 상속 -----
         st.markdown(
             f"<h5 style='color:{COLOR_NAVY};'>조직 상속 ({sel_row['team']})</h5>",
             unsafe_allow_html=True,
@@ -309,28 +450,126 @@ with tab_indv:
         if inherited.empty:
             st.caption("상속된 Required Skill이 없습니다.")
         else:
-            st.caption(f"전사 공통 {len(company_req)}건 + 팀 {len(org_req)}건 = 총 {len(inherited)}건 (조직에서 자동 상속)")
+            st.caption(f"전사 공통 {len(company_req)}건 + 팀 {len(org_req)}건 = 총 {len(inherited)}건")
             _editor(inherited, skills_df, editable=False, key=f"req_inherit_{sel_emp}")
 
+        # ----- 개인 Skill (Approved) -----
         st.markdown(
-            f"<h5 style='color:{COLOR_NAVY}; margin-top:24px;'>개인 추가 Required Skill</h5>",
+            f"<h5 style='color:{COLOR_NAVY}; margin-top:24px;'>개인 Skill — 승인됨 (평가 대상에 포함)</h5>",
             unsafe_allow_html=True,
         )
-        st.caption("조직 매핑 외에 이 구성원에게 추가로 요구되는 Skill (개인별 직무·과제 특성)")
-        indv_req = _enrich(_load_required("individual", sel_emp), skills_df)
-
-        edited_indv = _editor(
-            indv_req, skills_df,
-            editable=editable_indv, key=f"req_indv_{sel_emp}",
-        )
-
-        if editable_indv:
-            if st.button("💾 개인 Required Skill 저장", type="primary", key=f"save_indv_{sel_emp}"):
-                try:
-                    n = _save_required("individual", sel_emp, edited_indv)
-                    st.success(f"[{sel_row['name']}] 저장 완료 · {n}건")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"저장 실패: {e}")
+        approved = _enrich(_load_required("individual", sel_emp, status="approved"), skills_df)
+        if approved.empty:
+            st.caption("승인된 개인 Skill이 없습니다.")
         else:
-            st.caption("ℹ️ 이 구성원의 개인 Required Skill은 편집 권한이 없습니다.")
+            for _, r in approved.iterrows():
+                acols = st.columns([4, 1, 1])
+                acols[0].markdown(
+                    f"#{int(r['skill_id']):03d} <b>{r['skill_name']}</b> "
+                    f"<span style='color:{COLOR_TEXT_MED}; font-size:12px;'>"
+                    f"({r['family_name']} · {r['sub_family_name']})</span>",
+                    unsafe_allow_html=True,
+                )
+                acols[1].markdown(
+                    f"<div style='text-align:right;'>요구 <b>L{int(r['target_level'])}</b></div>",
+                    unsafe_allow_html=True,
+                )
+                if is_leader_of_target or is_admin:
+                    if acols[2].button("제거", key=f"rm_appr_{sel_emp}_{int(r['skill_id'])}",
+                                       use_container_width=True):
+                        _remove_approved(sel_emp, int(r["skill_id"]))
+                        st.rerun()
+
+        # ----- 개인 Skill (Pending) -----
+        st.markdown(
+            f"<h5 style='color:{COLOR_NAVY}; margin-top:24px;'>개인 Skill — 승인 대기 (Pending)</h5>",
+            unsafe_allow_html=True,
+        )
+        pending = _enrich(_load_required("individual", sel_emp, status="pending"), skills_df)
+        if pending.empty:
+            st.caption("승인 대기 중인 신청이 없습니다.")
+        else:
+            for _, r in pending.iterrows():
+                pcols = st.columns([4, 1, 1, 1])
+                pcols[0].markdown(
+                    f"#{int(r['skill_id']):03d} <b>{r['skill_name']}</b> "
+                    f"<span style='color:{COLOR_TEXT_MED}; font-size:12px;'>"
+                    f"({r['family_name']} · {r['sub_family_name']})</span>",
+                    unsafe_allow_html=True,
+                )
+                pcols[1].markdown(
+                    f"<div style='text-align:right;'>요구 <b>L{int(r['target_level'])}</b></div>",
+                    unsafe_allow_html=True,
+                )
+                if is_leader_of_target or is_admin:
+                    if pcols[2].button("승인", key=f"app_p_{sel_emp}_{int(r['skill_id'])}",
+                                       type="primary", use_container_width=True):
+                        _approve_individual(sel_emp, int(r["skill_id"]))
+                        st.rerun()
+                    if pcols[3].button("반려", key=f"rej_p_{sel_emp}_{int(r['skill_id'])}",
+                                       use_container_width=True):
+                        _reject_individual(sel_emp, int(r["skill_id"]))
+                        st.rerun()
+                elif is_self:
+                    pcols[2].markdown(
+                        f"<div style='text-align:right; color:{COLOR_TEXT_MED}; padding-top:6px;'>대기</div>",
+                        unsafe_allow_html=True,
+                    )
+                    if pcols[3].button("취소", key=f"cancel_p_{sel_emp}_{int(r['skill_id'])}",
+                                       use_container_width=True):
+                        _cancel_pending(sel_emp, int(r["skill_id"]))
+                        st.rerun()
+
+        # ----- 새 신청 -----
+        if is_self or is_leader_of_target or is_admin:
+            st.markdown(
+                f"<h5 style='color:{COLOR_NAVY}; margin-top:24px;'>"
+                f"{'개인 Skill 신청' if is_self else '개인 Skill 추가 (대리)'}</h5>",
+                unsafe_allow_html=True,
+            )
+            if is_self:
+                st.caption("아래에서 추가 평가받고 싶은 Skill을 선택해 신청하세요. 팀장 승인 후 평가 대상에 포함됩니다.")
+            else:
+                st.caption("Team Leader / HR Admin은 직접 추가하면 자동 승인 처리됩니다.")
+
+            # 이미 매핑되어 있거나 상속된 것은 제외
+            existing_ids = set()
+            if not inherited.empty:
+                existing_ids.update(inherited["skill_id"].tolist())
+            if not approved.empty:
+                existing_ids.update(approved["skill_id"].tolist())
+            if not pending.empty:
+                existing_ids.update(pending["skill_id"].tolist())
+            avail = skills_df[~skills_df["skill_id"].isin(existing_ids)]
+
+            with st.form(f"req_new_{sel_emp}", clear_on_submit=True):
+                fcol1, fcol2, fcol3 = st.columns([3, 1, 1])
+                with fcol1:
+                    sid = st.selectbox(
+                        "Skill 선택",
+                        options=avail["skill_id"].astype(int).tolist(),
+                        format_func=lambda x: (
+                            f"#{x:03d} {avail[avail['skill_id']==x].iloc[0]['skill_name']} "
+                            f"({avail[avail['skill_id']==x].iloc[0]['sub_family_name']})"
+                        ) if not avail.empty else "—",
+                    )
+                with fcol2:
+                    target_lv = st.number_input("Target Level", min_value=1, max_value=4, value=2, step=1)
+                with fcol3:
+                    submit = st.form_submit_button(
+                        "신청" if is_self else "직접 추가",
+                        type="primary", use_container_width=True,
+                    )
+                if submit and avail.empty:
+                    st.warning("더 추가할 Skill이 없습니다.")
+                elif submit:
+                    added = _request_individual_skill(sel_emp, int(sid), int(target_lv))
+                    if added and (is_leader_of_target or is_admin):
+                        # 팀장·HR Admin은 자동 승인
+                        _approve_individual(sel_emp, int(sid))
+                        st.success(f"#{int(sid):03d} 직접 추가 (자동 승인)")
+                    elif added:
+                        st.success(f"#{int(sid):03d} 신청 완료 (팀장 승인 대기)")
+                    else:
+                        st.error("이미 등록된 Skill입니다.")
+                    st.rerun()

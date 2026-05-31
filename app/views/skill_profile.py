@@ -58,7 +58,7 @@ def _load_required_for_member(employee_id: str, team: str) -> pd.DataFrame:
             """SELECT skill_id, target_level, is_core FROM required_skill
                WHERE (org_or_individual='company' AND target_id='ALL')
                   OR (org_or_individual='department' AND target_id=?)
-                  OR (org_or_individual='individual' AND target_id=?)""",
+                  OR (org_or_individual='individual' AND target_id=? AND status='approved')""",
             conn, params=(team, employee_id),
         )
     finally:
