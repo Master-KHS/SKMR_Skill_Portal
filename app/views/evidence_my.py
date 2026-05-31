@@ -12,7 +12,7 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("Evidence — 내 자료",
+page_header("My Evidence",
             "본인 평가 근거 자료 등록·관리 (프로젝트·자격증·교육·산출물·특허)")
 
 if not member:

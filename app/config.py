@@ -7,6 +7,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # SQLite DB 파일 위치 - data 폴더 안에 생성됨
 DB_PATH = PROJECT_ROOT / "data" / "skmr.db"
 
+# 회사 로고 (사이드바·favicon·Dashboard 헤더)
+LOGO_PATH = PROJECT_ROOT / "data" / "company_logo.png"
+
 # --- 디자인 토큰 (Notion/Linear 톤, Navy 주색 + SK Red 포인트) ---
 COLOR_NAVY = "#0A1929"        # 주색 - 헤더·강조 텍스트
 COLOR_SK_RED = "#E60012"      # 포인트만 사용 - Critical·경고·KPI 강조

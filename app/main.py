@@ -2,6 +2,7 @@
 # st.navigation을 써서 페르소나별로 사이드바 메뉴 노출을 실시간 분기.
 import streamlit as st
 
+from config import LOGO_PATH
 from db import get_connection
 from permissions import can_see
 from persona_switch import render_persona_switch
@@ -14,9 +15,10 @@ from seed.skill_taxonomy import seed_skill_taxonomy
 from theme import apply_theme
 
 # --- 페이지 설정 (반드시 최상단) ---
+_favicon = str(LOGO_PATH) if LOGO_PATH.exists() else None
 st.set_page_config(
     page_title="SKMR Skill Portal",
-    page_icon=None,  # Step 11-C에서 SK 로고 이미지로 교체 예정
+    page_icon=_favicon,
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -48,31 +50,36 @@ try:
 finally:
     _conn.close()
 
-# --- 사이드바 최상단: 페르소나 selectbox (2단: 권한 → 사람) ---
+# --- 사이드바 최상단: 로고 + 페르소나 selectbox (2단: 권한 → 사람) ---
+with st.sidebar:
+    if LOGO_PATH.exists():
+        st.image(str(LOGO_PATH), use_container_width=True)
+        st.markdown("<div style='height:4px;'></div>", unsafe_allow_html=True)
+
 persona, _member = render_persona_switch()
 
 # --- 사이드바 하단: 시스템 정보 ---
 with st.sidebar:
     st.markdown("---")
-    st.caption("🎯 SKMR Skill Portal · v2 (Step 4)")
+    st.caption("SKMR Skill Portal · prototype")
 
 # --- 모든 화면 정의 (메뉴 키, 경로, 표시 라벨, 아이콘) ---
 # menu_key는 permissions.py와 1:1 매칭되어야 함.
 ALL_PAGES = [
     # (menu_key, file_path, title, section)
-    ("dashboard",       "views/dashboard.py",       "Dashboard",          None),
-    ("skill_master",    "views/skill_master.py",    "Skill Master",       None),
-    ("member_mgmt",     "views/member_mgmt.py",     "Member 관리",        None),
-    ("required_skill",  "views/required_skill.py",  "Required Skill",     None),
-    ("self_assess",     "views/self_assess.py",     "Self Assessment",    "Skill Assessment"),
-    ("leader_assess",   "views/leader_assess.py",   "Leader Assessment",  "Skill Assessment"),
-    ("calibration",     "views/calibration.py",     "Calibration",        "Skill Assessment"),
-    ("committee",       "views/committee.py",       "Committee",          "Skill Assessment"),
-    ("evidence_my",     "views/evidence_my.py",     "Evidence — 내 자료", "Evidence"),
-    ("evidence_review", "views/evidence_review.py", "Evidence — 검토",    "Evidence"),
-    ("skill_profile",   "views/skill_profile.py",   "Skill Profile",      None),
-    ("gap_analytics",   "views/gap_analytics.py",   "Gap Analytics",      None),
-    ("system_setting",  "views/system_setting.py",  "시스템 설정",        None),
+    ("dashboard",       "views/dashboard.py",       "Dashboard",        None),
+    ("skill_master",    "views/skill_master.py",    "Skill Master",     None),
+    ("required_skill",  "views/required_skill.py",  "Required Skill",   None),
+    ("skill_profile",   "views/skill_profile.py",   "Skill Profile",    None),
+    ("gap_analytics",   "views/gap_analytics.py",   "Gap Analytics",    None),
+    ("self_assess",     "views/self_assess.py",     "Self",             "Assessment"),
+    ("leader_assess",   "views/leader_assess.py",   "Leader",           "Assessment"),
+    ("calibration",     "views/calibration.py",     "Calibration",      "Assessment"),
+    ("committee",       "views/committee.py",       "Committee",        "Assessment"),
+    ("evidence_my",     "views/evidence_my.py",     "My",               "Evidence"),
+    ("evidence_review", "views/evidence_review.py", "Review",           "Evidence"),
+    ("member_mgmt",     "views/member_mgmt.py",     "Members",          "Admin"),
+    ("system_setting",  "views/system_setting.py",  "Settings",         "Admin"),
 ]
 
 # --- 페르소나 권한으로 필터링 + 섹션별 그룹화 ---
