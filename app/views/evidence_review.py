@@ -12,7 +12,7 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("📂 Evidence — 검토",
+page_header("Evidence — 검토",
             "팀원·구성원의 Evidence를 검토 (Skill·유형별 필터)")
 
 # 검토 범위 결정

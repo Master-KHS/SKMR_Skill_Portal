@@ -38,7 +38,7 @@ def _load_all():
 persona = st.session_state.get("current_persona", "hr_admin")
 render_persona_badge(persona)
 page_header(
-    "🏗️ Skill Master",
+    "Skill Master",
     "Family → Sub-family → Skill 계층 + Level Criteria (총 130개 Skill)",
 )
 
@@ -106,9 +106,9 @@ with left:
                         sid = int(row["skill_id"])
                         is_sel = sid == st.session_state.skill_master_selected_id
                         prefix = "▶ " if is_sel else "  "
-                        critical_tag = " 🔴" if row["is_critical"] else ""
+                        critical_tag = "  [CRT]" if row["is_critical"] else ""
                         if st.button(
-                            f"{prefix}#{sid:03d} · {row['skill_name']}{critical_tag}",
+                            f"{prefix}#{sid:03d}  {row['skill_name']}{critical_tag}",
                             key=f"sk_{sid}",
                             use_container_width=True,
                             type="primary" if is_sel else "secondary",
@@ -129,8 +129,9 @@ with right:
 
         # 상세 카드
         critical_badge = (
-            f"<span style='background:{COLOR_SK_RED}; color:white; padding:3px 10px; "
-            f"border-radius:12px; font-size:12px; margin-left:8px;'>CRITICAL</span>"
+            f"<span style='background:{COLOR_SK_RED}; color:white; padding:2px 8px; "
+            f"border-radius:3px; font-size:11px; font-weight:600; letter-spacing:0.04em; "
+            f"margin-left:8px; vertical-align:middle;'>CRITICAL</span>"
             if sk["is_critical"] else ""
         )
         st.markdown(

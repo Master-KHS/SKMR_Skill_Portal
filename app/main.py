@@ -16,7 +16,7 @@ from theme import apply_theme
 # --- 페이지 설정 (반드시 최상단) ---
 st.set_page_config(
     page_title="SKMR Skill Portal",
-    page_icon="🎯",
+    page_icon=None,  # Step 11-C에서 SK 로고 이미지로 교체 예정
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -59,28 +59,28 @@ with st.sidebar:
 # --- 모든 화면 정의 (메뉴 키, 경로, 표시 라벨, 아이콘) ---
 # menu_key는 permissions.py와 1:1 매칭되어야 함.
 ALL_PAGES = [
-    # (menu_key, file_path, title, icon, section)
-    ("dashboard",       "views/dashboard.py",       "Dashboard",          "📊", None),
-    ("skill_master",    "views/skill_master.py",    "Skill Master",       "🏗️", None),
-    ("member_mgmt",     "views/member_mgmt.py",     "Member 관리",        "👥", None),
-    ("required_skill",  "views/required_skill.py",  "Required Skill",     "🎯", None),
-    ("self_assess",     "views/self_assess.py",     "Self Assessment",    "📝", "Skill Assessment"),
-    ("leader_assess",   "views/leader_assess.py",   "Leader Assessment",  "📝", "Skill Assessment"),
-    ("calibration",     "views/calibration.py",     "Calibration",        "📝", "Skill Assessment"),
-    ("committee",       "views/committee.py",       "Committee",          "📝", "Skill Assessment"),
-    ("evidence_my",     "views/evidence_my.py",     "Evidence — 내 자료", "📂", "Evidence"),
-    ("evidence_review", "views/evidence_review.py", "Evidence — 검토",    "📂", "Evidence"),
-    ("skill_profile",   "views/skill_profile.py",   "Skill Profile",      "👤", None),
-    ("gap_analytics",   "views/gap_analytics.py",   "Gap Analytics",      "📈", None),
-    ("system_setting",  "views/system_setting.py", "시스템 설정",        "⚙️", None),
+    # (menu_key, file_path, title, section)
+    ("dashboard",       "views/dashboard.py",       "Dashboard",          None),
+    ("skill_master",    "views/skill_master.py",    "Skill Master",       None),
+    ("member_mgmt",     "views/member_mgmt.py",     "Member 관리",        None),
+    ("required_skill",  "views/required_skill.py",  "Required Skill",     None),
+    ("self_assess",     "views/self_assess.py",     "Self Assessment",    "Skill Assessment"),
+    ("leader_assess",   "views/leader_assess.py",   "Leader Assessment",  "Skill Assessment"),
+    ("calibration",     "views/calibration.py",     "Calibration",        "Skill Assessment"),
+    ("committee",       "views/committee.py",       "Committee",          "Skill Assessment"),
+    ("evidence_my",     "views/evidence_my.py",     "Evidence — 내 자료", "Evidence"),
+    ("evidence_review", "views/evidence_review.py", "Evidence — 검토",    "Evidence"),
+    ("skill_profile",   "views/skill_profile.py",   "Skill Profile",      None),
+    ("gap_analytics",   "views/gap_analytics.py",   "Gap Analytics",      None),
+    ("system_setting",  "views/system_setting.py",  "시스템 설정",        None),
 ]
 
 # --- 페르소나 권한으로 필터링 + 섹션별 그룹화 ---
 nav_dict: dict[str, list] = {"": []}  # ""는 섹션 없는 항목 (사이드바 상단에 평평하게)
-for menu_key, file_path, title, icon, section in ALL_PAGES:
+for menu_key, file_path, title, section in ALL_PAGES:
     if not can_see(menu_key, persona):
         continue
-    page = st.Page(file_path, title=title, icon=icon, url_path=menu_key)
+    page = st.Page(file_path, title=title, url_path=menu_key)
     section_key = section if section else ""
     nav_dict.setdefault(section_key, []).append(page)
 

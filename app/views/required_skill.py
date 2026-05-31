@@ -210,7 +210,7 @@ def _editor(df: pd.DataFrame, skills_df: pd.DataFrame, *, editable: bool, key: s
     else:
         view = df.copy()
         view["L"] = view["target_level"].map(lambda lv: f"L{int(lv)}")
-        view["Core"] = view["is_core"].map(lambda b: "★" if b else "")
+        view["Core"] = view["is_core"].map(lambda b: "CORE" if b else "")
         view = view[["Core", "skill_id", "skill_name", "family_name", "sub_family_name", "L"]]
         view = view.sort_values(["Core", "skill_id"], ascending=[False, True])
         st.dataframe(view, hide_index=True, use_container_width=True, height=420)
@@ -222,8 +222,8 @@ persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
 page_header(
-    "🎯 Required Skill",
-    "전사 / 조직 / 개인 단위로 요구 Skill·Target Level·Core 지정",
+    "Required Skill",
+    "전사 / 조직 / 개인 단위로 요구 Skill · Target Level · Core/Non-Core 지정",
 )
 
 skills_df = _load_skills()
@@ -233,7 +233,7 @@ can_edit_company = persona == "hr_admin"
 can_edit_org = persona in ("hr_admin", "team_leader")
 can_edit_individual = persona in ("hr_admin", "team_leader", "employee")
 
-tab_company, tab_org, tab_indv = st.tabs(["🏢 전사", "🏗️ 조직별", "👤 개인별"])
+tab_company, tab_org, tab_indv = st.tabs(["전사", "조직별", "개인별"])
 
 # ---------- 전사 ----------
 with tab_company:

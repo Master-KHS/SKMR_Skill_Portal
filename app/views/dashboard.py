@@ -211,7 +211,7 @@ persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
 page_header(
-    "📊 Dashboard",
+    "Dashboard",
     f"한눈에 보는 Skill 현황 · 조회 범위: {_scope_label(persona, member)}",
 )
 
@@ -300,14 +300,15 @@ st.markdown(
 )
 gaps = load_top_gaps(scope_sql, params, top_n=5)
 if gaps.empty:
-    st.success("🎉 부족한 Required Skill이 없습니다.")
+    st.success("부족한 Required Skill이 없습니다.")
 else:
     cols = st.columns(5)
     for i, (_, r) in enumerate(gaps.iterrows()):
         with cols[i]:
             badge = (
-                f"<span style='background:{COLOR_SK_RED}; color:white; padding:1px 6px; "
-                f"border-radius:8px; font-size:10px;'>★</span> " if r["is_core"] else ""
+                f"<span style='background:{COLOR_SK_RED}; color:white; padding:1px 5px; "
+                f"border-radius:3px; font-size:9px; font-weight:600; "
+                f"letter-spacing:0.04em; margin-right:4px;'>CORE</span>" if r["is_core"] else ""
             )
             st.markdown(
                 f"""

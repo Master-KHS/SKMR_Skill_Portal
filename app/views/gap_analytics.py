@@ -175,7 +175,7 @@ def fig_bubble_team(profile: pd.DataFrame, req: pd.DataFrame, team: str) -> go.F
             "요구 Level": r["target_level"],
             "보유 인원": n_holders,
             "Sub-family": r["sub_family_name"],
-            "Core": "★ Core" if r["is_core"] else "일반",
+            "Core": "Core" if r["is_core"] else "일반",
         })
     df = pd.DataFrame(rows)
 
@@ -185,7 +185,7 @@ def fig_bubble_team(profile: pd.DataFrame, req: pd.DataFrame, team: str) -> go.F
         hover_name="Skill",
         size_max=40,
         symbol="Core",
-        symbol_map={"★ Core": "star", "일반": "circle"},
+        symbol_map={"Core": "star", "일반": "circle"},
     )
     # 대각선 (이상선) 추가 - 현재 = 요구 인 경우
     fig.add_shape(
@@ -231,7 +231,7 @@ def fig_priority_matrix(profile: pd.DataFrame, req: pd.DataFrame, team: str) -> 
     fig = go.Figure()
     # Core / 일반 두 그룹으로
     for is_core, label, color, symbol in [
-        (True, "★ Core", COLOR_SK_RED, "star"),
+        (True, "Core", COLOR_SK_RED, "star"),
         (False, "일반", COLOR_NAVY, "circle"),
     ]:
         sub = df[df["Core"] == is_core]
@@ -320,7 +320,7 @@ def fig_radar_individual(member_prof: pd.DataFrame, req: pd.DataFrame,
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("📈 Gap Analytics", "전사·조직·개인 단위 Skill Gap 분석")
+page_header("Gap Analytics", "전사·조직·개인 단위 Skill Gap 분석")
 
 profile = _load_profiles()
 
@@ -328,7 +328,7 @@ if profile.empty:
     st.info("Skill Profile 데이터가 없습니다.")
     st.stop()
 
-tab_co, tab_org, tab_ind = st.tabs(["🏢 전사", "🏗️ 조직", "👤 개인"])
+tab_co, tab_org, tab_ind = st.tabs(["전사", "조직", "개인"])
 
 # ---------- 전사 ----------
 with tab_co:
@@ -495,11 +495,11 @@ with tab_ind:
         merged["Gap"] = (merged["target_level"] - merged["current_level"]).astype(int)
         merged = merged[merged["Gap"] > 0].sort_values(["is_core", "Gap"], ascending=[False, False])
         if merged.empty:
-            st.success("🎉 모든 Required Skill이 충족되었습니다!")
+            st.success("모든 Required Skill이 충족되었습니다.")
         else:
             view = merged[["skill_id", "skill_name", "sub_family_name",
                             "target_level", "current_level", "Gap", "is_core"]].copy()
-            view["Core"] = view["is_core"].map(lambda b: "★" if b else "")
+            view["Core"] = view["is_core"].map(lambda b: "CORE" if b else "")
             view["요구"] = view["target_level"].map(lambda x: f"L{int(x)}")
             view["현재"] = view["current_level"].map(lambda x: f"L{int(x)}" if x > 0 else "—")
             view["Gap"] = view["Gap"].map(lambda g: f"+{g}")

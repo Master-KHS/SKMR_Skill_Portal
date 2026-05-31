@@ -48,7 +48,7 @@ def render_persona_switch() -> tuple[str, dict | None]:
 
             if len(members) == 1:
                 member = members[0]
-                st.caption(f"👤 {member['name']} ({member['team']} · {member['role_level']})")
+                st.caption(f"{member['name']} ({member['team']} · {member['role_level']})")
             else:
                 idx = st.selectbox(
                     label="사람",
@@ -68,24 +68,34 @@ def render_persona_switch() -> tuple[str, dict | None]:
 
 
 def render_persona_badge(persona: str) -> None:
-    """페이지 상단 배지. session_state.current_member 사용."""
+    """페이지 상단 배지. session_state.current_member 사용. 각진·평평 톤."""
     member = st.session_state.get("current_member")
     label = PERSONA_LABELS.get(persona, persona)
     if member:
-        body = f"👤 현재 보기: <b>{label}</b> ({member['name']}, {member['team']} · {member['role_level']})"
+        info_html = (
+            f"<span style='color:rgba(255,255,255,0.7); font-weight:400;'>현재 보기 </span>"
+            f"<b>{label}</b> "
+            f"<span style='color:rgba(255,255,255,0.6); font-weight:400;'>· "
+            f"{member['name']} ({member['team']} · {member['role_level']})</span>"
+        )
     else:
-        body = f"👤 현재 보기: <b>{label}</b> (매핑된 인원 없음)"
+        info_html = (
+            f"<span style='color:rgba(255,255,255,0.7); font-weight:400;'>현재 보기 </span>"
+            f"<b>{label}</b> "
+            f"<span style='color:rgba(255,255,255,0.6); font-weight:400;'>· 미매핑</span>"
+        )
     st.markdown(
         f"""
         <div style="
             display:inline-block;
             background-color:{COLOR_NAVY};
             color:white;
-            padding:6px 14px;
-            border-radius:20px;
-            font-size:13px;
-            margin-bottom:12px;
-        ">{body}</div>
+            padding:4px 12px;
+            border-radius:3px;
+            font-size:12px;
+            letter-spacing:0.01em;
+            margin-bottom:10px;
+        ">{info_html}</div>
         """,
         unsafe_allow_html=True,
     )

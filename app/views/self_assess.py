@@ -16,7 +16,7 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("📝 Self Assessment", "본인 보유·요구 Skill에 대해 Level을 직접 평가하고 제출")
+page_header("Self Assessment", "본인 보유·요구 Skill에 대해 Level을 직접 평가하고 제출")
 
 if not member:
     st.warning("현재 페르소나에 매핑된 인원이 없습니다.")
@@ -57,10 +57,10 @@ view_mode = st.radio(
 filtered = state[state["self_lv"].isna()] if view_mode == "미제출만" else state
 
 if filtered.empty:
-    st.success("🎉 미제출 Skill이 없습니다. 모두 제출 완료!")
+    st.success("미제출 Skill이 없습니다. 모두 제출 완료.")
     st.stop()
 
-st.caption(f"{len(filtered)}건 표시 · Core(★)는 우선 평가 대상")
+st.caption(f"{len(filtered)}건 표시 · Core 표시 항목은 우선 평가 대상")
 
 # Skill별 평가 카드
 for _, row in filtered.iterrows():
@@ -69,11 +69,17 @@ for _, row in filtered.iterrows():
         head_col, lv_col = st.columns([3, 2])
         with head_col:
             core_badge = (
-                f"<span style='background:{COLOR_SK_RED}; color:white; padding:2px 8px; "
-                f"border-radius:10px; font-size:11px; margin-left:6px;'>★ CORE</span>"
+                f"<span style='background:{COLOR_SK_RED}; color:white; padding:1px 6px; "
+                f"border-radius:3px; font-size:10px; font-weight:600; "
+                f"letter-spacing:0.04em; margin-left:6px; vertical-align:middle;'>CORE</span>"
                 if row["req_is_core"] else ""
             )
-            critical_badge = " 🔴" if row["is_critical"] else ""
+            critical_badge = (
+                f"<span style='border:1px solid {COLOR_SK_RED}; color:{COLOR_SK_RED}; "
+                f"padding:1px 5px; border-radius:3px; font-size:10px; font-weight:600; "
+                f"letter-spacing:0.04em; margin-left:6px; vertical-align:middle;'>CRITICAL</span>"
+                if row["is_critical"] else ""
+            )
             st.markdown(
                 f"""
                 <div style='color:{COLOR_TEXT_MED}; font-size:12px;'>

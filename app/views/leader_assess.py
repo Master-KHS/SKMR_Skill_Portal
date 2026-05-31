@@ -16,7 +16,7 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("📝 Leader Assessment", "팀원이 Self 제출한 항목에 대해 팀장이 의견 입력")
+page_header("Leader Assessment", "팀원이 Self 제출한 항목에 대해 팀장이 의견 입력")
 
 # 팀 결정: Team Leader면 본인 팀, HR Admin이면 팀 선택
 conn = get_connection()
@@ -88,7 +88,7 @@ k2.metric("Leader 처리 완료", int(done_count.iloc[0]["cnt"]))
 st.divider()
 
 if pending.empty:
-    st.success("🎉 처리 대기 항목이 없습니다.")
+    st.success("처리 대기 항목이 없습니다.")
     st.stop()
 
 # 평가자 ID = 현재 페르소나의 사람 (HR Admin은 본인 ID)
@@ -103,7 +103,11 @@ for _, row in pending.iterrows():
     with st.container(border=True):
         head_col, lv_col = st.columns([3, 2])
         with head_col:
-            critical_badge = " 🔴" if row["is_critical"] else ""
+            critical_badge = (
+                f"<span style='background:{COLOR_SK_RED}; color:white; padding:1px 6px; "
+                f"border-radius:3px; font-size:10px; font-weight:600; margin-left:6px;'>CRITICAL</span>"
+                if row["is_critical"] else ""
+            )
             st.markdown(
                 f"""
                 <div style='color:{COLOR_TEXT_MED}; font-size:12px;'>

@@ -146,7 +146,7 @@ def _build_radar(profile: pd.DataFrame, sub_families: pd.DataFrame) -> go.Figure
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("👤 Skill Profile", "개인 보유 Skill 통합 — Radar 기반 강점·약점 한눈에")
+page_header("Skill Profile", "개인 보유 Skill 통합 — Radar 기반 강점·약점 한눈에")
 
 members_df = _load_member_options()
 
@@ -319,10 +319,10 @@ else:
     v["L"] = v["current_level"].map(lambda lv: f"L{int(lv)} · {LEVEL_NAMES[int(lv)]}")
     v["목표"] = v["target_level"].map(lambda lv: f"L{int(lv)}")
     v["요구"] = v.apply(
-        lambda r: (f"L{int(r['req_level'])}" + (" ★" if r.get('req_core') else "")) if r["req_level"] > 0 else "—",
+        lambda r: (f"L{int(r['req_level'])}" + (" (Core)" if r.get('req_core') else "")) if r["req_level"] > 0 else "—",
         axis=1,
     )
-    v["Critical"] = v["is_critical"].map(lambda b: "🔴" if b else "")
+    v["Critical"] = v["is_critical"].map(lambda b: "CRT" if b else "")
     v["Gap표시"] = v["Gap"].map(lambda g: f"+{g}" if g > 0 else ("OK" if g == 0 else ""))
 
     display = v[[

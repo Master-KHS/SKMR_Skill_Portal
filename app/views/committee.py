@@ -12,7 +12,7 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("📝 Skill Committee",
+page_header("Skill Committee",
             "Calibration 완료 후 최종 Level 의결 + skill_profile 갱신 (4단계 평가의 4단계)")
 
 # 전사 단위 운영 - Committee는 전사 위원회
@@ -58,7 +58,7 @@ k2.metric("최종 확정 누적", int(confirmed_count.iloc[0]["cnt"]))
 st.divider()
 
 if pending.empty:
-    st.success("🎉 Committee 의결 대기 항목이 없습니다.")
+    st.success("Committee 의결 대기 항목이 없습니다.")
     st.stop()
 
 st.caption(

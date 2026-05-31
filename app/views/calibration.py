@@ -12,7 +12,7 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("📝 Calibration",
+page_header("Calibration",
             "Leader 단계 완료 항목 비교 + 부서장이 조정 (4단계 평가의 3단계)")
 
 # 담당 단위로 운영
@@ -86,7 +86,7 @@ k2.metric("Calibration 완료", int(done_count.iloc[0]["cnt"]))
 st.divider()
 
 if pending.empty:
-    st.success("🎉 Calibration 대기 항목이 없습니다.")
+    st.success("Calibration 대기 항목이 없습니다.")
     st.stop()
 
 st.caption("같은 Skill 묶음으로 부서 인원을 한눈에 비교하면서 조정 의견을 입력하세요.")
@@ -101,12 +101,17 @@ for sid, group in pending.groupby("skill_id"):
     is_critical = group.iloc[0]["is_critical"]
 
     with st.container(border=True):
-        critical_badge = " 🔴" if is_critical else ""
+        critical_tag = (
+            f"<span style='background:{COLOR_SK_RED}; color:white; padding:1px 6px; "
+            f"border-radius:3px; font-size:10px; font-weight:600; "
+            f"letter-spacing:0.04em; margin-left:8px; vertical-align:middle;'>CRITICAL</span>"
+            if is_critical else ""
+        )
         st.markdown(
             f"""
             <div style='color:{COLOR_TEXT_MED}; font-size:12px;'>{family} · {sub_family}</div>
             <h4 style='margin:4px 0 10px 0; color:{COLOR_NAVY};'>
-                #{int(sid):03d} {skill_name}{critical_badge}
+                #{int(sid):03d} {skill_name}{critical_tag}
             </h4>
             """,
             unsafe_allow_html=True,

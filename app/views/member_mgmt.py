@@ -20,7 +20,7 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 render_persona_badge(persona)
 page_header(
-    "👥 Member 관리",
+    "Member 관리",
     "마스터 데이터 (HRIS 대체) — 엑셀이 정답, 화면은 조회·동기화",
 )
 
