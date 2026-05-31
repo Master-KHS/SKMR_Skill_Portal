@@ -1,0 +1,7 @@
+# venv·DB파일·캐시는 버전관리 대상이 아님 (로컬에서 재생성 가능)
+.venv/
+venv/
+__pycache__/
+*.pyc
+data/*.db
+.streamlit/secrets.toml
