@@ -166,6 +166,101 @@ def confirm_final(
     return new_id
 
 
+# ===== 후보자 비교 자동 산출 지표 =====
+def get_candidate_stats(employee_id: str) -> dict:
+    """후보자 비교용 자동 산출 지표.
+    반환:
+      - avg_lv: 보유 Skill 평균 Level
+      - total_skills: 보유 Skill 수
+      - n_l3_plus: 현재 Lv3 이상 Skill 수
+      - n_l4: 현재 Lv4 Skill 수
+      - critical_held: Critical Skill 보유 수
+      - required_fulfill: 본인 Required 충족률 (%)
+      - n_evidence: 총 Evidence 수
+      - n_recent_assess: 최근 6개월 평가 활동 수
+      - top_sub_family: 가장 평균 높은 Sub-family (이름, 평균 Level)
+    """
+    conn = get_connection()
+    try:
+        # 기본 통계
+        row = conn.execute(
+            """SELECT
+                 COUNT(*) AS total,
+                 AVG(sp.current_level) AS avg_lv,
+                 SUM(CASE WHEN sp.current_level >= 3 THEN 1 ELSE 0 END) AS n_l3_plus,
+                 SUM(CASE WHEN sp.current_level = 4 THEN 1 ELSE 0 END) AS n_l4,
+                 SUM(CASE WHEN s.is_critical=1 THEN 1 ELSE 0 END) AS crit
+               FROM skill_profile sp
+               JOIN skill s ON sp.skill_id = s.skill_id
+               WHERE sp.member_id=?""",
+            (employee_id,),
+        ).fetchone()
+
+        # 멤버 team
+        mrow = conn.execute(
+            "SELECT team FROM member WHERE employee_id=?", (employee_id,),
+        ).fetchone()
+        team = mrow["team"] if mrow else ""
+
+        # Required 충족률
+        req_row = conn.execute(
+            """SELECT r.skill_id, r.target_level,
+                       (SELECT current_level FROM skill_profile sp WHERE sp.member_id=? AND sp.skill_id=r.skill_id) AS cur
+                FROM required_skill r
+                WHERE (r.org_or_individual='company' AND r.target_id='ALL')
+                   OR (r.org_or_individual='department' AND r.target_id=?)
+                   OR (r.org_or_individual='individual' AND r.target_id=? AND r.status='approved')""",
+            (employee_id, team, employee_id),
+        ).fetchall()
+        n_req = len(req_row)
+        if n_req > 0:
+            met = sum(1 for r in req_row if (r["cur"] or 0) >= r["target_level"])
+            fulfill = met / n_req * 100
+        else:
+            fulfill = 0
+
+        # Evidence 수
+        n_ev = conn.execute(
+            "SELECT COUNT(*) FROM evidence WHERE member_id=?", (employee_id,),
+        ).fetchone()[0]
+
+        # 최근 6개월 평가
+        n_recent = conn.execute(
+            """SELECT COUNT(*) FROM assessment
+               WHERE member_id=? AND assessed_date >= DATE('now', '-6 months')""",
+            (employee_id,),
+        ).fetchone()[0]
+
+        # 가장 평균 높은 Sub-family
+        top = conn.execute(
+            """SELECT sf.sub_family_name, AVG(sp.current_level) AS avg_lv, COUNT(*) AS n
+               FROM skill_profile sp
+               JOIN skill s ON sp.skill_id = s.skill_id
+               JOIN sub_skill_family sf ON s.sub_family_id = sf.sub_family_id
+               WHERE sp.member_id=?
+               GROUP BY sf.sub_family_id
+               HAVING n >= 2
+               ORDER BY avg_lv DESC LIMIT 1""",
+            (employee_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    return {
+        "total_skills": int(row["total"] or 0),
+        "avg_lv": float(row["avg_lv"] or 0),
+        "n_l3_plus": int(row["n_l3_plus"] or 0),
+        "n_l4": int(row["n_l4"] or 0),
+        "critical_held": int(row["crit"] or 0),
+        "required_fulfill": fulfill,
+        "n_required": n_req,
+        "n_evidence": int(n_ev),
+        "n_recent_assess": int(n_recent),
+        "top_sub_family": top["sub_family_name"] if top else None,
+        "top_sub_avg": float(top["avg_lv"]) if top else 0,
+    }
+
+
 # ===== Evidence 평가 단계 통합 헬퍼 =====
 def get_evidence_for_skill(member_id: str, skill_id: int):
     """그 구성원의 해당 Skill에 연결된 Evidence 목록."""

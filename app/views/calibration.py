@@ -8,13 +8,14 @@ from config import COLOR_NAVY, COLOR_SK_RED, COLOR_TEXT_MED, LEVEL_NAMES
 from db import get_connection
 from persona_switch import render_persona_badge
 from theme import page_header
+from views._candidate_compare import render_candidate_compare_table
 from views._evidence_block import render_evidence_block
 
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
 page_header("Calibration",
-            "Leader 단계 완료 항목 비교 + 부서장이 조정 (4단계 평가의 3단계)")
+            "Lv3 이상 Rating 후보자 비교 + 부서장이 조정")
 
 # 담당 단위로 운영
 conn = get_connection()
@@ -115,6 +116,30 @@ for sid, group in pending.groupby("skill_id"):
                 #{int(sid):03d} {skill_name}{critical_tag}
             </h4>
             """,
+            unsafe_allow_html=True,
+        )
+
+        # === 후보자 자동 산출 비교 ===
+        st.markdown(
+            f"<p style='color:{COLOR_TEXT_MED}; font-size:12px; margin:4px 0;'>"
+            f"후보자 {len(group)}명 비교 — 자동 산출 지표</p>",
+            unsafe_allow_html=True,
+        )
+        candidates = []
+        for _, row in group.iterrows():
+            mid = row["member_id"]
+            candidates.append({
+                "employee_id": mid,
+                "name": row["name"],
+                "team": row["team"],
+                "role_level": row["role_level"],
+                "self_lv": get_proposed_level(mid, int(sid), "self"),
+                "leader_lv": int(row["leader_lv"]),
+            })
+        render_candidate_compare_table(candidates)
+
+        st.markdown(
+            f"<h6 style='color:{COLOR_NAVY}; margin:14px 0 6px 0;'>의결 입력</h6>",
             unsafe_allow_html=True,
         )
 
