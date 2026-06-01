@@ -15,6 +15,64 @@ STAGE_LABELS = {
 }
 
 
+def get_evaluators(employee_id: str) -> dict:
+    """평가자 자동 매핑.
+    팀원 → N+1=팀의 팀장, N+2=담당의 담당
+    팀장 → N+1=담당의 담당, N+2=경영(임원)
+    담당 → N+1=경영(임원), N+2=None
+    매핑 실패 시 None.
+    """
+    conn = get_connection()
+    try:
+        me = conn.execute(
+            "SELECT team, division, position FROM member WHERE employee_id=?",
+            (employee_id,),
+        ).fetchone()
+        if not me:
+            return {"n1": None, "n2": None, "n1_name": None, "n2_name": None}
+        team, division, position = me["team"], me["division"], me["position"]
+
+        def _find(sql: str, params: tuple) -> dict | None:
+            r = conn.execute(sql, params).fetchone()
+            return dict(r) if r else None
+
+        n1 = n2 = None
+        if position == "팀원":
+            n1 = _find(
+                "SELECT employee_id, name FROM member WHERE team=? AND position='팀장' "
+                "AND employee_id != ? LIMIT 1",
+                (team, employee_id),
+            )
+            n2 = _find(
+                "SELECT employee_id, name FROM member WHERE division=? AND position='담당' LIMIT 1",
+                (division,),
+            )
+        elif position == "팀장":
+            n1 = _find(
+                "SELECT employee_id, name FROM member WHERE division=? AND position='담당' "
+                "AND employee_id != ? LIMIT 1",
+                (division, employee_id),
+            )
+            n2 = _find(
+                "SELECT employee_id, name FROM member WHERE job_type='경영' LIMIT 1",
+                (),
+            )
+        elif position == "담당":
+            n1 = _find(
+                "SELECT employee_id, name FROM member WHERE job_type='경영' LIMIT 1",
+                (),
+            )
+    finally:
+        conn.close()
+
+    return {
+        "n1": n1["employee_id"] if n1 else None,
+        "n2": n2["employee_id"] if n2 else None,
+        "n1_name": n1["name"] if n1 else None,
+        "n2_name": n2["name"] if n2 else None,
+    }
+
+
 def get_latest_stage(member_id: str, skill_id: int) -> str | None:
     """해당 (member, skill)의 가장 최근 평가 stage (submitted 또는 confirmed). 없으면 None."""
     conn = get_connection()

@@ -13,6 +13,12 @@ from schema import init_db
 from seed.evidence_seed import seed_evidences
 from seed.members_loader import sync_members_from_xlsx
 from seed.required_skill_seed import seed_required_skills
+from seed.simulation_seed import (
+    generate_simulation_data,
+    get_simulation_count,
+    is_simulation_active,
+    remove_simulation_data,
+)
 from seed.skill_profile_seed import seed_skill_profiles
 from seed.skill_taxonomy import seed_skill_taxonomy
 from theme import page_header
@@ -61,6 +67,54 @@ c8.metric("DB 파일 (KB)", f"{DB_PATH.stat().st_size / 1024:.0f}" if DB_PATH.ex
 with st.expander("파일 경로"):
     st.code(f"DB:   {DB_PATH}", language=None)
     st.code(f"Logo: {LOGO_PATH} ({'OK' if LOGO_PATH.exists() else '없음'})", language=None)
+
+st.divider()
+
+# ===== 시뮬레이션 데이터 =====
+st.markdown(
+    f"<h5 style='color:{COLOR_NAVY};'>시뮬레이션 데이터</h5>",
+    unsafe_allow_html=True,
+)
+st.caption(
+    "시연·검증용 가상 인원 약 125명(5담당 × 3팀 × 9명 + 담당 5명)을 마스터에 추가합니다. "
+    "활성화 시 Dashboard·Reporting에서 더 풍부한 분포를 볼 수 있습니다. "
+    "비활성화하면 가상 인원과 그들의 평가·Profile·Evidence가 모두 제거됩니다."
+)
+
+sim_active = is_simulation_active()
+sim_count = get_simulation_count()
+
+simcol1, simcol2 = st.columns([3, 1])
+with simcol1:
+    if sim_active:
+        st.markdown(
+            f"<div style='padding:10px; background:#F0F7EF; border-left:3px solid #1B8A50;'>"
+            f"<b style='color:#1B8A50;'>활성</b> · 가상 인원 {sim_count}명 추가 상태</div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            f"<div style='padding:10px; background:#F5F5F7; border-left:3px solid {COLOR_TEXT_MED};'>"
+            f"<b style='color:{COLOR_TEXT_MED};'>비활성</b> · 실명·초기 시드 마스터만</div>",
+            unsafe_allow_html=True,
+        )
+
+with simcol2:
+    if sim_active:
+        if st.button("시뮬 데이터 제거", use_container_width=True, key="sim_off"):
+            info = remove_simulation_data()
+            st.success(f"{info['removed']}명 제거됨 · 잔여 {info['remaining']}명")
+            st.rerun()
+    else:
+        if st.button("시뮬 데이터 생성", type="primary", use_container_width=True, key="sim_on"):
+            with st.spinner("가상 인원 생성 중..."):
+                info = generate_simulation_data()
+            if info.get("skipped"):
+                st.info(f"이미 {info['existing']}건 존재")
+            else:
+                st.success(f"{info['added']}명 추가 · 총 {info['total_members']}명")
+                st.warning("Skill Profile·Evidence를 새 인원에 맞춰 재생성하려면 아래 시드 재적재를 실행하세요.")
+            st.rerun()
 
 st.divider()
 
