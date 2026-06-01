@@ -5,16 +5,77 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from config import (
+    COLOR_BG_LIGHT,
     COLOR_BG_WHITE,
     COLOR_BORDER,
     COLOR_NAVY,
     COLOR_SK_RED,
+    COLOR_TEXT_DARK,
     COLOR_TEXT_MED,
     LEVEL_NAMES,
 )
 from db import get_connection
 from persona_switch import render_persona_badge
 from theme import page_header
+
+
+def _load_assessment_history(employee_id: str) -> pd.DataFrame:
+    """본인 평가 이력 - assessment 테이블에서 모든 평가."""
+    conn = get_connection()
+    try:
+        return pd.read_sql_query(
+            """SELECT a.assessment_id, a.skill_id, a.stage, a.proposed_level,
+                      a.confirmed_level, a.assessed_date, a.status, a.rationale,
+                      s.skill_name, sf.sub_family_name, f.family_name,
+                      m.name AS assessor_name
+               FROM assessment a
+               JOIN skill s ON a.skill_id = s.skill_id
+               JOIN sub_skill_family sf ON s.sub_family_id = sf.sub_family_id
+               JOIN skill_family f      ON sf.family_id = f.family_id
+               LEFT JOIN member m ON a.assessor_id = m.employee_id
+               WHERE a.member_id = ?
+               ORDER BY a.assessment_id DESC""",
+            conn, params=(employee_id,),
+        )
+    finally:
+        conn.close()
+
+
+def _load_skill_progress(employee_id: str) -> pd.DataFrame:
+    """Skill별 평가 진행 현황 - 각 (Skill)이 어느 stage까지 갔는지."""
+    conn = get_connection()
+    try:
+        # 본인 Required + 보유 Skill의 합집합에 대해 stage 추적
+        df = pd.read_sql_query(
+            """WITH all_skills AS (
+                  SELECT skill_id FROM skill_profile WHERE member_id=?
+                  UNION
+                  SELECT r.skill_id FROM required_skill r, member m
+                  WHERE m.employee_id=?
+                    AND ((r.org_or_individual='company' AND r.target_id='ALL')
+                      OR (r.org_or_individual='department' AND r.target_id=m.team)
+                      OR (r.org_or_individual='individual' AND r.target_id=? AND r.status='approved'))
+               )
+               SELECT s.skill_id, s.skill_name, sf.sub_family_name,
+                      sp.current_level,
+                      MAX(CASE WHEN a.stage='self' THEN 1 ELSE 0 END) AS done_self,
+                      MAX(CASE WHEN a.stage='leader' THEN 1 ELSE 0 END) AS done_leader,
+                      MAX(CASE WHEN a.stage='calibration' THEN 1 ELSE 0 END) AS done_calib,
+                      MAX(CASE WHEN a.stage='committee' THEN 1 ELSE 0 END) AS done_comm,
+                      MAX(a.assessed_date) AS last_date
+               FROM all_skills ak
+               JOIN skill s ON ak.skill_id = s.skill_id
+               JOIN sub_skill_family sf ON s.sub_family_id = sf.sub_family_id
+               LEFT JOIN skill_profile sp ON sp.member_id=? AND sp.skill_id=s.skill_id
+               LEFT JOIN assessment a ON a.member_id=? AND a.skill_id=s.skill_id
+                   AND a.status IN ('submitted','confirmed')
+               GROUP BY s.skill_id
+               ORDER BY s.skill_id""",
+            conn, params=(employee_id, employee_id, employee_id, employee_id, employee_id),
+        )
+    finally:
+        conn.close()
+    return df
 
 
 def _load_member_options() -> pd.DataFrame:
@@ -339,3 +400,127 @@ else:
         f"필터 결과 {len(v)} / 보유 전체 {len(profile_df)} · "
         "Gap = Required Target - 현재 Level (요구 있는 Skill만)"
     )
+
+# ========== 평가 진행 현황 ==========
+st.divider()
+st.markdown(
+    f"<h4 style='color:{COLOR_NAVY};'>평가 진행 현황</h4>",
+    unsafe_allow_html=True,
+)
+st.caption("각 Skill이 4단계 평가 워크플로의 어디까지 진행됐는지 한눈에. ●=완료 ○=미진행")
+
+progress_df = _load_skill_progress(sel_emp)
+if progress_df.empty:
+    st.info("평가 대상 Skill이 없습니다.")
+else:
+    p_total = len(progress_df)
+    p_done_self = int(progress_df["done_self"].sum())
+    p_done_leader = int(progress_df["done_leader"].sum())
+    p_done_calib = int(progress_df["done_calib"].sum())
+    p_done_comm = int(progress_df["done_comm"].sum())
+
+    pk1, pk2, pk3, pk4, pk5 = st.columns(5)
+    pk1.metric("대상 Skill", p_total)
+    pk2.metric("자가 진단", f"{p_done_self} / {p_total}")
+    pk3.metric("리더 진단", f"{p_done_leader} / {p_total}")
+    pk4.metric("Calibration", f"{p_done_calib} / {p_total}")
+    pk5.metric("Committee", f"{p_done_comm} / {p_total}")
+
+    # 필터: 미진행만 / 전체
+    only_pending = st.checkbox("평가 미진행 Skill만 보기", value=False, key="prof_only_pending")
+    prog_view = progress_df.copy()
+    if only_pending:
+        prog_view = prog_view[prog_view["done_self"] == 0]
+
+    if prog_view.empty:
+        st.success("필터 조건의 Skill이 없습니다.")
+    else:
+        def _mark(v):
+            return "●" if v else "○"
+        disp = pd.DataFrame({
+            "ID":         prog_view["skill_id"],
+            "Skill":      prog_view["skill_name"],
+            "Sub-family": prog_view["sub_family_name"],
+            "현재 Lv":    prog_view["current_level"].apply(
+                lambda x: f"L{int(x)}" if pd.notna(x) else "—"),
+            "Self":       prog_view["done_self"].map(_mark),
+            "Leader":     prog_view["done_leader"].map(_mark),
+            "Calib":      prog_view["done_calib"].map(_mark),
+            "Comm.":      prog_view["done_comm"].map(_mark),
+            "최근 평가":   prog_view["last_date"].fillna("—"),
+        })
+        st.dataframe(disp, hide_index=True, use_container_width=True, height=360)
+
+# ========== 평가 이력 타임라인 ==========
+st.divider()
+st.markdown(
+    f"<h4 style='color:{COLOR_NAVY};'>평가 이력 (History)</h4>",
+    unsafe_allow_html=True,
+)
+st.caption("본인이 받은 모든 평가 이력 — 최근 순")
+
+hist_df = _load_assessment_history(sel_emp)
+if hist_df.empty:
+    st.info("평가 이력이 없습니다.")
+else:
+    # 필터
+    hf1, hf2 = st.columns([2, 4])
+    with hf1:
+        stage_opts = ["전체", "self", "leader", "calibration", "committee"]
+        sel_stage = st.selectbox("Stage 필터", stage_opts, key="hist_stage")
+    with hf2:
+        hk = st.text_input("Skill 이름 검색", key="hist_kw")
+
+    hv = hist_df.copy()
+    if sel_stage != "전체":
+        hv = hv[hv["stage"] == sel_stage]
+    if hk.strip():
+        hv = hv[hv["skill_name"].str.contains(hk.strip(), case=False, na=False)]
+
+    STAGE_LABELS = {"self": "자가", "leader": "리더",
+                      "calibration": "Calib", "committee": "Committee"}
+    STAGE_COLORS = {"self": "#7A8FA8", "leader": "#3D5A80",
+                      "calibration": "#2C4865", "committee": COLOR_NAVY}
+
+    st.caption(f"{len(hv)} / {len(hist_df)} 건")
+    for _, r in hv.iterrows():
+        stg = r["stage"]
+        color = STAGE_COLORS.get(stg, COLOR_NAVY)
+        lv = r["confirmed_level"] if pd.notna(r["confirmed_level"]) else r["proposed_level"]
+        status_chip = (
+            f"<span style='background:#1B8A50; color:white; padding:1px 5px; "
+            f"border-radius:3px; font-size:9px; font-weight:600;'>CONFIRMED</span>"
+            if r["status"] == "confirmed" else
+            f"<span style='border:1px solid {COLOR_TEXT_MED}; color:{COLOR_TEXT_MED}; padding:0 5px; "
+            f"border-radius:3px; font-size:9px; font-weight:500;'>SUBMITTED</span>"
+        )
+        rat = (r['rationale'] or '').strip()
+        rat_html = (f"<div style='color:{COLOR_TEXT_MED}; font-size:12px; margin-top:4px;'>"
+                    f"근거: {rat}</div>") if rat else ""
+        st.markdown(
+            f"""
+            <div style='border-left:3px solid {color}; padding:8px 12px; margin-bottom:8px;
+                        background:{COLOR_BG_WHITE}; border-radius:0 4px 4px 0;'>
+                <div style='display:flex; justify-content:space-between; align-items:baseline;'>
+                    <div>
+                        <span style='background:{color}; color:white; padding:1px 7px;
+                               border-radius:3px; font-size:10px; font-weight:600;
+                               letter-spacing:0.04em;'>{STAGE_LABELS.get(stg, stg).upper()}</span>
+                        <b style='color:{COLOR_NAVY}; margin-left:8px;'>
+                            #{int(r['skill_id']):03d} {r['skill_name']}</b>
+                        <span style='color:{COLOR_TEXT_MED}; font-size:11px; margin-left:6px;'>
+                            ({r['sub_family_name']})</span>
+                    </div>
+                    <div>
+                        {status_chip}
+                        <b style='color:{COLOR_NAVY}; margin-left:10px;'>L{int(lv) if pd.notna(lv) else "—"}</b>
+                    </div>
+                </div>
+                <div style='color:{COLOR_TEXT_MED}; font-size:12px; margin-top:3px;'>
+                    {r['assessed_date']} · 평가자 {r['assessor_name'] or '—'}
+                </div>
+                {rat_html}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
