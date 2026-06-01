@@ -25,7 +25,8 @@ from theme import page_header
 
 persona = st.session_state.get("current_persona", "hr_admin")
 render_persona_badge(persona)
-page_header("Settings", "시스템 관리 — DB·시드·Critical Skill 지정 (HR Admin 전용)")
+page_header("Admin 권한 관리",
+            "시스템 정보 · Critical Skill 지정 · 시드 · DB (HR Admin 전용)")
 
 # 권한 가드
 if persona != "hr_admin":

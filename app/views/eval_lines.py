@@ -13,7 +13,7 @@ persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
 page_header(
-    "Eval Lines",
+    "Assessment 라인 관리",
     "구성원별 평가자 자동 매핑 — N+1 (팀장) / N+2 (담당)",
 )
 

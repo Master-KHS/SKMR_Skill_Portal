@@ -8,8 +8,8 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 render_persona_badge(persona)
 page_header(
-    "Policy",
-    "Skill Architecture · Level 체계 운영 정책 (HR Admin 전용)",
+    "운영 정책 관리",
+    "Skill Architecture · Level 체계 — 정책 변경을 시스템에서 직접 (HR Admin 전용)",
 )
 
 if persona not in ("hr_admin", "hr_viewer"):

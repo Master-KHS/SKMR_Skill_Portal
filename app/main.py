@@ -68,21 +68,21 @@ with st.sidebar:
 ALL_PAGES = [
     # (menu_key, file_path, title, section)
     # ===== Foundation =====
-    ("policy",          "views/policy.py",          "Policy",           "Foundation"),
-    ("skill_master",    "views/skill_master.py",    "Skill Library",    "Foundation"),
-    ("required_skill",  "views/required_skill.py",  "Required Skills",  "Foundation"),
-    ("eval_lines",      "views/eval_lines.py",      "Eval Lines",       "Foundation"),
-    ("member_mgmt",     "views/member_mgmt.py",     "Members",          "Foundation"),
-    ("system_setting",  "views/system_setting.py",  "Settings",         "Foundation"),
+    ("policy",          "views/policy.py",          "운영 정책 관리",      "Foundation"),
+    ("skill_master",    "views/skill_master.py",    "Skill Library",      "Foundation"),
+    ("required_skill",  "views/required_skill.py",  "필요 Skill 정의",     "Foundation"),
+    ("eval_lines",      "views/eval_lines.py",      "Assessment 라인 관리", "Foundation"),
+    ("member_mgmt",     "views/member_mgmt.py",     "구성원 관리",         "Foundation"),
+    ("system_setting",  "views/system_setting.py",  "Admin 권한 관리",     "Foundation"),
     # ===== Assessment =====
-    ("self_assess",     "views/self_assess.py",     "Self",             "Assessment"),
-    ("leader_assess",   "views/leader_assess.py",   "Leader",           "Assessment"),
-    ("calibration",     "views/calibration.py",     "Calibration",      "Assessment"),
-    ("committee",       "views/committee.py",       "Committee",        "Assessment"),
-    ("skill_profile",   "views/skill_profile.py",   "My History",       "Assessment"),
+    ("self_assess",     "views/self_assess.py",     "자가 진단",          "Assessment"),
+    ("leader_assess",   "views/leader_assess.py",   "리더 진단",          "Assessment"),
+    ("calibration",     "views/calibration.py",     "Calibration",       "Assessment"),
+    ("committee",       "views/committee.py",       "Committee",         "Assessment"),
+    ("skill_profile",   "views/skill_profile.py",   "최종 결과 확인",      "Assessment"),
     # ===== Reporting =====
-    ("dashboard",       "views/dashboard.py",       "Dashboard",        "Reporting"),
-    ("talent_search",   "views/talent_search.py",   "Talent Search",    "Reporting"),
+    ("dashboard",       "views/dashboard.py",       "진단 결과 확인",      "Reporting"),
+    ("talent_search",   "views/talent_search.py",   "Talent Search",     "Reporting"),
 ]
 
 # --- 페르소나 권한으로 필터링 + 섹션별 그룹화 ---

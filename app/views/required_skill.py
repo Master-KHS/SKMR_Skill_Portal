@@ -222,7 +222,7 @@ persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
 page_header(
-    "Required Skills",
+    "필요 Skill 정의",
     "전사 / 조직 / 개인 단위로 요구 Skill · Target Level · Core/Non-Core 지정",
 )
 

@@ -452,7 +452,7 @@ persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
 page_header(
-    "Dashboard",
+    "진단 결과 확인",
     f"권한별 Skill 현황 통합 · 조회 범위: {_scope_label(persona, member)}",
 )
 

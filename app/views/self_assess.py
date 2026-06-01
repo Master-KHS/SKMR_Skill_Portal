@@ -16,7 +16,7 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("Self Assessment", "본인 보유·요구 Skill에 대해 Level을 직접 평가하고 제출")
+page_header("자가 진단", "본인 보유·요구 Skill에 대해 Level을 직접 평가하고 제출")
 
 if not member:
     st.warning("현재 페르소나에 매핑된 인원이 없습니다.")

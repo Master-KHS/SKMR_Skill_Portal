@@ -146,8 +146,8 @@ def _build_radar(profile: pd.DataFrame, sub_families: pd.DataFrame) -> go.Figure
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("My History",
-            "개인 보유 Skill 통합 + 평가 이력 — Radar / Gap / 상세 테이블")
+page_header("최종 결과 확인",
+            "나의 Skill Level 확인 + 평가 History — Radar / Gap / 상세 테이블")
 
 members_df = _load_member_options()
 

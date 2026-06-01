@@ -16,7 +16,7 @@ from theme import page_header
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
-page_header("Leader Assessment", "팀원이 Self 제출한 항목에 대해 팀장이 의견 입력")
+page_header("리더 진단", "팀원이 자가 진단 제출한 항목을 팀장이 리뷰·Lv2 결과 확정")
 
 # 팀 결정: Team Leader면 본인 팀, HR Admin이면 팀 선택
 conn = get_connection()
