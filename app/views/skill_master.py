@@ -38,7 +38,7 @@ def _load_all():
 persona = st.session_state.get("current_persona", "hr_admin")
 render_persona_badge(persona)
 page_header(
-    "Skill Master",
+    "Skill Library",
     "Family → Sub-family → Skill 계층 + Level Criteria (총 130개 Skill)",
 )
 

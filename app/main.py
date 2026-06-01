@@ -67,19 +67,22 @@ with st.sidebar:
 # menu_key는 permissions.py와 1:1 매칭되어야 함.
 ALL_PAGES = [
     # (menu_key, file_path, title, section)
-    ("dashboard",       "views/dashboard.py",       "Dashboard",        None),
-    ("skill_master",    "views/skill_master.py",    "Skill Master",     None),
-    ("required_skill",  "views/required_skill.py",  "Required Skill",   None),
-    ("skill_profile",   "views/skill_profile.py",   "Skill Profile",    None),
-    ("gap_analytics",   "views/gap_analytics.py",   "Gap Analytics",    None),
+    # ===== Foundation =====
+    ("policy",          "views/policy.py",          "Policy",           "Foundation"),
+    ("skill_master",    "views/skill_master.py",    "Skill Library",    "Foundation"),
+    ("required_skill",  "views/required_skill.py",  "Required Skills",  "Foundation"),
+    ("eval_lines",      "views/eval_lines.py",      "Eval Lines",       "Foundation"),
+    ("member_mgmt",     "views/member_mgmt.py",     "Members",          "Foundation"),
+    ("system_setting",  "views/system_setting.py",  "Settings",         "Foundation"),
+    # ===== Assessment =====
     ("self_assess",     "views/self_assess.py",     "Self",             "Assessment"),
     ("leader_assess",   "views/leader_assess.py",   "Leader",           "Assessment"),
     ("calibration",     "views/calibration.py",     "Calibration",      "Assessment"),
     ("committee",       "views/committee.py",       "Committee",        "Assessment"),
-    ("evidence_my",     "views/evidence_my.py",     "My",               "Evidence"),
-    ("evidence_review", "views/evidence_review.py", "Review",           "Evidence"),
-    ("member_mgmt",     "views/member_mgmt.py",     "Members",          "Admin"),
-    ("system_setting",  "views/system_setting.py",  "Settings",         "Admin"),
+    ("skill_profile",   "views/skill_profile.py",   "My History",       "Assessment"),
+    # ===== Reporting =====
+    ("dashboard",       "views/dashboard.py",       "Dashboard",        "Reporting"),
+    ("talent_search",   "views/talent_search.py",   "Talent Search",    "Reporting"),
 ]
 
 # --- 페르소나 권한으로 필터링 + 섹션별 그룹화 ---
