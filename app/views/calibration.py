@@ -3,11 +3,12 @@
 import pandas as pd
 import streamlit as st
 
-from assessment_logic import get_proposed_level, submit_assessment
-from config import COLOR_NAVY, COLOR_TEXT_MED, LEVEL_NAMES
+from assessment_logic import confirm_final, get_proposed_level, submit_assessment
+from config import COLOR_NAVY, COLOR_SK_RED, COLOR_TEXT_MED, LEVEL_NAMES
 from db import get_connection
 from persona_switch import render_persona_badge
 from theme import page_header
+from views._evidence_block import render_evidence_block
 
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
@@ -131,20 +132,39 @@ for sid, group in pending.groupby("skill_id"):
             )
             cols[1].markdown(f"Self: <b>L{self_lv}</b>", unsafe_allow_html=True)
             cols[2].markdown(f"Leader: <b>L{leader_lv}</b>", unsafe_allow_html=True)
-            default_idx = leader_lv - 1
+            # Calibration은 Lv3 이상만 진입 (Lv≤2는 Leader에서 확정됨)
+            default_idx = max(leader_lv - 1, 2)  # L3부터
             lv = cols[3].selectbox(
                 "Calib",
-                options=[1, 2, 3, 4],
-                index=default_idx,
+                options=[3, 4],
+                index=0 if leader_lv <= 3 else 1,
                 format_func=lambda x: f"L{x}",
                 key=f"calib_lv_{mid}_{sid}",
                 label_visibility="collapsed",
             )
-            if cols[4].button("Submit", key=f"calib_sub_{mid}_{sid}",
+            btn_label = "L3 확정" if lv == 3 else "L4 후보 → Committee"
+            if cols[4].button(btn_label, key=f"calib_sub_{mid}_{sid}",
                               type="primary", use_container_width=True):
-                submit_assessment(
-                    member_id=mid, skill_id=int(sid), stage="calibration",
-                    assessor_id=assessor_id, proposed_level=lv,
-                )
-                st.success(f"{row['name']} #{int(sid):03d} Calibration 제출 (L{lv})")
+                if lv == 3:
+                    confirm_final(
+                        member_id=mid, skill_id=int(sid), stage="calibration",
+                        assessor_id=assessor_id, confirmed_level=3,
+                    )
+                    st.success(f"{row['name']} #{int(sid):03d} L3 확정 + Profile 갱신")
+                else:
+                    submit_assessment(
+                        member_id=mid, skill_id=int(sid), stage="calibration",
+                        assessor_id=assessor_id, proposed_level=4,
+                    )
+                    st.success(f"{row['name']} #{int(sid):03d} L4 후보 → Committee")
                 st.rerun()
+
+        # Skill 그룹 내 Evidence (대표로 첫 인원 기준이 아니라 인별)
+        with st.expander("이 Skill 관련 Evidence (인원별)", expanded=False):
+            for _, row in group.iterrows():
+                st.markdown(f"**{row['name']}**", unsafe_allow_html=True)
+                render_evidence_block(
+                    row["member_id"], int(sid),
+                    allow_add=False,
+                    key_suffix=f"calib_{row['member_id']}_{sid}",
+                )

@@ -12,6 +12,7 @@ from assessment_logic import (
 from config import COLOR_NAVY, COLOR_SK_RED, COLOR_TEXT_MED, LEVEL_NAMES
 from persona_switch import render_persona_badge
 from theme import page_header
+from views._evidence_block import render_evidence_block
 
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
@@ -131,3 +132,9 @@ for _, row in filtered.iterrows():
                 )
                 st.success(f"#{sid:03d} 제출 완료 (L{lv})")
                 st.rerun()
+
+        # Evidence 첨부·조회
+        render_evidence_block(
+            member["employee_id"], sid,
+            allow_add=True, key_suffix="self",
+        )

@@ -8,12 +8,13 @@ from config import COLOR_NAVY, COLOR_SK_RED, COLOR_TEXT_MED, LEVEL_NAMES
 from db import get_connection
 from persona_switch import render_persona_badge
 from theme import page_header
+from views._evidence_block import render_evidence_block
 
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
 render_persona_badge(persona)
 page_header("Skill Committee",
-            "Calibration 완료 후 최종 Level 의결 + skill_profile 갱신 (4단계 평가의 4단계)")
+            "Lv4 후보자에 대한 최종 의결 + skill_profile 갱신")
 
 # 전사 단위 운영 - Committee는 전사 위원회
 conn = get_connection()
@@ -105,11 +106,11 @@ for sid, group in pending.groupby("skill_id"):
             cols[1].markdown(f"Self <b>L{self_lv}</b>", unsafe_allow_html=True)
             cols[2].markdown(f"Leader <b>L{leader_lv}</b>", unsafe_allow_html=True)
             cols[3].markdown(f"Calib <b>L{calib_lv}</b>", unsafe_allow_html=True)
-            default_idx = calib_lv - 1
+            # Committee는 Lv4 후보 의결. 확정 또는 Lv3으로 하향 가능.
             final_lv = cols[4].selectbox(
                 "Final",
-                options=[1, 2, 3, 4],
-                index=default_idx,
+                options=[3, 4],
+                index=1,  # 기본 L4 확정
                 format_func=lambda x: f"L{x}",
                 key=f"comm_lv_{mid}_{sid}",
                 label_visibility="collapsed",
@@ -117,9 +118,18 @@ for sid, group in pending.groupby("skill_id"):
             if cols[5].button("최종 확정", key=f"comm_sub_{mid}_{sid}",
                               type="primary", use_container_width=True):
                 confirm_final(
-                    member_id=mid, skill_id=int(sid),
-                    assessor_id=assessor_id,
-                    confirmed_level=final_lv,
+                    member_id=mid, skill_id=int(sid), stage="committee",
+                    assessor_id=assessor_id, confirmed_level=final_lv,
                 )
                 st.success(f"{row['name']} #{int(sid):03d} 최종 L{final_lv} 확정 + Profile 갱신")
                 st.rerun()
+
+        # Skill 그룹 내 Evidence (인원별)
+        with st.expander("이 Skill 관련 Evidence (인원별)", expanded=False):
+            for _, row in group.iterrows():
+                st.markdown(f"**{row['name']}**", unsafe_allow_html=True)
+                render_evidence_block(
+                    row["member_id"], int(sid),
+                    allow_add=False,
+                    key_suffix=f"comm_{row['member_id']}_{sid}",
+                )

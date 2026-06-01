@@ -127,9 +127,12 @@ def submit_assessment(
 
 def confirm_final(
     *, member_id: str, skill_id: int, assessor_id: str,
-    confirmed_level: int, rationale: str = "",
+    confirmed_level: int, rationale: str = "", stage: str = "committee",
 ) -> int:
-    """Committee 단계 최종 확정 → assessment + skill_profile.current_level 갱신."""
+    """평가 확정 → assessment(status='confirmed') + skill_profile.current_level 갱신.
+    stage는 leader/calibration/committee 중 하나 (Lv 기준 분기 워크플로)."""
+    if stage not in ("leader", "calibration", "committee"):
+        raise ValueError(f"확정 가능 stage: leader/calibration/committee. 입력: {stage}")
     conn = get_connection()
     try:
         cur = conn.cursor()
@@ -137,12 +140,11 @@ def confirm_final(
             """INSERT INTO assessment
                (member_id, skill_id, stage, assessor_id, proposed_level,
                 confirmed_level, rationale, assessed_date, status)
-               VALUES (?,?,'committee',?,?,?,?,DATE('now'),'confirmed')""",
-            (member_id, skill_id, assessor_id, confirmed_level, confirmed_level, rationale),
+               VALUES (?,?,?,?,?,?,?,DATE('now'),'confirmed')""",
+            (member_id, skill_id, stage, assessor_id, confirmed_level, confirmed_level, rationale),
         )
         new_id = cur.lastrowid
 
-        # skill_profile UPSERT
         cur.execute("SELECT 1 FROM skill_profile WHERE member_id=? AND skill_id=?",
                     (member_id, skill_id))
         if cur.fetchone():
@@ -162,6 +164,45 @@ def confirm_final(
     finally:
         conn.close()
     return new_id
+
+
+# ===== Evidence 평가 단계 통합 헬퍼 =====
+def get_evidence_for_skill(member_id: str, skill_id: int):
+    """그 구성원의 해당 Skill에 연결된 Evidence 목록."""
+    import pandas as pd
+    conn = get_connection()
+    try:
+        return pd.read_sql_query(
+            """SELECT e.evidence_id, e.evidence_type, e.title, e.description, e.created_date
+               FROM evidence e
+               JOIN evidence_skill_link esl ON e.evidence_id = esl.evidence_id
+               WHERE e.member_id=? AND esl.skill_id=?
+               ORDER BY e.created_date DESC""",
+            conn, params=(member_id, skill_id),
+        )
+    finally:
+        conn.close()
+
+
+def add_evidence_for_skill(*, member_id: str, skill_id: int,
+                            evidence_type: str, title: str, description: str = "") -> int:
+    """Evidence 등록 + 해당 Skill 연결."""
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """INSERT INTO evidence
+               (member_id, evidence_type, title, description, created_date)
+               VALUES (?,?,?,?,DATE('now'))""",
+            (member_id, evidence_type, title, description),
+        )
+        eid = cur.lastrowid
+        cur.execute("INSERT OR IGNORE INTO evidence_skill_link VALUES (?,?)",
+                    (eid, skill_id))
+        conn.commit()
+    finally:
+        conn.close()
+    return eid
 
 
 def get_skill_workflow_state(member_id: str, team: str | None = None) -> pd.DataFrame:

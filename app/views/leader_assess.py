@@ -5,6 +5,7 @@ import streamlit as st
 
 from assessment_logic import (
     STAGE_LABELS,
+    confirm_final,
     get_proposed_level,
     submit_assessment,
 )
@@ -12,6 +13,7 @@ from config import COLOR_NAVY, COLOR_SK_RED, COLOR_TEXT_MED, LEVEL_NAMES
 from db import get_connection
 from persona_switch import render_persona_badge
 from theme import page_header
+from views._evidence_block import render_evidence_block
 
 persona = st.session_state.get("current_persona", "hr_admin")
 member = st.session_state.get("current_member")
@@ -139,12 +141,34 @@ for _, row in pending.iterrows():
                 key=f"leader_rat_{mid}_{sid}",
                 label_visibility="collapsed",
             )
-            if st.button("Leader 제출", key=f"leader_sub_{mid}_{sid}",
-                         type="primary", use_container_width=True):
-                submit_assessment(
-                    member_id=mid, skill_id=sid, stage="leader",
-                    assessor_id=assessor_id,
-                    proposed_level=lv, rationale=rationale,
-                )
-                st.success(f"{row['name']} #{sid:03d} 제출 완료 (L{lv})")
+            # Lv 기준 분기 안내
+            if lv <= 2:
+                btn_label = f"Lv{lv} 확정"
+                hint = "Leader 단계에서 즉시 확정 → Skill Profile 갱신"
+            elif lv == 3:
+                btn_label = "Calibration 후보로 제출"
+                hint = "Lv3은 Calibration 단계에서 논의"
+            else:  # lv == 4
+                btn_label = "Calibration 후보로 제출 (Lv4)"
+                hint = "Lv4 후보는 Calibration → Committee 단계 거침"
+
+            st.caption(hint)
+            if st.button(btn_label, key=f"leader_sub_{mid}_{sid}",
+                          type="primary", use_container_width=True):
+                if lv <= 2:
+                    confirm_final(
+                        member_id=mid, skill_id=sid, stage="leader",
+                        assessor_id=assessor_id, confirmed_level=lv, rationale=rationale,
+                    )
+                    st.success(f"{row['name']} #{sid:03d} Lv{lv} 확정 + Profile 갱신")
+                else:
+                    submit_assessment(
+                        member_id=mid, skill_id=sid, stage="leader",
+                        assessor_id=assessor_id,
+                        proposed_level=lv, rationale=rationale,
+                    )
+                    st.success(f"{row['name']} #{sid:03d} Calibration 후보 제출 (Lv{lv})")
                 st.rerun()
+
+        # Evidence 첨부·조회
+        render_evidence_block(mid, sid, allow_add=True, key_suffix=f"leader_{mid}")
