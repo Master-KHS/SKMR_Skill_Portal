@@ -70,11 +70,11 @@ ALL_PAGES = [
     # ===== Foundation =====
     ("policy",          "views/policy.py",          "운영 정책 관리",      "Foundation"),
     ("skill_master",    "views/skill_master.py",    "Skill Library",      "Foundation"),
-    ("required_skill",  "views/required_skill.py",  "필요 Skill 정의",     "Foundation"),
     ("eval_lines",      "views/eval_lines.py",      "Assessment 라인 관리", "Foundation"),
     ("member_mgmt",     "views/member_mgmt.py",     "구성원 관리",         "Foundation"),
     ("system_setting",  "views/system_setting.py",  "Admin 권한 관리",     "Foundation"),
     # ===== Assessment =====
+    ("required_skill",  "views/required_skill.py",  "필요 Skill 정의",     "Assessment"),
     ("self_assess",     "views/self_assess.py",     "자가 진단",          "Assessment"),
     ("leader_assess",   "views/leader_assess.py",   "리더 진단",          "Assessment"),
     ("calibration",     "views/calibration.py",     "Calibration",       "Assessment"),

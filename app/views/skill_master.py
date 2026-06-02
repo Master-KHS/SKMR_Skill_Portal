@@ -119,7 +119,11 @@ if is_admin:
             with ncol2:
                 new_name = st.text_input("Skill 이름 *")
                 new_critical = st.checkbox("Critical Skill", value=False)
-            new_desc = st.text_area("설명 (선택)", height=80)
+            new_desc = st.text_area(
+                "Skill 정의 (이 Skill이 무엇인지 명확하게)",
+                height=100,
+                placeholder="예: 유기 반도체 소재의 분자 설계 시 Target Property 달성을 위한 분자 구조 설계 능력",
+            )
             if st.form_submit_button("Skill 등록", type="primary"):
                 if not new_name.strip():
                     st.error("Skill 이름은 필수입니다.")
@@ -206,6 +210,25 @@ with right:
             f"margin-left:8px; vertical-align:middle;'>CRITICAL</span>"
             if sk["is_critical"] else ""
         )
+        desc_html = ""
+        if sk.get("description"):
+            desc_html = (
+                f"<div style='margin-top:14px; padding:12px 14px; background:#F5F5F7; "
+                f"border-radius:3px; border-left:3px solid {COLOR_NAVY};'>"
+                f"<div style='color:{COLOR_TEXT_MED}; font-size:11px; font-weight:600; "
+                f"letter-spacing:0.04em; text-transform:uppercase; margin-bottom:4px;'>"
+                f"Skill 정의</div>"
+                f"<div style='color:{COLOR_TEXT_DARK}; font-size:13px; line-height:1.5;'>"
+                f"{sk['description']}</div></div>"
+            )
+        else:
+            desc_html = (
+                f"<div style='margin-top:14px; padding:8px 12px; background:#FFFAF0; "
+                f"border-radius:3px; border-left:2px solid #E0A030;'>"
+                f"<span style='color:#9B6B0F; font-size:12px;'>"
+                f"Skill 정의가 입력되지 않았습니다. HR Admin이 아래 '편집·삭제'에서 입력 가능합니다."
+                f"</span></div>"
+            )
         st.markdown(
             f"""
             <div style="background:white; border:1px solid {COLOR_BORDER};
@@ -216,7 +239,7 @@ with right:
                 <h3 style="margin:6px 0 0 0; color:{COLOR_NAVY};">
                     #{int(sk['skill_id']):03d} · {sk['skill_name']}{critical_badge}
                 </h3>
-                {f'<p style="color:{COLOR_TEXT_MED}; font-size:13px; margin:8px 0 0 0;">{sk["description"]}</p>' if sk.get("description") else ''}
+                {desc_html}
             </div>
             """,
             unsafe_allow_html=True,
@@ -249,8 +272,12 @@ with right:
                                               key=f"e_name_{selected_skill_id}")
                     new_critical = st.checkbox("Critical Skill", value=bool(sk["is_critical"]),
                                                 key=f"e_crit_{selected_skill_id}")
-                new_desc = st.text_area("설명", value=sk.get("description") or "",
-                                          key=f"e_desc_{selected_skill_id}", height=80)
+                new_desc = st.text_area(
+                    "Skill 정의 (이 Skill이 무엇인지·언제 발휘되는지 명확하게)",
+                    value=sk.get("description") or "",
+                    key=f"e_desc_{selected_skill_id}", height=120,
+                    placeholder="예: 유기 반도체 소재의 분자 설계 시 Target Property(HOMO/LUMO, 형광 효율 등) 달성을 위한 분자 구조 설계 능력",
+                )
 
                 bcol1, bcol2 = st.columns(2)
                 with bcol1:

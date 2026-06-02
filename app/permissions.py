@@ -22,7 +22,7 @@ MENU_VISIBILITY = {
     "member_mgmt":     {"employee": False, "team_leader": False, "calibration": False, "committee": False, "hr_admin": True,  "hr_viewer": False, "executive": False},
     "system_setting":  {"employee": False, "team_leader": False, "calibration": False, "committee": False, "hr_admin": True,  "hr_viewer": False, "executive": False},
     # ===== Assessment =====
-    "self_assess":     {"employee": True,  "team_leader": True,  "calibration": True,  "committee": True,  "hr_admin": False, "hr_viewer": False, "executive": False},
+    "self_assess":     {"employee": True,  "team_leader": True,  "calibration": True,  "committee": True,  "hr_admin": True,  "hr_viewer": False, "executive": False},
     "leader_assess":   {"employee": False, "team_leader": True,  "calibration": True,  "committee": False, "hr_admin": True,  "hr_viewer": False, "executive": False},
     "calibration":     {"employee": False, "team_leader": True,  "calibration": True,  "committee": False, "hr_admin": True,  "hr_viewer": False, "executive": False},
     "committee":       {"employee": False, "team_leader": False, "calibration": False, "committee": True,  "hr_admin": True,  "hr_viewer": False, "executive": False},
