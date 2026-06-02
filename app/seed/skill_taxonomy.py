@@ -5,6 +5,7 @@ FAMILIES = [
     # (family_id, family_name, description)
     ("EXP", "전문지식", "산업·도메인 이해 — 알아야 하는 지식 영역"),
     ("WRK", "업무기술", "실제로 수행하는 업무 스킬"),
+    ("ENB", "Enabler", "전사 공통 필요 스킬 — 디지털·협업 인프라"),
 ]
 
 SUB_FAMILIES = [
@@ -18,6 +19,8 @@ SUB_FAMILIES = [
     ("ANA", "WRK", "Analysis",            "분석·평가·진단·시뮬레이션"),
     ("MGT", "WRK", "Management",          "운영 통제·표준화·문서 관리"),
     ("OPS", "WRK", "Operations",          "직접 수행 작업·정비·점검"),
+    ("AIT", "ENB", "AI/DT",               "데이터 분석·AI 활용 역량"),
+    ("TMS", "ENB", "Teamship",            "디지털 협업·프로젝트 운영 역량"),
 ]
 
 # 130개 Skill - 사양 4.1 그대로 적재 (skill_id, sub_family_id, name)
@@ -161,6 +164,12 @@ SKILLS = [
     (128, "OPS", "Lab 유틸리티 유지관리"),
     (129, "OPS", "설비 점검 및 기본 유지관리"),
     (130, "OPS", "측정 정도 점검"),
+    # Enabler / AI·DT (2)
+    (131, "AIT", "데이터 분석"),
+    (132, "AIT", "생성형 AI Literacy"),
+    # Enabler / Teamship (2)
+    (133, "TMS", "디지털 협업"),
+    (134, "TMS", "Project Management"),
 ]
 
 # --- Level Criteria 공통 베이스 (사양 4.2 통합 표) ---
@@ -201,31 +210,25 @@ def build_level_criteria_rows():
 
 
 def seed_skill_taxonomy(conn) -> dict:
-    """DB가 비어 있으면 130 Skill + 9 Sub-family + 36 Level Criteria 적재.
-    이미 있으면 건너뜀 (중복 INSERT 방지). 반환: 적재 결과 카운트."""
+    """멱등 적재: 없는 행만 추가. Enabler 같은 신규 family/sub/skill을 추후에 추가하면
+    부팅 시 자동으로 들어옴 (INSERT OR IGNORE)."""
     cur = conn.cursor()
 
-    # 이미 적재돼 있으면 skip
-    existing = cur.execute("SELECT COUNT(*) FROM skill").fetchone()[0]
-    if existing > 0:
-        return {"skipped": True, "skill_count": existing}
-
-    cur.executemany("INSERT INTO skill_family VALUES (?,?,?)", FAMILIES)
-    cur.executemany("INSERT INTO sub_skill_family VALUES (?,?,?,?)", SUB_FAMILIES)
-    # is_critical은 기본 0 (사양 4.1엔 표시 없음, HR이 추후 토글)
+    cur.executemany("INSERT OR IGNORE INTO skill_family VALUES (?,?,?)", FAMILIES)
+    cur.executemany("INSERT OR IGNORE INTO sub_skill_family VALUES (?,?,?,?)", SUB_FAMILIES)
     cur.executemany(
-        "INSERT INTO skill (skill_id, sub_family_id, skill_name, description, is_critical) VALUES (?,?,?,NULL,0)",
+        "INSERT OR IGNORE INTO skill (skill_id, sub_family_id, skill_name, description, is_critical) "
+        "VALUES (?,?,?,NULL,0)",
         SKILLS,
     )
     cur.executemany(
-        "INSERT INTO level_criteria VALUES (?,?,?,?)",
+        "INSERT OR IGNORE INTO level_criteria VALUES (?,?,?,?)",
         build_level_criteria_rows(),
     )
     conn.commit()
     return {
-        "skipped": False,
-        "family": len(FAMILIES),
-        "sub_family": len(SUB_FAMILIES),
-        "skill": len(SKILLS),
-        "level_criteria": 36,
+        "family":     cur.execute("SELECT COUNT(*) FROM skill_family").fetchone()[0],
+        "sub_family": cur.execute("SELECT COUNT(*) FROM sub_skill_family").fetchone()[0],
+        "skill":      cur.execute("SELECT COUNT(*) FROM skill").fetchone()[0],
+        "level_criteria": cur.execute("SELECT COUNT(*) FROM level_criteria").fetchone()[0],
     }

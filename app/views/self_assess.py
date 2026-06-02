@@ -151,8 +151,8 @@ with left:
         f"선택 {len(st.session_state.self_selected)}건 · 표시 {len(display)}건 / 전체 {len(state)}건"
     )
 
-    # === 좌측 하단: 추가 Skill 신청 ===
-    with st.expander("추가 Skill 신청 (Individual)", expanded=False):
+    # === 좌측 하단: 추가 Skill 신청 (타팀 스킬 풀에서) ===
+    with st.expander("추가 Skill 신청 — 타팀 스킬 풀에서 선택", expanded=False):
         if not pending_df.empty:
             st.caption(f"승인 대기 {len(pending_df)}건 — 팀장 승인 후 평가 대상에 포함됩니다.")
             for _, r in pending_df.iterrows():
@@ -162,23 +162,71 @@ with left:
                     unsafe_allow_html=True,
                 )
 
+        # 타팀 스킬 풀 — 다른 팀의 Required(approved)로 등록된 Skill
+        conn = get_connection()
+        try:
+            other_pool = pd.read_sql_query(
+                """SELECT DISTINCT r.skill_id, s.skill_name,
+                          sf.sub_family_name, f.family_name,
+                          GROUP_CONCAT(DISTINCT r.target_id) AS teams
+                   FROM required_skill r
+                   JOIN skill s             ON r.skill_id = s.skill_id
+                   JOIN sub_skill_family sf ON s.sub_family_id = sf.sub_family_id
+                   JOIN skill_family f      ON sf.family_id    = f.family_id
+                   WHERE r.org_or_individual='department'
+                     AND r.target_id != ?
+                     AND r.status='approved'
+                   GROUP BY r.skill_id""",
+                conn, params=(member.get("team", ""),),
+            )
+        finally:
+            conn.close()
+
+        # 본인이 이미 가진 Skill 제외
         existing_ids = set(state["skill_id"].astype(int).tolist())
         if not pending_df.empty:
             existing_ids |= set(pending_df["skill_id"].astype(int).tolist())
-        avail = all_skills[~all_skills["skill_id"].isin(existing_ids)]
+        other_pool = other_pool[~other_pool["skill_id"].isin(existing_ids)]
+
+        st.caption(
+            f"본인 팀({member.get('team','—')}) 외의 다른 팀에서 Required로 등록된 Skill 중에서 선택. "
+            f"풀 크기: **{len(other_pool)}건**"
+        )
 
         with st.form("self_req_new", clear_on_submit=True):
-            if avail.empty:
-                st.caption("추가 신청 가능한 Skill이 없습니다.")
+            if other_pool.empty:
+                st.caption("타팀에 등록된 Skill 중 본인이 안 가진 항목이 없습니다.")
                 sel_sid = None
             else:
-                sel_sid = st.selectbox(
-                    "Skill",
-                    options=avail["skill_id"].astype(int).tolist(),
-                    format_func=lambda x: (
-                        f"#{x:03d} {avail[avail['skill_id']==x].iloc[0]['skill_name']}"
-                    ),
-                )
+                # Family/Sub-family 필터
+                ffcol1, ffcol2 = st.columns(2)
+                with ffcol1:
+                    fam_opts = ["전체"] + sorted(other_pool["family_name"].unique().tolist())
+                    sel_pool_fam = st.selectbox("Family", fam_opts, key="pool_fam")
+                with ffcol2:
+                    pool2 = other_pool if sel_pool_fam == "전체" else other_pool[other_pool["family_name"] == sel_pool_fam]
+                    sub_opts2 = ["전체"] + sorted(pool2["sub_family_name"].unique().tolist())
+                    sel_pool_sub = st.selectbox("Sub-family", sub_opts2, key="pool_sub")
+
+                pool_view = other_pool.copy()
+                if sel_pool_fam != "전체":
+                    pool_view = pool_view[pool_view["family_name"] == sel_pool_fam]
+                if sel_pool_sub != "전체":
+                    pool_view = pool_view[pool_view["sub_family_name"] == sel_pool_sub]
+
+                if pool_view.empty:
+                    sel_sid = None
+                    st.caption("필터 조건의 Skill이 없습니다.")
+                else:
+                    sel_sid = st.selectbox(
+                        "추가할 Skill",
+                        options=pool_view["skill_id"].astype(int).tolist(),
+                        format_func=lambda x: (
+                            f"#{x:03d} {pool_view[pool_view['skill_id']==x].iloc[0]['skill_name']} "
+                            f"({pool_view[pool_view['skill_id']==x].iloc[0]['sub_family_name']}) · "
+                            f"사용 팀: {pool_view[pool_view['skill_id']==x].iloc[0]['teams']}"
+                        ),
+                    )
             target_lv = st.number_input("요구 Lv", 1, 4, 2, 1)
             if st.form_submit_button("신청", type="primary", use_container_width=True) \
                and sel_sid is not None:

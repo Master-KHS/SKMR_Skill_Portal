@@ -3,10 +3,16 @@
 # (org_or_individual, target_id, skill_id, target_level, is_core)
 
 # 전사 공통 - 모든 평가 대상자가 갖춰야 할 기본
+# Enabler 4개는 전사 공통 자동 포함 (조직별 차이는 부서 Required에서 처리)
 COMPANY_REQUIRED = [
     # (skill_id, target_level, is_core)
-    (11, 2, 1),   # EHS 규제 및 유해·위험물 관리 기준 이해 - Core
-    (13, 2, 0),   # Project Planning & Coordination
+    (11,  2, 1),   # EHS 규제 및 유해·위험물 관리 기준 이해 - Core
+    (13,  2, 0),   # Project Planning & Coordination
+    # Enabler (전사 기본)
+    (131, 2, 0),   # 데이터 분석
+    (132, 2, 0),   # 생성형 AI Literacy
+    (133, 2, 0),   # 디지털 협업
+    (134, 2, 0),   # Project Management
 ]
 
 # 팀별 Core 5 + Non-Core 3 = 8건 (HR이 화면에서 자유롭게 추가·삭제 가능)
@@ -49,26 +55,33 @@ TEAM_REQUIRED: dict[str, list[tuple[int, int, int]]] = {
 
 
 def seed_required_skills(conn) -> dict:
-    """required_skill 테이블이 비어 있으면 초기 매핑 적재."""
+    """멱등 적재. 전사 Required(Enabler 포함)는 항상 누락분 보강. 팀별은 처음 한 번만."""
     cur = conn.cursor()
-    existing = cur.execute("SELECT COUNT(*) FROM required_skill").fetchone()[0]
-    if existing > 0:
-        return {"skipped": True, "count": existing}
 
-    rows = []
-    # 전사
-    for skill_id, lv, core in COMPANY_REQUIRED:
-        rows.append(("company", "ALL", skill_id, lv, core))
-    # 팀별
+    # 전사 — 누락된 행만 추가 (Enabler 신규 추가가 부팅 시 자동 반영됨)
+    for sid, lv, core in COMPANY_REQUIRED:
+        cur.execute(
+            """INSERT OR IGNORE INTO required_skill
+               (org_or_individual, target_id, skill_id, target_level, is_core, status)
+               VALUES ('company', 'ALL', ?, ?, ?, 'approved')""",
+            (sid, lv, core),
+        )
+
+    # 팀별 — 한 번도 시드 안 됐으면 적재 (이미 있는 팀은 skip)
     for team, items in TEAM_REQUIRED.items():
-        for skill_id, lv, core in items:
-            rows.append(("department", team, skill_id, lv, core))
+        team_count = cur.execute(
+            "SELECT COUNT(*) FROM required_skill WHERE org_or_individual='department' AND target_id=?",
+            (team,),
+        ).fetchone()[0]
+        if team_count == 0:
+            for sid, lv, core in items:
+                cur.execute(
+                    """INSERT OR IGNORE INTO required_skill
+                       (org_or_individual, target_id, skill_id, target_level, is_core, status)
+                       VALUES ('department', ?, ?, ?, ?, 'approved')""",
+                    (team, sid, lv, core),
+                )
 
-    cur.executemany(
-        """INSERT INTO required_skill
-           (org_or_individual, target_id, skill_id, target_level, is_core)
-           VALUES (?,?,?,?,?)""",
-        rows,
-    )
     conn.commit()
-    return {"skipped": False, "count": len(rows)}
+    total = cur.execute("SELECT COUNT(*) FROM required_skill").fetchone()[0]
+    return {"count": total}

@@ -262,7 +262,11 @@ with tab_company:
 
 # ---------- 조직별 ----------
 with tab_org:
-    # 팀 목록 가져오기
+    st.caption(
+        "팀 단위 Required Skill 정의. 1차로 **Required** 체크 → 2차로 Required 중에서 **Core** 5개 선택. "
+        "Core는 반드시 5개여야 저장됩니다 (Enabler·전사 Required는 자동 포함되어 별도 카운트 안 됨)."
+    )
+
     conn = get_connection()
     try:
         teams_df = pd.read_sql_query(
@@ -272,14 +276,9 @@ with tab_org:
     finally:
         conn.close()
 
-    # 페르소나별 보이는 팀 범위
     visible_teams = teams_df["team"].tolist()
     if persona == "team_leader" and member:
-        # Team Leader는 본인 팀만
         visible_teams = [member["team"]] if member.get("team") in teams_df["team"].values else []
-    elif persona in ("calibration", "committee", "hr_viewer") and member:
-        # 본인 담당 범위 (단순화: 본인 팀만 정렬 1순위로)
-        pass
 
     if not visible_teams:
         st.warning("조회 가능한 팀이 없습니다.")
@@ -295,27 +294,135 @@ with tab_org:
                 unsafe_allow_html=True,
             )
 
-        team_req = _enrich(_load_required("department", sel_team), skills_df)
+        # 현재 팀의 Required (Enabler 제외)
+        team_req = _load_required("department", sel_team)
 
-        # KPI 카드
+        # 전체 Skill (Enabler 제외 — 전사 자동 포함)
+        skills_no_enb = skills_df[skills_df["family_id"] != "ENB"].copy()
+
+        # 매트릭스: 모든 Skill을 row로, Required·Core·Target 컬럼
+        is_req_map = dict(zip(team_req["skill_id"], [True] * len(team_req)))
+        is_core_map = dict(zip(team_req["skill_id"], team_req["is_core"].astype(bool)))
+        target_map = dict(zip(team_req["skill_id"], team_req["target_level"].astype(int)))
+
+        matrix = pd.DataFrame({
+            "Required":  skills_no_enb["skill_id"].map(lambda s: is_req_map.get(s, False)),
+            "Core":      skills_no_enb["skill_id"].map(lambda s: is_core_map.get(s, False)),
+            "ID":        skills_no_enb["skill_id"],
+            "Skill":     skills_no_enb["skill_name"],
+            "Family":    skills_no_enb["family_name"],
+            "Sub-family": skills_no_enb["sub_family_name"],
+            "Target":    skills_no_enb["skill_id"].map(lambda s: target_map.get(s, 2)),
+        })
+
+        # 현황 KPI
+        n_req_now = int(matrix["Required"].sum())
+        n_core_now = int(matrix["Core"].sum())
+
         kcol1, kcol2, kcol3, kcol4 = st.columns(4)
-        n_core = int(team_req["is_core"].sum()) if not team_req.empty else 0
-        n_total = len(team_req)
-        kcol1.metric("매핑 Skill 수", n_total)
-        kcol2.metric("Core", n_core)
-        kcol3.metric("Non-Core", n_total - n_core)
-        kcol4.metric("평균 Target Level", f"L{team_req['target_level'].mean():.1f}" if not team_req.empty else "—")
+        kcol1.metric("팀 Required (현재)", n_req_now)
+        # Core 5개 강제 — 현재값과 목표(5)를 같이 표시
+        delta = n_core_now - 5
+        delta_str = (f"+{delta}" if delta > 0 else (f"{delta}" if delta < 0 else "OK"))
+        kcol2.metric("Core (필요 5개)", f"{n_core_now} / 5", delta=delta_str if delta != 0 else None)
+        kcol3.metric("Non-Core", n_req_now - n_core_now)
+        kcol4.metric("전사 Enabler (자동)", 4)
 
-        edited_org = _editor(
-            team_req, skills_df,
-            editable=can_edit_org, key=f"req_org_{sel_team}",
+        st.divider()
+
+        # 필터
+        fcol1, fcol2, fcol3 = st.columns(3)
+        with fcol1:
+            fam_opts = ["전체"] + matrix["Family"].drop_duplicates().tolist()
+            sel_fam = st.selectbox("Family", fam_opts, key=f"org_fam_{sel_team}")
+        with fcol2:
+            pool = matrix if sel_fam == "전체" else matrix[matrix["Family"] == sel_fam]
+            sub_opts = ["전체"] + pool["Sub-family"].drop_duplicates().tolist()
+            sel_sub_filter = st.selectbox("Sub-family", sub_opts, key=f"org_sub_{sel_team}")
+        with fcol3:
+            only_required = st.checkbox("Required만 보기", value=False, key=f"org_only_req_{sel_team}")
+
+        view = matrix.copy()
+        if sel_fam != "전체":
+            view = view[view["Family"] == sel_fam]
+        if sel_sub_filter != "전체":
+            view = view[view["Sub-family"] == sel_sub_filter]
+        if only_required:
+            view = view[view["Required"]]
+
+        # 정렬: Required → Core → ID
+        view = view.sort_values(["Required", "Core", "ID"], ascending=[False, False, True])
+
+        st.markdown(
+            f"<p style='color:{COLOR_TEXT_MED}; font-size:13px;'>"
+            f"{len(view)} / {len(matrix)} Skill 표시</p>",
+            unsafe_allow_html=True,
         )
 
+        edited = st.data_editor(
+            view,
+            hide_index=True,
+            use_container_width=True,
+            num_rows="fixed",
+            height=520,
+            disabled=(["ID", "Skill", "Family", "Sub-family"]
+                       if can_edit_org else
+                       ["Required", "Core", "ID", "Skill", "Family", "Sub-family", "Target"]),
+            column_config={
+                "Required": st.column_config.CheckboxColumn("Required", width="small"),
+                "Core":     st.column_config.CheckboxColumn("Core (필요 5개)", width="small"),
+                "ID":       st.column_config.NumberColumn("ID", width="small"),
+                "Skill":    st.column_config.TextColumn("Skill"),
+                "Family":   st.column_config.TextColumn("Family", width="small"),
+                "Sub-family": st.column_config.TextColumn("Sub-family", width="small"),
+                "Target":   st.column_config.NumberColumn(
+                    "Target Lv", min_value=1, max_value=4, step=1, width="small",
+                ),
+            },
+            key=f"req_org_matrix_{sel_team}",
+        )
+
+        # Core 체크 시 Required 자동 ON 보정 + 표시 영역 외 행은 원래 matrix 값 유지
+        # 편집된 행만 matrix에 반영
+        edited_indexed = edited.set_index("ID")
+        for sid in edited_indexed.index:
+            matrix.loc[matrix["ID"] == sid, "Required"] = bool(edited_indexed.loc[sid, "Required"])
+            matrix.loc[matrix["ID"] == sid, "Core"] = bool(edited_indexed.loc[sid, "Core"])
+            matrix.loc[matrix["ID"] == sid, "Target"] = int(edited_indexed.loc[sid, "Target"])
+
+        # Core=True인데 Required=False면 Required 강제 ON
+        matrix.loc[matrix["Core"], "Required"] = True
+
+        n_req_after = int(matrix["Required"].sum())
+        n_core_after = int(matrix["Core"].sum())
+
         if can_edit_org:
-            if st.button("💾 조직 Required Skill 저장", type="primary", key=f"save_org_{sel_team}"):
+            save_col, hint_col = st.columns([1, 3])
+            with save_col:
+                save_clicked = st.button(
+                    f"저장 (Core {n_core_after}/5)",
+                    type="primary",
+                    use_container_width=True,
+                    disabled=(n_core_after != 5),
+                    key=f"org_save_{sel_team}",
+                )
+            with hint_col:
+                if n_core_after != 5:
+                    st.warning(f"Core가 {n_core_after}개입니다. 정확히 **5개**여야 저장 가능합니다.")
+                else:
+                    st.success(
+                        f"Core 5개 충족 — 저장 가능 (Required 총 {n_req_after} = Core 5 + Non-Core {n_req_after - 5})"
+                    )
+
+            if save_clicked and n_core_after == 5:
+                save_df = matrix[matrix["Required"]][["ID", "Target", "Core"]].rename(
+                    columns={"ID": "skill_id", "Target": "target_level", "Core": "is_core"}
+                )
+                save_df["is_core"] = save_df["is_core"].astype(int)
+                save_df["skill_name"] = ""  # _save_required는 사용 안 함
                 try:
-                    n = _save_required("department", sel_team, edited_org)
-                    st.success(f"[{sel_team}] 저장 완료 · {n}건")
+                    n = _save_required("department", sel_team, save_df)
+                    st.success(f"[{sel_team}] 저장 완료 · Required {n}건 (Core 5 + Non-Core {n-5})")
                     st.rerun()
                 except Exception as e:
                     st.error(f"저장 실패: {e}")
