@@ -68,10 +68,10 @@ with st.sidebar:
 ALL_PAGES = [
     # (menu_key, file_path, title, section)
     # ===== Foundation =====
-    ("policy",          "views/policy.py",          "운영 정책 관리",      "Foundation"),
-    ("skill_master",    "views/skill_master.py",    "Skill Library",      "Foundation"),
+    ("policy",          "views/policy.py",          "운영 정책 관리",       "Foundation"),
+    ("skill_master",    "views/skill_master.py",    "Skill Library",       "Foundation"),
+    ("member_mgmt",     "views/member_mgmt.py",     "구성원 Master Data",  "Foundation"),
     ("eval_lines",      "views/eval_lines.py",      "Assessment 라인 관리", "Foundation"),
-    ("member_mgmt",     "views/member_mgmt.py",     "구성원 관리",         "Foundation"),
     ("system_setting",  "views/system_setting.py",  "Admin 권한 관리",     "Foundation"),
     # ===== Assessment =====
     ("required_skill",  "views/required_skill.py",  "필요 Skill 정의",     "Assessment"),
