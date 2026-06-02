@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from assessment_logic import confirm_final, get_proposed_level
-from config import COLOR_NAVY, COLOR_SK_RED, COLOR_TEXT_MED, LEVEL_NAMES
+from config import COLOR_NAVY, COLOR_SK_RED, COLOR_TEXT_DARK, COLOR_TEXT_MED, LEVEL_NAMES
 from db import get_connection
 from persona_switch import render_persona_badge
 from theme import page_header
@@ -23,16 +23,18 @@ try:
     pending = pd.read_sql_query(
         """
         WITH calib_done AS (
-            SELECT member_id, skill_id, MAX(assessment_id) AS aid, MAX(proposed_level) AS calib_lv
+            SELECT member_id, skill_id, MAX(assessment_id) AS aid,
+                   MAX(proposed_level) AS calib_lv,
+                   MAX(narrative) AS narrative
             FROM assessment
-            WHERE stage='calibration' AND status='submitted'
+            WHERE stage='calibration' AND status='submitted' AND proposed_level=4
             GROUP BY member_id, skill_id
         ),
         commit_done AS (
             SELECT DISTINCT member_id, skill_id FROM assessment
             WHERE stage='committee' AND status='confirmed'
         )
-        SELECT cd.member_id, cd.skill_id, cd.calib_lv,
+        SELECT cd.member_id, cd.skill_id, cd.calib_lv, cd.narrative,
                m.name, m.division, m.team, m.role_level,
                s.skill_name, sf.sub_family_name, f.family_name, s.is_critical
         FROM calib_done cd
@@ -150,7 +152,30 @@ for sid, group in pending.groupby("skill_id"):
                 st.success(f"{row['name']} #{int(sid):03d} 최종 L{final_lv} 확정 + Profile 갱신")
                 st.rerun()
 
-        # Skill 그룹 내 Evidence (인원별)
+        # Skill 그룹 내 Narrative (인원별) — Committee 의결 자료
+        with st.expander("Narrative (인원별) — Committee 의결 자료", expanded=True):
+            for _, row in group.iterrows():
+                narr = (row["narrative"] or "").strip()
+                if narr:
+                    st.markdown(
+                        f"""
+                        <div style='border-left:3px solid {COLOR_NAVY};
+                                    background:#F5F7FA; padding:10px 14px; margin-bottom:8px;'>
+                            <b style='color:{COLOR_NAVY};'>{row['name']}</b>
+                            <span style='color:{COLOR_TEXT_MED}; font-size:11px; margin-left:6px;'>
+                                ({row['team']} · {row['role_level']})</span>
+                            <p style='color:{COLOR_TEXT_DARK}; font-size:13px; margin:6px 0 0 0; line-height:1.5;'>{narr}</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.markdown(
+                        f"<div style='color:{COLOR_TEXT_MED}; font-size:12px; padding:6px 10px;'>"
+                        f"<b>{row['name']}</b> — Narrative 미작성 (Narrative 작성 메뉴에서 입력)</div>",
+                        unsafe_allow_html=True,
+                    )
+
         with st.expander("이 Skill 관련 Evidence (인원별)", expanded=False):
             for _, row in group.iterrows():
                 st.markdown(f"**{row['name']}**", unsafe_allow_html=True)

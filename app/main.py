@@ -78,6 +78,7 @@ ALL_PAGES = [
     ("self_assess",     "views/self_assess.py",     "자가 진단",          "Assessment"),
     ("leader_assess",   "views/leader_assess.py",   "리더 진단",          "Assessment"),
     ("calibration",     "views/calibration.py",     "Calibration",       "Assessment"),
+    ("narrative",       "views/narrative.py",       "Narrative 작성",     "Assessment"),
     ("committee",       "views/committee.py",       "Committee",         "Assessment"),
     ("skill_profile",   "views/skill_profile.py",   "최종 결과 확인",      "Assessment"),
     # ===== Reporting =====

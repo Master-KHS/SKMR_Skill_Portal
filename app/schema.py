@@ -131,9 +131,13 @@ def init_db() -> None:
             conn.execute(
                 "ALTER TABLE required_skill ADD COLUMN status TEXT DEFAULT 'approved'"
             )
-            # 기존 individual 행은 모두 approved로 간주 (DEFAULT가 적용됨)
         except _sqlite3.OperationalError:
-            pass  # 이미 있는 컬럼이면 무시
+            pass
+        # assessment.narrative — Calibration → Committee 사이 작성하는 의결 자료
+        try:
+            conn.execute("ALTER TABLE assessment ADD COLUMN narrative TEXT")
+        except _sqlite3.OperationalError:
+            pass
         conn.commit()
     finally:
         conn.close()

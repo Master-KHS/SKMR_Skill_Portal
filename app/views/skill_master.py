@@ -1,9 +1,10 @@
-# Skill Library - 130개 Skill 카탈로그 조회 + HR Admin 편집 (CRUD).
-# 좌측 트리 + 우측 상세·Level Criteria. HR Admin일 때 신규 등록/편집/삭제 가능.
+# Skill Library - 카탈로그 조회 + HR Admin CRUD.
+# 우측 상세를 4박스 구성: Definition / Tool·Cert / Level Guideline / 보유 현황 도넛.
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
 
-from config import COLOR_BORDER, COLOR_NAVY, COLOR_SK_RED, COLOR_TEXT_MED, LEVEL_NAMES
+from config import COLOR_BORDER, COLOR_NAVY, COLOR_SK_RED, COLOR_TEXT_DARK, COLOR_TEXT_MED, LEVEL_NAMES
 from db import get_connection
 from persona_switch import render_persona_badge
 from theme import page_header
@@ -37,6 +38,46 @@ def _load_all():
     return skills, criteria, subs
 
 
+def _load_holders(skill_id: int):
+    """이 Skill 보유자 데이터 - 전사 보유율·평균 + 부서별 보유율·평균."""
+    conn = get_connection()
+    try:
+        total = conn.execute(
+            "SELECT COUNT(*) FROM member WHERE job_type IN ('사무직','기술직','연구직')"
+        ).fetchone()[0]
+        holders = conn.execute(
+            """SELECT COUNT(*) AS n, AVG(current_level) AS avg_lv
+               FROM skill_profile sp JOIN member m ON sp.member_id=m.employee_id
+               WHERE sp.skill_id=? AND m.job_type IN ('사무직','기술직','연구직')""",
+            (skill_id,),
+        ).fetchone()
+        # Level 분포 (전사)
+        level_dist = pd.read_sql_query(
+            """SELECT sp.current_level AS lv, COUNT(*) AS n
+               FROM skill_profile sp JOIN member m ON sp.member_id=m.employee_id
+               WHERE sp.skill_id=? AND m.job_type IN ('사무직','기술직','연구직')
+               GROUP BY sp.current_level""",
+            conn, params=(skill_id,),
+        )
+        # 팀 분포 (보유자가 어느 팀에)
+        team_dist = pd.read_sql_query(
+            """SELECT m.division AS div, COUNT(*) AS n
+               FROM skill_profile sp JOIN member m ON sp.member_id=m.employee_id
+               WHERE sp.skill_id=? AND m.job_type IN ('사무직','기술직','연구직')
+               GROUP BY m.division ORDER BY n DESC""",
+            conn, params=(skill_id,),
+        )
+    finally:
+        conn.close()
+    return {
+        "total": total,
+        "n_holders": holders["n"] or 0,
+        "avg_lv": holders["avg_lv"] or 0,
+        "level_dist": level_dist,
+        "team_dist": team_dist,
+    }
+
+
 def _next_skill_id() -> int:
     conn = get_connection()
     try:
@@ -46,7 +87,7 @@ def _next_skill_id() -> int:
         conn.close()
 
 
-def _insert_skill(sub_family_id: str, name: str, description: str, is_critical: int) -> int:
+def _insert_skill(sub_family_id, name, description, is_critical):
     new_id = _next_skill_id()
     conn = get_connection()
     try:
@@ -60,7 +101,7 @@ def _insert_skill(sub_family_id: str, name: str, description: str, is_critical: 
     return new_id
 
 
-def _update_skill(skill_id: int, sub_family_id: str, name: str, description: str, is_critical: int) -> None:
+def _update_skill(skill_id, sub_family_id, name, description, is_critical):
     conn = get_connection()
     try:
         conn.execute(
@@ -72,8 +113,7 @@ def _update_skill(skill_id: int, sub_family_id: str, name: str, description: str
         conn.close()
 
 
-def _delete_skill(skill_id: int) -> dict:
-    """삭제 전 참조 무결성 체크. profile/required/assessment/evidence에 있으면 차단."""
+def _delete_skill(skill_id):
     conn = get_connection()
     try:
         n_prof = conn.execute("SELECT COUNT(*) FROM skill_profile WHERE skill_id=?", (skill_id,)).fetchone()[0]
@@ -87,22 +127,94 @@ def _delete_skill(skill_id: int) -> dict:
         conn.commit()
     finally:
         conn.close()
-    return {"deleted": True, "refs": {}}
+    return {"deleted": True}
 
 
-# ---------- 페이지 시작 ----------
+def _box_header(title: str) -> str:
+    """이미지 참고 — 파란 헤더 박스 (네이비 배경 + 흰 글자)."""
+    return (
+        f"<div style='background:{COLOR_NAVY}; color:white; padding:6px 14px; "
+        f"border-radius:3px; display:inline-block; font-size:13px; font-weight:600; "
+        f"letter-spacing:0.02em; margin-bottom:8px;'>{title}</div>"
+    )
+
+
+def _donut(value: float, total: float, label: str, color=COLOR_NAVY) -> go.Figure:
+    """보유율 도넛 차트."""
+    pct = (value / total * 100) if total > 0 else 0
+    fig = go.Figure(go.Pie(
+        values=[value, max(total - value, 0)],
+        labels=[label, "기타"],
+        hole=0.65,
+        marker=dict(colors=[color, "#E8EEF5"]),
+        textinfo="none",
+        showlegend=False,
+        sort=False,
+    ))
+    fig.add_annotation(
+        text=f"<b>{pct:.0f}%</b>",
+        showarrow=False, font=dict(size=22, color=COLOR_NAVY),
+        x=0.5, y=0.5,
+    )
+    fig.update_layout(
+        height=160, margin=dict(t=0, b=0, l=0, r=0),
+        paper_bgcolor="white",
+    )
+    return fig
+
+
+def _level_bar(avg: float) -> go.Figure:
+    """평균 Level 가로 바 (1~4 스케일)."""
+    fig = go.Figure(go.Bar(
+        x=[avg], y=[""], orientation="h",
+        marker=dict(color=COLOR_NAVY),
+        text=[f"<b>{avg:.1f}</b>"], textposition="inside",
+        textfont=dict(color="white"),
+        hoverinfo="none",
+    ))
+    fig.update_layout(
+        height=50, margin=dict(t=0, b=0, l=0, r=0),
+        paper_bgcolor="white", plot_bgcolor="white",
+        xaxis=dict(range=[0, 4], showgrid=False, showticklabels=True, dtick=1,
+                   tickfont=dict(size=10, color=COLOR_TEXT_MED)),
+        yaxis=dict(showgrid=False, showticklabels=False),
+    )
+    return fig
+
+
+def _team_pie(team_dist: pd.DataFrame) -> go.Figure:
+    """팀 분포 파이."""
+    if team_dist.empty:
+        fig = go.Figure()
+        fig.update_layout(height=180, margin=dict(t=0, b=0, l=0, r=0))
+        return fig
+    colors = ["#0A1929", "#3D5A80", "#7A8FA8", "#A8B8C8", "#C7D0DA", "#E8EEF5"]
+    fig = go.Figure(go.Pie(
+        values=team_dist["n"], labels=team_dist["div"],
+        marker=dict(colors=colors[:len(team_dist)]),
+        textinfo="label+percent", textposition="outside",
+        textfont=dict(size=10),
+        showlegend=False,
+    ))
+    fig.update_layout(
+        height=200, margin=dict(t=10, b=10, l=10, r=10),
+        paper_bgcolor="white",
+    )
+    return fig
+
+
+# ===== 페이지 시작 =====
 persona = st.session_state.get("current_persona", "hr_admin")
 render_persona_badge(persona)
 page_header(
     "Skill Library",
-    "Family → Sub-family → Skill 계층 + Level Criteria · HR Admin 편집 가능",
+    "Skill 카탈로그 — 정의·Tool·Level Guideline·보유 현황",
 )
 
 is_admin = persona == "hr_admin"
-
 skills_df, criteria_df, subs_df = _load_all()
 
-# ===== HR Admin: 새 Skill 등록 폼 =====
+# 새 Skill 등록 (HR Admin)
 if is_admin:
     with st.expander("새 Skill 등록", expanded=False):
         with st.form("new_skill", clear_on_submit=True):
@@ -120,20 +232,20 @@ if is_admin:
                 new_name = st.text_input("Skill 이름 *")
                 new_critical = st.checkbox("Critical Skill", value=False)
             new_desc = st.text_area(
-                "Skill 정의 (이 Skill이 무엇인지 명확하게)",
+                "Skill 정의",
                 height=100,
-                placeholder="예: 유기 반도체 소재의 분자 설계 시 Target Property 달성을 위한 분자 구조 설계 능력",
+                placeholder="이 Skill이 무엇인지·언제 발휘되는지 명확하게",
             )
             if st.form_submit_button("Skill 등록", type="primary"):
                 if not new_name.strip():
                     st.error("Skill 이름은 필수입니다.")
                 else:
-                    new_id = _insert_skill(sub_choice, new_name.strip(), new_desc.strip(),
-                                            1 if new_critical else 0)
+                    new_id = _insert_skill(sub_choice, new_name.strip(),
+                                            new_desc.strip(), 1 if new_critical else 0)
                     st.success(f"#{new_id:03d} '{new_name}' 등록 완료")
                     st.rerun()
 
-# ===== 필터 =====
+# 상단 필터
 filter_col1, filter_col2, filter_col3 = st.columns([2, 2, 3])
 with filter_col1:
     family_opts = ["전체"] + skills_df["family_name"].drop_duplicates().tolist()
@@ -163,8 +275,8 @@ mcol3.metric("Critical Skill", int(view_df["is_critical"].sum()))
 
 st.divider()
 
-# ===== 좌 트리 + 우 상세 =====
-left, right = st.columns([1, 1.4])
+# 좌 트리 + 우 상세
+left, right = st.columns([1, 2.3])
 
 with left:
     st.markdown(f"<h5 style='color:{COLOR_NAVY};'>Skill Tree</h5>", unsafe_allow_html=True)
@@ -186,10 +298,9 @@ with left:
                     for _, row in sf_group.iterrows():
                         sid = int(row["skill_id"])
                         is_sel = sid == st.session_state.sm_selected_id
-                        prefix = "▶ " if is_sel else "  "
                         critical_tag = "  [CRT]" if row["is_critical"] else ""
                         if st.button(
-                            f"{prefix}#{sid:03d}  {row['skill_name']}{critical_tag}",
+                            f"#{sid:03d}  {row['skill_name']}{critical_tag}",
                             key=f"sk_{sid}",
                             use_container_width=True,
                             type="primary" if is_sel else "secondary",
@@ -199,7 +310,6 @@ with left:
         selected_skill_id = st.session_state.sm_selected_id
 
 with right:
-    st.markdown(f"<h5 style='color:{COLOR_NAVY};'>Skill 상세</h5>", unsafe_allow_html=True)
     if selected_skill_id is None or selected_skill_id not in skills_df["skill_id"].values:
         st.info("좌측에서 Skill을 선택하세요.")
     else:
@@ -210,42 +320,137 @@ with right:
             f"margin-left:8px; vertical-align:middle;'>CRITICAL</span>"
             if sk["is_critical"] else ""
         )
-        desc_html = ""
-        if sk.get("description"):
-            desc_html = (
-                f"<div style='margin-top:14px; padding:12px 14px; background:#F5F5F7; "
-                f"border-radius:3px; border-left:3px solid {COLOR_NAVY};'>"
-                f"<div style='color:{COLOR_TEXT_MED}; font-size:11px; font-weight:600; "
-                f"letter-spacing:0.04em; text-transform:uppercase; margin-bottom:4px;'>"
-                f"Skill 정의</div>"
-                f"<div style='color:{COLOR_TEXT_DARK}; font-size:13px; line-height:1.5;'>"
-                f"{sk['description']}</div></div>"
-            )
-        else:
-            desc_html = (
-                f"<div style='margin-top:14px; padding:8px 12px; background:#FFFAF0; "
-                f"border-radius:3px; border-left:2px solid #E0A030;'>"
-                f"<span style='color:#9B6B0F; font-size:12px;'>"
-                f"Skill 정의가 입력되지 않았습니다. HR Admin이 아래 '편집·삭제'에서 입력 가능합니다."
-                f"</span></div>"
-            )
+        # Skill 명 (이미지 참고 — 흰 박스 라벨 + 네이비 박스 이름)
         st.markdown(
             f"""
-            <div style="background:white; border:1px solid {COLOR_BORDER};
-                        border-radius:4px; padding:18px 22px; margin-bottom:14px;">
-                <div style="color:{COLOR_TEXT_MED}; font-size:12px;">
-                    {sk['family_name']} · {sk['sub_family_name']}
-                </div>
-                <h3 style="margin:6px 0 0 0; color:{COLOR_NAVY};">
+            <div style='display:flex; align-items:center; gap:8px; margin-bottom:14px;'>
+                <span style='border:1.5px solid {COLOR_NAVY}; color:{COLOR_NAVY};
+                       padding:6px 14px; border-radius:3px; font-size:13px; font-weight:600;'>스킬 명</span>
+                <span style='background:{COLOR_NAVY}; color:white; padding:7px 16px;
+                       border-radius:3px; font-size:14px; font-weight:600;'>
                     #{int(sk['skill_id']):03d} · {sk['skill_name']}{critical_badge}
-                </h3>
-                {desc_html}
+                </span>
+                <span style='color:{COLOR_TEXT_MED}; font-size:12px; margin-left:6px;'>
+                    {sk['family_name']} · {sk['sub_family_name']}
+                </span>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        # HR Admin이면 편집·삭제 영역
+        # 4 박스 그리드 — 좌측(Definition·보유 현황) / 우측(Level Guideline)
+        bl, br = st.columns([1, 1.4])
+
+        with bl:
+            # Skill Definition
+            st.markdown(_box_header("Skill Definition"), unsafe_allow_html=True)
+            if sk.get("description") and sk["description"].strip():
+                st.markdown(
+                    f"<div style='background:#F1F5FA; border:1px solid {COLOR_BORDER}; "
+                    f"border-radius:3px; padding:14px 16px; min-height:160px; "
+                    f"color:{COLOR_TEXT_DARK}; font-size:13px; line-height:1.6;'>"
+                    f"{sk['description']}</div>",
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f"<div style='background:#FFFAF0; border:1px dashed #E0A030; "
+                    f"border-radius:3px; padding:14px 16px; min-height:160px; "
+                    f"color:#9B6B0F; font-size:12px;'>"
+                    f"Skill 정의 미입력 — HR Admin이 아래 '편집' expander에서 입력하세요.</div>",
+                    unsafe_allow_html=True,
+                )
+
+            # 보유 현황 (도넛 2개)
+            h = _load_holders(int(sk["skill_id"]))
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(_box_header("전사 내 Skill 보유 현황"), unsafe_allow_html=True)
+            sub_h1, sub_h2 = st.columns([1, 1])
+            with sub_h1:
+                st.plotly_chart(
+                    _donut(h["n_holders"], h["total"], "보유"),
+                    use_container_width=True,
+                )
+            with sub_h2:
+                st.markdown(
+                    f"<p style='color:{COLOR_TEXT_MED}; font-size:11px; margin:4px 0 0 0;'>전사 평균 Level</p>",
+                    unsafe_allow_html=True,
+                )
+                st.plotly_chart(_level_bar(h["avg_lv"]), use_container_width=True)
+                st.markdown(
+                    f"<p style='color:{COLOR_TEXT_MED}; font-size:11px; margin:4px 0 0 0;'>"
+                    f"보유 {int(h['n_holders'])} / 평가 대상 {h['total']}명</p>",
+                    unsafe_allow_html=True,
+                )
+
+        with br:
+            # Level Definition / Guideline
+            st.markdown(_box_header("Level Definition / Guideline"), unsafe_allow_html=True)
+            lc = (criteria_df[criteria_df["sub_family_id"] == sk["sub_family_id"]]
+                  .sort_values("level", ascending=False))
+            for _, c in lc.iterrows():
+                lv = int(c["level"])
+                lvl_name = LEVEL_NAMES.get(lv, "")
+                st.markdown(
+                    f"""
+                    <div style='display:flex; gap:12px; margin-bottom:8px;
+                                background:#F1F5FA; border:1px solid {COLOR_BORDER};
+                                border-radius:3px; padding:10px 14px;'>
+                        <div style='min-width:90px;'>
+                            <b style='color:{COLOR_NAVY}; font-size:13px;'>{lvl_name}</b>
+                            <div style='color:{COLOR_TEXT_MED}; font-size:11px;'>L{lv}</div>
+                        </div>
+                        <div style='flex:1; color:{COLOR_TEXT_DARK}; font-size:12px; line-height:1.5;'>
+                            <div style='color:{COLOR_TEXT_MED}; font-size:11px; font-weight:600; margin-bottom:2px;'>전문성</div>
+                            {c['expertise_criteria'] or '—'}
+                            <div style='color:{COLOR_TEXT_MED}; font-size:11px; font-weight:600; margin:6px 0 2px 0;'>영향력</div>
+                            {c['impact_criteria'] or '—'}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            # 해당 레벨 보유자 분포 (담당 분포)
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(_box_header("해당 Skill 보유자 분포"), unsafe_allow_html=True)
+            sub_d1, sub_d2 = st.columns([1, 1])
+            with sub_d1:
+                st.markdown(
+                    f"<p style='color:{COLOR_TEXT_MED}; font-size:11px;'>담당 분포</p>",
+                    unsafe_allow_html=True,
+                )
+                st.plotly_chart(_team_pie(h["team_dist"]), use_container_width=True)
+            with sub_d2:
+                st.markdown(
+                    f"<p style='color:{COLOR_TEXT_MED}; font-size:11px;'>Level 분포</p>",
+                    unsafe_allow_html=True,
+                )
+                ld = h["level_dist"]
+                if ld.empty:
+                    st.caption("보유자 없음")
+                else:
+                    # Level별 가로 막대
+                    lv_rows = []
+                    for lv in [4, 3, 2, 1]:
+                        cnt = int(ld[ld["lv"] == lv]["n"].sum()) if lv in ld["lv"].values else 0
+                        lv_rows.append({"Level": f"L{lv}", "보유": cnt})
+                    lv_df_show = pd.DataFrame(lv_rows)
+                    fig = go.Figure(go.Bar(
+                        y=lv_df_show["Level"], x=lv_df_show["보유"],
+                        orientation="h",
+                        marker=dict(color=["#0A1929", "#3D5A80", "#7A8FA8", "#A8B8C8"]),
+                        text=lv_df_show["보유"], textposition="outside",
+                    ))
+                    fig.update_layout(
+                        height=180, margin=dict(t=10, b=10, l=10, r=20),
+                        paper_bgcolor="white", plot_bgcolor="white",
+                        xaxis=dict(showgrid=False),
+                        yaxis=dict(showgrid=False),
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+
+        # HR Admin 편집 영역
         if is_admin:
             with st.expander("이 Skill 편집·삭제", expanded=False):
                 ecol1, ecol2 = st.columns(2)
@@ -273,16 +478,14 @@ with right:
                     new_critical = st.checkbox("Critical Skill", value=bool(sk["is_critical"]),
                                                 key=f"e_crit_{selected_skill_id}")
                 new_desc = st.text_area(
-                    "Skill 정의 (이 Skill이 무엇인지·언제 발휘되는지 명확하게)",
+                    "Skill 정의",
                     value=sk.get("description") or "",
                     key=f"e_desc_{selected_skill_id}", height=120,
-                    placeholder="예: 유기 반도체 소재의 분자 설계 시 Target Property(HOMO/LUMO, 형광 효율 등) 달성을 위한 분자 구조 설계 능력",
                 )
-
                 bcol1, bcol2 = st.columns(2)
                 with bcol1:
-                    if st.button("변경사항 저장", type="primary",
-                                  use_container_width=True, key=f"e_save_{selected_skill_id}"):
+                    if st.button("변경사항 저장", type="primary", use_container_width=True,
+                                  key=f"e_save_{selected_skill_id}"):
                         _update_skill(int(selected_skill_id), new_sub, new_name.strip(),
                                        new_desc.strip(), 1 if new_critical else 0)
                         st.success("저장됨")
@@ -296,25 +499,8 @@ with right:
                             st.session_state.sm_selected_id = int(skills_df.iloc[0]["skill_id"])
                             st.rerun()
                         else:
-                            refs = res["refs"]
+                            r = res["refs"]
                             st.error(
-                                f"삭제 차단: 참조 존재 — "
-                                f"Profile {refs['profile']}건 / Required {refs['required']}건 / "
-                                f"Assessment {refs['assessment']}건 / Evidence-Link {refs['evidence_link']}건"
+                                f"삭제 차단 — Profile {r['profile']} / Required {r['required']} / "
+                                f"Assessment {r['assessment']} / Evidence {r['evidence_link']}"
                             )
-
-        # Level Criteria 표
-        st.markdown(f"<h5 style='color:{COLOR_NAVY};'>Level Criteria</h5>", unsafe_allow_html=True)
-        lc = (criteria_df[criteria_df["sub_family_id"] == sk["sub_family_id"]]
-              .sort_values("level", ascending=False).copy())
-        lc["Level"] = lc["level"].map(lambda lv: f"L{lv} · {LEVEL_NAMES[lv]}")
-        lc = lc.rename(columns={
-            "expertise_criteria": "전문성 (Expertise)",
-            "impact_criteria": "영향력 (Impact)",
-        })[["Level", "전문성 (Expertise)", "영향력 (Impact)"]]
-        st.dataframe(lc, hide_index=True, use_container_width=True)
-
-        st.caption(
-            f"※ Level 기준은 Sub-family '{sk['sub_family_name']}' 단위로 정의됩니다. "
-            "운영 정책 관리 화면에서 편집 가능."
-        )
