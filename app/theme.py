@@ -1,5 +1,5 @@
-# 디자인 토큰 - Notion/Linear 톤. Navy 주색 + SK Red 포인트 + Pretendard.
-# Step 11-A: 각진 형태 (4-6px), 이모지 배제, 헤더 정돈된 무게감.
+# 디자인 토큰 적용 - 흰색 강조 + 연한 하늘색 메뉴 포인트 + Pretendard.
+# 참고 이미지: 깔끔한 흰 배경, 사이드바 active = 연한 하늘색, 네이비 텍스트.
 import streamlit as st
 
 from config import (
@@ -7,54 +7,80 @@ from config import (
     COLOR_BG_WHITE,
     COLOR_BORDER,
     COLOR_NAVY,
+    COLOR_NAVY_LIGHT,
     COLOR_SK_RED,
+    COLOR_SKY,
+    COLOR_SKY_MED,
     COLOR_TEXT_DARK,
     COLOR_TEXT_MED,
 )
 
 
 def apply_theme() -> None:
-    """전역 CSS 주입 - 톤·여백·각진 모서리를 한 번에 적용."""
+    """전역 CSS 주입."""
     st.markdown(
         f"""
         <style>
-        /* Pretendard 폰트 - 한국어 가독성 우선, 실패 시 시스템 폰트 fallback */
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
         html, body, [class*="css"] {{
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont,
                          'Segoe UI', 'Malgun Gothic', sans-serif !important;
             color: {COLOR_TEXT_DARK};
-            font-feature-settings: 'tnum';
         }}
 
-        /* 메인 배경 */
+        /* ===== 페이지 배경 ===== */
         .stApp {{
             background-color: {COLOR_BG_LIGHT};
         }}
 
-        /* 사이드바 */
+        /* ===== 사이드바 ===== */
         section[data-testid="stSidebar"] {{
             background-color: {COLOR_BG_WHITE};
             border-right: 1px solid {COLOR_BORDER};
         }}
-        section[data-testid="stSidebar"] [data-testid="stSidebarNavSeparator"] {{
-            border-color: {COLOR_BORDER};
+
+        /* 사이드바 메뉴 아이템 */
+        section[data-testid="stSidebar"] a[data-testid="stSidebarNavLink"] {{
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin: 1px 4px;
+            color: {COLOR_TEXT_DARK} !important;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.15s;
+        }}
+        section[data-testid="stSidebar"] a[data-testid="stSidebarNavLink"]:hover {{
+            background-color: {COLOR_SKY} !important;
+            color: {COLOR_NAVY} !important;
+        }}
+        /* 활성 메뉴 — 연한 하늘색 강조 */
+        section[data-testid="stSidebar"] a[data-testid="stSidebarNavLink"][aria-current="page"] {{
+            background-color: {COLOR_SKY} !important;
+            color: {COLOR_NAVY} !important;
+            font-weight: 700;
+            border-left: 3px solid {COLOR_NAVY};
         }}
 
-        /* 헤더 — 정돈된 무게, 좁은 letter-spacing */
+        /* 섹션 헤더 (Foundation / Assessment / Reporting) */
+        section[data-testid="stSidebar"] [data-testid="stSidebarNavSeparator"] + div,
+        section[data-testid="stSidebar"] li.st-emotion-cache-1cymh87 {{
+            color: {COLOR_TEXT_MED} !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.08em !important;
+            text-transform: uppercase !important;
+        }}
+
+        /* ===== 헤더 ===== */
         h1 {{
             color: {COLOR_NAVY} !important;
             font-weight: 700;
+            font-size: 24px;
             letter-spacing: -0.02em;
             margin-bottom: 4px;
         }}
-        h2 {{
-            color: {COLOR_NAVY} !important;
-            font-weight: 700;
-            letter-spacing: -0.015em;
-        }}
-        h3, h4 {{
+        h2, h3, h4 {{
             color: {COLOR_NAVY} !important;
             font-weight: 600;
             letter-spacing: -0.01em;
@@ -62,111 +88,127 @@ def apply_theme() -> None:
         h5 {{
             color: {COLOR_NAVY} !important;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
             letter-spacing: -0.005em;
             margin-bottom: 8px;
         }}
 
-        /* 본문 */
-        p, label, .stMarkdown {{
-            color: {COLOR_TEXT_DARK};
-        }}
-
-        /* Primary 버튼 - SK Red, 각진 모서리 */
-        .stButton > button[kind="primary"] {{
-            background-color: {COLOR_SK_RED};
-            border-color: {COLOR_SK_RED};
-            color: white;
-            font-weight: 600;
-            border-radius: 4px;
-        }}
-        .stButton > button[kind="primary"]:hover {{
-            background-color: {COLOR_NAVY};
-            border-color: {COLOR_NAVY};
-        }}
-
-        /* Secondary 버튼 */
-        .stButton > button[kind="secondary"] {{
-            background-color: {COLOR_BG_WHITE};
-            border: 1px solid {COLOR_BORDER};
-            color: {COLOR_NAVY};
-            border-radius: 4px;
-        }}
-        .stButton > button[kind="secondary"]:hover {{
-            border-color: {COLOR_NAVY};
-        }}
-
-        /* 링크 */
-        a {{ color: {COLOR_SK_RED}; text-decoration: none; }}
-        a:hover {{ text-decoration: underline; }}
-
-        /* 메트릭 카드 - 각진 형태 */
+        /* ===== 메트릭 카드 ===== */
         [data-testid="stMetric"] {{
             background-color: {COLOR_BG_WHITE};
             border: 1px solid {COLOR_BORDER};
-            border-radius: 4px;
+            border-radius: 8px;
             padding: 14px 18px;
+            box-shadow: 0 1px 4px rgba(10,33,71,0.07);
         }}
-        [data-testid="stMetricLabel"] {{
-            color: {COLOR_TEXT_MED};
-            font-size: 12px;
-            font-weight: 500;
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
+        [data-testid="stMetricLabel"] > div {{
+            color: {COLOR_TEXT_MED} !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.06em !important;
+            text-transform: uppercase !important;
         }}
-        [data-testid="stMetricValue"] {{
+        [data-testid="stMetricValue"] > div {{
+            color: {COLOR_NAVY} !important;
+            font-weight: 700 !important;
+            font-size: 26px !important;
+        }}
+
+        /* ===== 버튼 ===== */
+        .stButton > button[kind="primary"] {{
+            background-color: {COLOR_NAVY};
+            border-color: {COLOR_NAVY};
+            color: white;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }}
+        .stButton > button[kind="primary"]:hover {{
+            background-color: {COLOR_NAVY_LIGHT};
+            border-color: {COLOR_NAVY_LIGHT};
+        }}
+        .stButton > button[kind="secondary"] {{
+            background-color: {COLOR_BG_WHITE};
+            border: 1.5px solid {COLOR_BORDER};
             color: {COLOR_NAVY};
-            font-weight: 700;
-            font-size: 24px;
+            border-radius: 6px;
         }}
-        [data-testid="stMetricDelta"] {{
-            color: {COLOR_TEXT_MED};
-            font-size: 12px;
+        .stButton > button[kind="secondary"]:hover {{
+            background-color: {COLOR_SKY};
+            border-color: {COLOR_SKY_MED};
         }}
 
-        /* Container border - 각진 */
+        /* ===== 컨테이너 (with border=True) ===== */
         [data-testid="stVerticalBlockBorderWrapper"] {{
-            border-radius: 4px !important;
+            background-color: {COLOR_BG_WHITE};
+            border: 1px solid {COLOR_BORDER} !important;
+            border-radius: 8px !important;
+            box-shadow: 0 1px 4px rgba(10,33,71,0.06);
         }}
 
-        /* Tab 스타일 정돈 */
+        /* ===== 탭 ===== */
         button[data-baseweb="tab"] {{
             font-weight: 500;
+            font-size: 13px;
+            color: {COLOR_TEXT_MED};
         }}
         button[data-baseweb="tab"][aria-selected="true"] {{
             color: {COLOR_NAVY} !important;
-            font-weight: 700;
+            font-weight: 700 !important;
+        }}
+        [data-baseweb="tab-highlight"] {{
+            background-color: {COLOR_NAVY} !important;
+        }}
+        [data-baseweb="tab-border"] {{
+            background-color: {COLOR_BORDER} !important;
         }}
 
-        /* Dataframe - 각진 */
-        [data-testid="stDataFrame"] {{
-            border-radius: 4px;
+        /* ===== Expander ===== */
+        [data-testid="stExpander"] {{
+            background-color: {COLOR_BG_WHITE};
+            border: 1px solid {COLOR_BORDER} !important;
+            border-radius: 6px !important;
         }}
 
-        /* 구분선 */
-        hr {{
-            border-color: {COLOR_BORDER};
-            margin: 16px 0;
-        }}
-
-        /* Selectbox / Input - 각진 */
+        /* ===== Input / Selectbox ===== */
         [data-baseweb="select"] > div,
         [data-baseweb="input"] > div,
         [data-baseweb="textarea"] > div {{
-            border-radius: 4px !important;
+            border-radius: 6px !important;
+            border-color: {COLOR_BORDER} !important;
+        }}
+        [data-baseweb="select"] > div:focus-within,
+        [data-baseweb="input"] > div:focus-within {{
+            border-color: {COLOR_NAVY} !important;
         }}
 
-        /* Expander - 각진 */
-        [data-testid="stExpander"] {{
-            border-radius: 4px !important;
+        /* ===== Dataframe ===== */
+        [data-testid="stDataFrame"] {{
+            border-radius: 6px;
             border: 1px solid {COLOR_BORDER};
+            overflow: hidden;
         }}
 
-        /* Caption 톤 */
-        [data-testid="stCaptionContainer"] {{
-            color: {COLOR_TEXT_MED};
-            font-size: 12px;
+        /* ===== 구분선 ===== */
+        hr {{
+            border-color: {COLOR_BORDER};
+            margin: 12px 0;
         }}
+
+        /* ===== Caption ===== */
+        [data-testid="stCaptionContainer"] > p {{
+            color: {COLOR_TEXT_MED} !important;
+            font-size: 11px !important;
+        }}
+
+        /* ===== Success / Warning / Error 박스 ===== */
+        [data-testid="stAlert"] {{
+            border-radius: 6px;
+        }}
+
+        /* ===== 링크 ===== */
+        a {{ color: {COLOR_NAVY}; text-decoration: none; }}
+        a:hover {{ color: {COLOR_SK_RED}; }}
         </style>
         """,
         unsafe_allow_html=True,
@@ -174,37 +216,62 @@ def apply_theme() -> None:
 
 
 def page_header(title: str, subtitle: str | None = None) -> None:
-    """모든 페이지 상단에서 호출 - 일관된 타이틀 스타일.
-    title에 이모지가 들어와도 자동으로 제거 (Step 11 디자인 정책)."""
+    """페이지 상단 헤더 — 하늘색 배경 가로줄 + 타이틀."""
     # 이모지/특수기호 prefix 제거
     clean_title = title.lstrip("📊🏗️👥🎯📝📂👤📈⚙️🏢⚙ ").strip()
     st.markdown(
-        f"<h1 style='margin-bottom:4px;'>{clean_title}</h1>",
+        f"""
+        <div style='background:linear-gradient(90deg, {COLOR_NAVY} 0%, {COLOR_NAVY_LIGHT} 100%);
+                    padding:16px 24px; border-radius:8px; margin-bottom:16px;'>
+            <h1 style='color:white !important; margin:0; font-size:20px; letter-spacing:-0.01em;'>
+                {clean_title}
+            </h1>
+            {f'<p style="color:rgba(255,255,255,0.7); margin:4px 0 0 0; font-size:13px;">{subtitle}</p>' if subtitle else ''}
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-    if subtitle:
-        st.markdown(
-            f"<p style='color:{COLOR_TEXT_MED}; margin-top:0; font-size:14px;'>{subtitle}</p>",
-            unsafe_allow_html=True,
-        )
-    st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+
+
+def section_header(title: str) -> None:
+    """섹션 소제목 — 연한 하늘색 좌측 바 강조."""
+    st.markdown(
+        f"""
+        <div style='border-left:3px solid {COLOR_NAVY}; padding:2px 10px;
+                    margin:16px 0 8px 0;'>
+            <span style='color:{COLOR_NAVY}; font-weight:600; font-size:14px;'>{title}</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def kpi_card(label: str, value: str, sub: str = "") -> str:
+    """커스텀 KPI 카드 HTML — 흰 배경 + 네이비 수치."""
+    sub_html = f"<div style='color:{COLOR_TEXT_MED}; font-size:11px; margin-top:2px;'>{sub}</div>" if sub else ""
+    return (
+        f"<div style='background:{COLOR_BG_WHITE}; border:1px solid {COLOR_BORDER}; "
+        f"border-radius:8px; padding:14px 18px; box-shadow:0 1px 4px rgba(10,33,71,0.07);'>"
+        f"<div style='color:{COLOR_TEXT_MED}; font-size:11px; font-weight:600; "
+        f"letter-spacing:0.06em; text-transform:uppercase;'>{label}</div>"
+        f"<div style='color:{COLOR_NAVY}; font-weight:700; font-size:26px; margin-top:2px;'>{value}</div>"
+        f"{sub_html}</div>"
+    )
 
 
 def status_tag(text: str, color: str = COLOR_NAVY) -> str:
-    """이모지 대신 쓸 텍스트 배지 — Critical/Core/Pending 등 상태 표시용."""
     return (
         f"<span style='display:inline-block; background:{color}; color:white; "
-        f"padding:1px 7px; border-radius:3px; font-size:10px; font-weight:600; "
+        f"padding:1px 7px; border-radius:4px; font-size:10px; font-weight:600; "
         f"letter-spacing:0.04em; text-transform:uppercase; vertical-align:middle;'>"
         f"{text}</span>"
     )
 
 
 def outline_tag(text: str, color: str = COLOR_TEXT_MED) -> str:
-    """outline 형태 배지 (덜 강한 강조)."""
     return (
         f"<span style='display:inline-block; border:1px solid {color}; color:{color}; "
-        f"padding:0 6px; border-radius:3px; font-size:10px; font-weight:500; "
+        f"padding:0 6px; border-radius:4px; font-size:10px; font-weight:500; "
         f"letter-spacing:0.04em; text-transform:uppercase; vertical-align:middle;'>"
         f"{text}</span>"
     )

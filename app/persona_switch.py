@@ -68,34 +68,31 @@ def render_persona_switch() -> tuple[str, dict | None]:
 
 
 def render_persona_badge(persona: str) -> None:
-    """페이지 상단 배지. session_state.current_member 사용. 각진·평평 톤."""
+    """페이지 상단 배지 — 연한 하늘색 배경 + 네이비 텍스트."""
+    from config import COLOR_SKY, COLOR_SKY_MED
     member = st.session_state.get("current_member")
     label = PERSONA_LABELS.get(persona, persona)
     if member:
-        info_html = (
-            f"<span style='color:rgba(255,255,255,0.7); font-weight:400;'>현재 보기 </span>"
-            f"<b>{label}</b> "
-            f"<span style='color:rgba(255,255,255,0.6); font-weight:400;'>· "
-            f"{member['name']} ({member['team']} · {member['role_level']})</span>"
-        )
+        detail = f"{member['name']} · {member['team']} · {member['role_level']}"
     else:
-        info_html = (
-            f"<span style='color:rgba(255,255,255,0.7); font-weight:400;'>현재 보기 </span>"
-            f"<b>{label}</b> "
-            f"<span style='color:rgba(255,255,255,0.6); font-weight:400;'>· 미매핑</span>"
-        )
+        detail = "미매핑"
     st.markdown(
         f"""
         <div style="
-            display:inline-block;
-            background-color:{COLOR_NAVY};
-            color:white;
-            padding:4px 12px;
-            border-radius:3px;
+            display:inline-flex; align-items:center; gap:8px;
+            background:{COLOR_SKY};
+            border:1px solid {COLOR_SKY_MED};
+            color:{COLOR_NAVY};
+            padding:5px 14px;
+            border-radius:6px;
             font-size:12px;
-            letter-spacing:0.01em;
-            margin-bottom:10px;
-        ">{info_html}</div>
+            margin-bottom:12px;
+        ">
+            <span style='background:{COLOR_NAVY}; color:white; padding:1px 8px;
+                   border-radius:4px; font-size:10px; font-weight:700;
+                   letter-spacing:0.04em;'>{label.upper()}</span>
+            <span style='color:{COLOR_NAVY}; font-weight:500;'>{detail}</span>
+        </div>
         """,
         unsafe_allow_html=True,
     )

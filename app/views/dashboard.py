@@ -12,6 +12,8 @@ from config import (
     COLOR_BORDER,
     COLOR_NAVY,
     COLOR_SK_RED,
+    COLOR_SKY,
+    COLOR_SKY_MED,
     COLOR_TEXT_DARK,
     COLOR_TEXT_MED,
     LEVEL_NAMES,
@@ -373,7 +375,13 @@ def fig_sub_family_bar(df: pd.DataFrame) -> go.Figure:
 # ---------- 위젯 렌더링 헬퍼 ----------
 def _section_header(title: str) -> None:
     st.markdown(
-        f"<h5 style='color:{COLOR_NAVY}; margin:18px 0 8px 0;'>{title}</h5>",
+        f"""
+        <div style='background:{COLOR_SKY}; border-left:4px solid {COLOR_NAVY};
+                    padding:8px 14px; border-radius:0 6px 6px 0;
+                    margin:20px 0 10px 0;'>
+            <span style='color:{COLOR_NAVY}; font-weight:700; font-size:14px;'>{title}</span>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
@@ -432,15 +440,18 @@ def _team_required_card(team: str, df: pd.DataFrame) -> None:
     st.markdown(
         f"""
         <div style='background:{COLOR_BG_WHITE}; border:1px solid {COLOR_BORDER};
-                    border-radius:4px; padding:14px 16px;'>
-            <div style='display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;'>
+                    border-radius:8px; overflow:hidden;
+                    box-shadow:0 2px 8px rgba(10,33,71,0.07);'>
+            <div style='background:{COLOR_SKY}; border-bottom:1px solid {COLOR_SKY_MED};
+                        padding:10px 16px; display:flex;
+                        justify-content:space-between; align-items:center;'>
                 <div>
                     <b style='color:{COLOR_NAVY}; font-size:14px;'>{team}</b>
                     <span style='color:{COLOR_TEXT_MED}; font-size:11px; margin-left:6px;'>· {n_team}명</span>
                 </div>
-                <div style='color:{color_pct}; font-weight:700; font-size:16px;'>{overall:.0f}%</div>
+                <div style='color:{color_pct}; font-weight:700; font-size:18px;'>{overall:.0f}%</div>
             </div>
-            {body}
+            <div style='padding:12px 16px;'>{body}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -459,15 +470,35 @@ page_header(
 scope_sql, params = _scope_filter(persona, member)
 summary = load_summary(scope_sql, params)
 
-# ===== 1. 4 KPI =====
-k1, k2, k3, k4 = st.columns(4)
-k1.metric("구성원" if persona != "employee" else "본인", f"{summary['members']} 명")
-k2.metric("등록 Skill", f"{summary['skills_total']} 개",
-          help="시스템 전체 Skill 카탈로그 (모든 페르소나 공통)")
-k3.metric("평가 진행률", f"{summary['assess_rate']:.0f}%",
-          delta=f"{summary['assessed']} / {summary['profile_total']} 항목", delta_color="off")
-k4.metric("Critical 보유율", f"{summary['critical_rate']:.0f}%",
-          delta=f"{summary['critical_held']} 건", delta_color="off")
+# ===== 1. KPI 카드 (이미지 참고 — 원형 아이콘 + 숫자 + 라벨) =====
+kpi_items = [
+    ("구성원" if persona != "employee" else "본인", f"{summary['members']}", "명", "👥"),
+    ("등록 Skill", f"{summary['skills_total']}", "개", "📚"),
+    ("평가 진행률", f"{summary['assess_rate']:.0f}", "%", "📊"),
+    ("Critical 보유율", f"{summary['critical_rate']:.0f}", "%", "⭐"),
+]
+k_cols = st.columns(4)
+for col, (label, val, unit, icon) in zip(k_cols, kpi_items):
+    with col:
+        col.markdown(
+            f"""
+            <div style='background:{COLOR_BG_WHITE}; border:1px solid {COLOR_BORDER};
+                        border-radius:10px; padding:18px 16px; text-align:center;
+                        box-shadow:0 2px 8px rgba(10,33,71,0.08);'>
+                <div style='width:50px; height:50px; background:{COLOR_NAVY};
+                            border-radius:50%; display:flex; align-items:center;
+                            justify-content:center; margin:0 auto 10px auto;
+                            font-size:22px;'>{icon}</div>
+                <div style='font-size:28px; font-weight:700; color:{COLOR_NAVY};
+                            line-height:1;'>{val}<span style='font-size:14px; font-weight:500;
+                            color:{COLOR_TEXT_MED}; margin-left:2px;'>{unit}</span></div>
+                <div style='color:{COLOR_TEXT_MED}; font-size:11px; font-weight:600;
+                            letter-spacing:0.05em; text-transform:uppercase;
+                            margin-top:6px;'>{label}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 st.divider()
 

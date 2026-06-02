@@ -10,14 +10,17 @@ DB_PATH = PROJECT_ROOT / "data" / "skmr.db"
 # 회사 로고 (사이드바·favicon·Dashboard 헤더)
 LOGO_PATH = PROJECT_ROOT / "data" / "company_logo.png"
 
-# --- 디자인 토큰 (Notion/Linear 톤, Navy 주색 + SK Red 포인트) ---
-COLOR_NAVY = "#0A1929"        # 주색 - 헤더·강조 텍스트
-COLOR_SK_RED = "#E60012"      # 포인트만 사용 - Critical·경고·KPI 강조
-COLOR_BG_WHITE = "#FFFFFF"    # 카드·메인 배경
-COLOR_BG_LIGHT = "#F5F5F7"    # 페이지 배경
-COLOR_TEXT_DARK = "#1D1D1F"   # 본문
-COLOR_TEXT_MED = "#6E6E73"    # 보조 텍스트
-COLOR_BORDER = "#E5E5EA"      # 카드 테두리·구분선
+# --- 디자인 토큰 (참고 이미지: 흰색 강조 + 연한 하늘색 포인트) ---
+COLOR_NAVY = "#0A2147"        # 주색 - 헤더·강조 (약간 더 진한 네이비)
+COLOR_NAVY_LIGHT = "#1A3A6B"  # 사이드바 active, 버튼 hover
+COLOR_SK_RED = "#E60012"      # Critical·경고 포인트 (SK Red)
+COLOR_SKY = "#E8F0F8"         # 연한 하늘색 — 메뉴 hover/active, 헤더 배경
+COLOR_SKY_MED = "#C2D4EC"     # 연한 하늘색 진한 버전 — 구분선
+COLOR_BG_WHITE = "#FFFFFF"    # 메인 배경·카드 (흰색 강조)
+COLOR_BG_LIGHT = "#F0F4FA"    # 페이지 배경 (아주 연한 하늘빛)
+COLOR_TEXT_DARK = "#1A2A3A"   # 본문 (약간 네이비 빛)
+COLOR_TEXT_MED = "#5A7090"    # 보조 텍스트 (하늘빛 회색)
+COLOR_BORDER = "#D4E0EE"      # 테두리 (연한 하늘색 계열)
 
 # --- Skill Level 표기 (3.2 Level 체계) ---
 LEVEL_NAMES = {
