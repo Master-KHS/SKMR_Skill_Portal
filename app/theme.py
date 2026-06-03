@@ -80,6 +80,13 @@ def apply_theme() -> None:
             letter-spacing: -0.02em;
             margin-bottom: 4px;
         }}
+        /* page_header 내부 h1/p는 네이비 그라데이션 위라 흰색 강제 */
+        .skmr-page-header h1, .skmr-page-header h1 * {{
+            color: #FFFFFF !important;
+        }}
+        .skmr-page-header p {{
+            color: rgba(255,255,255,0.75) !important;
+        }}
         h2, h3, h4 {{
             color: {COLOR_NAVY} !important;
             font-weight: 600;
@@ -221,12 +228,12 @@ def page_header(title: str, subtitle: str | None = None) -> None:
     clean_title = title.lstrip("📊🏗️👥🎯📝📂👤📈⚙️🏢⚙ ").strip()
     st.markdown(
         f"""
-        <div style='background:linear-gradient(90deg, {COLOR_NAVY} 0%, {COLOR_NAVY_LIGHT} 100%);
+        <div class='skmr-page-header' style='background:linear-gradient(90deg, {COLOR_NAVY} 0%, {COLOR_NAVY_LIGHT} 100%);
                     padding:16px 24px; border-radius:8px; margin-bottom:16px;'>
-            <h1 style='color:white !important; margin:0; font-size:20px; letter-spacing:-0.01em;'>
+            <h1 style='margin:0; font-size:26px; letter-spacing:-0.01em;'>
                 {clean_title}
             </h1>
-            {f'<p style="color:rgba(255,255,255,0.7); margin:4px 0 0 0; font-size:13px;">{subtitle}</p>' if subtitle else ''}
+            {f'<p style="margin:4px 0 0 0; font-size:13px;">{subtitle}</p>' if subtitle else ''}
         </div>
         """,
         unsafe_allow_html=True,

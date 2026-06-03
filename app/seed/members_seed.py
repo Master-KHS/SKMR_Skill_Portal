@@ -23,13 +23,15 @@ REQUIRED_COLUMNS = [
 # R&D 8명, 공정기술 8명 = 가상
 # 임원 더미 2명 = 페르소나 매핑용 (직종=경영, 평가 대상 X)
 INITIAL_MEMBERS = [
-    # HR기획팀 (실명) - 전원 HR Admin
-    ("EMP001", "유성우", CORPORATION, "기업문화담당", "HR기획팀", "L6", "팀장", "사무직", "hr_admin"),
-    ("EMP002", "윤찬영", CORPORATION, "기업문화담당", "HR기획팀", "L5", "팀원", "사무직", "hr_admin"),
-    ("EMP003", "박정규", CORPORATION, "기업문화담당", "HR기획팀", "L5", "팀원", "사무직", "hr_admin"),
-    ("EMP004", "반윤선", CORPORATION, "기업문화담당", "HR기획팀", "L5", "팀원", "사무직", "hr_admin"),
-    ("EMP005", "김현수", CORPORATION, "기업문화담당", "HR기획팀", "L4", "팀원", "사무직", "hr_admin"),
-    ("EMP006", "박정원", CORPORATION, "기업문화담당", "HR기획팀", "L3", "팀원", "사무직", "hr_admin"),
+    # HR기획팀 (가상 이름) - 전원 HR Admin
+    ("EMP001", "우성유", CORPORATION, "기업문화담당", "HR기획팀", "L6", "팀장", "사무직", "hr_admin"),
+    ("EMP002", "윤영찬", CORPORATION, "기업문화담당", "HR기획팀", "L5", "팀원", "사무직", "hr_admin"),
+    ("EMP003", "박규정", CORPORATION, "기업문화담당", "HR기획팀", "L5", "팀원", "사무직", "hr_admin"),
+    ("EMP004", "반선윤", CORPORATION, "기업문화담당", "HR기획팀", "L5", "팀원", "사무직", "hr_admin"),
+    ("EMP005", "김수현", CORPORATION, "기업문화담당", "HR기획팀", "L4", "팀원", "사무직", "hr_admin"),
+    ("EMP006", "박원정", CORPORATION, "기업문화담당", "HR기획팀", "L3", "팀원", "사무직", "hr_admin"),
+    ("EMP007", "이경주", CORPORATION, "기업문화담당", "HR기획팀", "L4", "팀원", "사무직", "hr_admin"),
+    ("EMP008", "훈윤",   CORPORATION, "기업문화담당", "HR기획팀", "L3", "팀원", "사무직", "hr_admin"),
 
     # R&D담당 / 소재개발팀 (연구직) 8명 - 가상
     ("EMP011", "이도현", CORPORATION, "R&D담당", "소재개발팀", "L6", "팀장",   "연구직", "team_leader"),

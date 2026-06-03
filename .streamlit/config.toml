@@ -1,9 +1,6 @@
 [server]
-headless = true
+headless = false
 
+# 사이드바 메뉴를 항상 전체 펼침 — "View less" 버튼 제거
 [client]
 showSidebarNavigation = true
-
-[ui]
-# 사이드바 메뉴를 항상 전체 펼침 — "View less" 버튼 제거
-hideSidebarNav = false

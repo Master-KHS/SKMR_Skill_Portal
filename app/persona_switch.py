@@ -6,9 +6,9 @@ import streamlit as st
 from config import COLOR_NAVY, COLOR_TEXT_MED
 from permissions import PERSONA_LABELS, get_members_for_persona
 
-# 시연 시 처음 떴을 때 누가 보이게 할지 - HR Admin · 김현수(EMP005)가 사용자 본인
+# 시연 시 처음 떴을 때 누가 보이게 할지 - HR Admin · 김수현(EMP005)이 기본 사용자
 DEFAULT_PERSONA = "hr_admin"
-DEFAULT_EMPLOYEE_ID = "EMP005"  # 김현수
+DEFAULT_EMPLOYEE_ID = "EMP005"  # 김수현
 
 
 def render_persona_switch() -> tuple[str, dict | None]:

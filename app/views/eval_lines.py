@@ -72,7 +72,7 @@ with fcol1:
     div_opts = ["전체"] + sorted(result["담당"].dropna().unique().tolist())
     sel_div = st.selectbox("담당", div_opts)
 with fcol2:
-    keyword = st.text_input("이름·사번 검색", placeholder="예: 김현수, EMP005")
+    keyword = st.text_input("이름·사번 검색", placeholder="예: 김수현, EMP005")
 
 view = result.copy()
 if sel_div != "전체":
