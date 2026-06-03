@@ -17,4 +17,4 @@ echo  Your browser will open automatically.
 echo  To stop: press Ctrl+C in this window.
 echo ================================================
 
-streamlit run app\main.py
+streamlit run app\main.py --server.headless false
