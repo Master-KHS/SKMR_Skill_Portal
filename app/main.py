@@ -1,5 +1,8 @@
 # Streamlit 진입점 - 페르소나 selectbox + 권한 매트릭스 기반 동적 네비게이션.
 # st.navigation을 써서 페르소나별로 사이드바 메뉴 노출을 실시간 분기.
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # Cloud 배포 시 app/ 폴더를 모듈 경로에 추가
+
 import streamlit as st
 
 from config import LOGO_PATH
