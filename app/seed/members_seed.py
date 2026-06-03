@@ -30,8 +30,8 @@ INITIAL_MEMBERS = [
     ("EMP004", "반선윤", CORPORATION, "기업문화담당", "HR기획팀", "L5", "팀원", "사무직", "hr_admin"),
     ("EMP005", "김수현", CORPORATION, "기업문화담당", "HR기획팀", "L4", "팀원", "사무직", "hr_admin"),
     ("EMP006", "박원정", CORPORATION, "기업문화담당", "HR기획팀", "L3", "팀원", "사무직", "hr_admin"),
-    ("EMP007", "이경주", CORPORATION, "기업문화담당", "HR기획팀", "L4", "팀원", "사무직", "hr_admin"),
-    ("EMP008", "훈윤",   CORPORATION, "기업문화담당", "HR기획팀", "L3", "팀원", "사무직", "hr_admin"),
+    ("EMP007", "이경주", CORPORATION, "기업문화담당", "HR기획팀", "L5", "팀원", "사무직", "hr_admin"),
+    ("EMP008", "훈윤",   CORPORATION, "기업문화담당", "HR기획팀", "L5", "팀원", "사무직", "hr_admin"),
 
     # R&D담당 / 소재개발팀 (연구직) 8명 - 가상
     ("EMP011", "이도현", CORPORATION, "R&D담당", "소재개발팀", "L6", "팀장",   "연구직", "team_leader"),
