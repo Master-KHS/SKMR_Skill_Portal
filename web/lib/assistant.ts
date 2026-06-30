@@ -64,7 +64,7 @@ export async function runAssistant(
   question: string,
   opts: { apiKey: string; model?: string }
 ): Promise<AssistantResponse> {
-  const model = opts.model || "gemini-2.0-flash";
+  const model = opts.model || "gemini-2.5-flash";
   const skills = getSkills();
   const skillCatalog = skills.map((s) => `${s.skill_id}|${s.skill_name}`).join("\n");
   const divisions = [...new Set(getMembers().map((m) => m.division).filter(Boolean))];
