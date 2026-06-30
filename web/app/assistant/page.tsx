@@ -16,7 +16,9 @@ export default function AssistantPage() {
   const [error, setError] = useState<string | null>(null);
   const [resp, setResp] = useState<AssistantResponse | null>(null);
   const [copied, setCopied] = useState(false);
-  const [apiKey, setApiKey] = useState("");
+  // 빌드 시점에 NEXT_PUBLIC_GEMINI_API_KEY가 주입되면 시연용으로 자동 사용.
+  const bakedKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY ?? "";
+  const [apiKey, setApiKey] = useState(bakedKey);
 
   useEffect(() => {
     const saved = localStorage.getItem("gemini_key");
@@ -72,22 +74,29 @@ export default function AssistantPage() {
         desc="자연어로 질문하면 스킬·인재 DB를 근거로 답합니다 (Gemini 연동)"
       />
 
-      {/* Gemini 키 입력 (데모용 — 브라우저에만 저장) */}
-      <div className="mb-4 border border-info bg-info/[0.06] p-3">
-        <div className="flex items-center gap-2 mb-2">
-          <Badge tone="info" label="설정: Gemini API 키" />
-          <span className="text-xs text-text-muted">
-            데모 방식 — 키는 이 브라우저에만 저장되며 서버로 전송되지 않습니다.
-          </span>
+      {/* Gemini 키 — 빌드에 탑재되면 입력 불필요, 아니면 직접 입력 */}
+      {bakedKey ? (
+        <div className="mb-4 border border-success bg-success/[0.06] p-3 flex items-center gap-2">
+          <Badge tone="success" label="설정: Gemini 키 탑재됨" />
+          <span className="text-xs text-text-muted">시연용으로 키가 내장되어 바로 질문할 수 있습니다.</span>
         </div>
-        <input
-          type="password"
-          className="w-full border border-border-soft bg-white px-3 py-2 text-sm focus:border-info focus:outline-none"
-          placeholder="AIza... (Google AI Studio에서 무료 발급)"
-          value={apiKey}
-          onChange={(e) => saveKey(e.target.value)}
-        />
-      </div>
+      ) : (
+        <div className="mb-4 border border-info bg-info/[0.06] p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Badge tone="info" label="설정: Gemini API 키" />
+            <span className="text-xs text-text-muted">
+              데모 방식 — 키는 이 브라우저에만 저장되며 서버로 전송되지 않습니다.
+            </span>
+          </div>
+          <input
+            type="password"
+            className="w-full border border-border-soft bg-white px-3 py-2 text-sm focus:border-info focus:outline-none"
+            placeholder="AIza... (Google AI Studio에서 무료 발급)"
+            value={apiKey}
+            onChange={(e) => saveKey(e.target.value)}
+          />
+        </div>
+      )}
 
       {/* 질문 입력창 */}
       <Card className="mb-4">
