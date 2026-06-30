@@ -4,7 +4,16 @@ import { notFound } from "next/navigation";
 
 // 정적 추출: 이식 예정 메뉴들을 미리 정적 페이지로 생성.
 // 명시적 라우트(dashboard/talent-search/assistant)는 제외.
-const EXPLICIT = new Set(["dashboard", "talent-search", "assistant"]);
+const EXPLICIT = new Set([
+  "dashboard",
+  "talent-search",
+  "assistant",
+  "self-assess",
+  "skill-master",
+  "member-mgmt",
+  "required-skill",
+  "skill-profile",
+]);
 export function generateStaticParams() {
   return NAV_ITEMS.filter((i) => !EXPLICIT.has(i.key)).map((i) => ({
     slug: i.key.split("/"),
