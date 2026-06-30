@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // 정적 HTML 추출 (시연용) — Netlify/GitHub Pages 등 정적 호스팅에 그대로 업로드 가능.
-  // 서버 기능이 없으므로 검색은 브라우저에서 실행, Gemini는 클라이언트에서 직접 호출.
-  output: "export",
-  images: { unoptimized: true },
-  // 정적 호스팅에서 새로고침 시 404 방지
-  trailingSlash: true,
+  // 서버 모드 — API 라우트 + 로컬 SQLite로 데이터 영구 저장.
+  // better-sqlite3는 네이티브 모듈이므로 번들 대상에서 제외.
+  serverExternalPackages: ["better-sqlite3"],
 };
 
 export default nextConfig;

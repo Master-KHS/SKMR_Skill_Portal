@@ -1,5 +1,6 @@
-// AI 인재 검색 로직 (프레임워크 비의존) — 정적 빌드에서 브라우저가 직접 호출.
-// 1) Gemini가 자연어 → 검색 조건(JSON) 해석  2) 로컬 데이터 검색  3) Gemini 결과 요약
+// AI 인재 검색 로직 (서버 전용).
+// 1) Gemini가 자연어 → 검색 조건(JSON) 해석  2) 로컬 DB 검색  3) Gemini 결과 요약
+import "server-only";
 import { getSkills, getMembers } from "./data";
 import { searchTalent, type SearchFilters, type SkillCondition, type SearchResultRow } from "./search";
 

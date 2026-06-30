@@ -1,14 +1,28 @@
-import { getSeed } from "@/lib/data";
+import {
+  getMembers,
+  getSkills,
+  getSkillProfiles,
+  getFamilies,
+  getSubFamilies,
+} from "@/lib/data";
+import { query } from "@/lib/db";
 import { PageHeader, Card, Stat, Badge } from "@/components/ui";
 
+export const dynamic = "force-dynamic";
+
 export default function DashboardPage() {
-  const d = getSeed();
-  const evaluable = d.member.filter((m) =>
+  const members = getMembers();
+  const skills = getSkills();
+  const profiles = getSkillProfiles();
+  const families = getFamilies();
+  const subs = getSubFamilies();
+  const evidenceCount = (query<{ c: number }>("SELECT COUNT(*) c FROM evidence")[0]?.c) ?? 0;
+
+  const evaluable = members.filter((m) =>
     ["사무직", "기술직", "연구직"].includes(m.job_type ?? "")
   );
-  const critical = d.skill.filter((s) => s.is_critical).length;
+  const critical = skills.filter((s) => s.is_critical).length;
 
-  // 팀별 인원
   const byTeam = new Map<string, number>();
   for (const m of evaluable) {
     const t = m.team ?? "-";
@@ -20,10 +34,10 @@ export default function DashboardPage() {
       <PageHeader title="진단 결과 확인" desc="Skill 보유 현황 요약 대시보드" />
 
       <div className="grid grid-cols-4 gap-4 mb-6">
-        <Stat label="구성원" value={`${d.member.length}명`} accent />
-        <Stat label="Skill 정의" value={`${d.skill.length}개`} />
-        <Stat label="Skill Profile" value={`${d.skill_profile.length}건`} />
-        <Stat label="Evidence" value={`${d.evidence.length}건`} />
+        <Stat label="구성원" value={`${members.length}명`} accent />
+        <Stat label="Skill 정의" value={`${skills.length}개`} />
+        <Stat label="Skill Profile" value={`${profiles.length}건`} />
+        <Stat label="Evidence" value={`${evidenceCount}건`} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -44,11 +58,11 @@ export default function DashboardPage() {
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span>Skill Family</span>
-              <span className="font-medium">{d.skill_family.length}개</span>
+              <span className="font-medium">{families.length}개</span>
             </div>
             <div className="flex justify-between">
               <span>Sub Family</span>
-              <span className="font-medium">{d.sub_skill_family.length}개</span>
+              <span className="font-medium">{subs.length}개</span>
             </div>
             <div className="flex justify-between items-center">
               <span>Critical Skill</span>

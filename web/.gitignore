@@ -5,3 +5,7 @@
 .env*.local
 *.tsbuildinfo
 next-env.d.ts
+
+# 런타임 SQLite DB (시드에서 자동 생성)
+data/skmr.db
+data/skmr.db-*

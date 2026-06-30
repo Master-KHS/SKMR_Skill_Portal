@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { PageHeader, Card } from "@/components/ui";
-import { searchTalent, type SearchResultRow } from "@/lib/search";
+import type { SearchResultRow } from "@/lib/search";
 
 interface Facets {
   divisions: string[];
@@ -26,20 +26,24 @@ export function TalentSearchClient({ facets }: { facets: Facets }) {
   const [rows, setRows] = useState<SearchResultRow[]>([]);
   const [count, setCount] = useState(0);
 
-  const run = useCallback(() => {
+  const run = useCallback(async () => {
     const skills = conds
       .filter((c) => c.skill_id !== "")
       .map((c) => ({ skill_id: Number(c.skill_id), min_level: c.min_level }));
-    // 정적 빌드: 브라우저에서 직접 검색 (서버 API 불필요)
-    const results = searchTalent({
-      division: division || undefined,
-      team: team || undefined,
-      job_type: jobType || undefined,
-      role_level: roleLevel || undefined,
-      skills,
-    }).sort((a, b) => b.avg_level - a.avg_level);
-    setRows(results);
-    setCount(results.length);
+    const res = await fetch("/api/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        division: division || undefined,
+        team: team || undefined,
+        job_type: jobType || undefined,
+        role_level: roleLevel || undefined,
+        skills,
+      }),
+    });
+    const data = await res.json();
+    setRows(data.results);
+    setCount(data.count);
   }, [division, team, jobType, roleLevel, conds]);
 
   useEffect(() => {

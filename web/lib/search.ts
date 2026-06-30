@@ -1,6 +1,7 @@
-// 인재 검색 엔진 — Talent Search 화면과 Gemini 챗봇이 공유.
-import { getMembers, getSkillProfiles, skillById, memberById } from "./data";
-import type { Member } from "./types";
+// 인재 검색 엔진 (서버 전용) — Talent Search API와 Gemini 챗봇이 공유.
+import "server-only";
+import { getMembers, getSkillProfiles, getSkills } from "./data";
+import type { Member, Skill } from "./types";
 
 export interface SkillCondition {
   skill_id: number;
@@ -13,7 +14,7 @@ export interface SearchFilters {
   job_type?: string;
   role_level?: string;
   position?: string;
-  skills?: SkillCondition[]; // AND 결합 — 모두 만족
+  skills?: SkillCondition[];
 }
 
 export interface SearchResultRow {
@@ -29,14 +30,17 @@ export interface SearchResultRow {
   matched: { skill_id: number; skill_name: string; level: number }[];
 }
 
+function skillMap(): Map<number, Skill> {
+  return new Map(getSkills().map((s) => [s.skill_id, s]));
+}
+
 export function searchTalent(filters: SearchFilters): SearchResultRow[] {
   const members = getMembers().filter((m) =>
     ["사무직", "기술직", "연구직"].includes(m.job_type ?? "")
   );
   const profiles = getSkillProfiles();
-  const sById = skillById();
+  const sById = skillMap();
 
-  // 조직 필터
   let pool: Member[] = members.filter((m) => {
     if (filters.division && m.division !== filters.division) return false;
     if (filters.team && m.team !== filters.team) return false;
@@ -46,7 +50,6 @@ export function searchTalent(filters: SearchFilters): SearchResultRow[] {
     return true;
   });
 
-  // 스킬 조건(AND)
   const conds = (filters.skills ?? []).filter((c) => c.skill_id != null);
   if (conds.length > 0) {
     pool = pool.filter((m) =>
@@ -61,7 +64,6 @@ export function searchTalent(filters: SearchFilters): SearchResultRow[] {
     );
   }
 
-  // 통계 + 매칭 스킬
   const statByMember = new Map<string, { n: number; sum: number }>();
   for (const p of profiles) {
     const s = statByMember.get(p.member_id) ?? { n: 0, sum: 0 };
@@ -96,17 +98,3 @@ export function searchTalent(filters: SearchFilters): SearchResultRow[] {
     };
   });
 }
-
-// 한 사람의 보유 스킬 전체 (챗봇 설명용)
-export function memberSkillSummary(employee_id: string) {
-  const sById = skillById();
-  return getSkillProfiles()
-    .filter((p) => p.member_id === employee_id)
-    .map((p) => ({
-      skill_name: sById.get(p.skill_id)?.skill_name ?? `#${p.skill_id}`,
-      level: p.current_level,
-    }))
-    .sort((a, b) => b.level - a.level);
-}
-
-export { memberById };
