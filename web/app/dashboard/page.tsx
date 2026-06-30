@@ -20,7 +20,7 @@ export default function DashboardPage() {
       <PageHeader title="진단 결과 확인" desc="Skill 보유 현황 요약 대시보드" />
 
       <div className="grid grid-cols-4 gap-4 mb-6">
-        <Stat label="구성원" value={`${d.member.length}명`} />
+        <Stat label="구성원" value={`${d.member.length}명`} accent />
         <Stat label="Skill 정의" value={`${d.skill.length}개`} />
         <Stat label="Skill Profile" value={`${d.skill_profile.length}건`} />
         <Stat label="Evidence" value={`${d.evidence.length}건`} />
