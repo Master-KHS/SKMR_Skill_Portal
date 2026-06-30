@@ -2,6 +2,15 @@ import { NAV_ITEMS } from "@/lib/nav";
 import { PageHeader, Card, Badge } from "@/components/ui";
 import { notFound } from "next/navigation";
 
+// 정적 추출: 이식 예정 메뉴들을 미리 정적 페이지로 생성.
+// 명시적 라우트(dashboard/talent-search/assistant)는 제외.
+const EXPLICIT = new Set(["dashboard", "talent-search", "assistant"]);
+export function generateStaticParams() {
+  return NAV_ITEMS.filter((i) => !EXPLICIT.has(i.key)).map((i) => ({
+    slug: i.key.split("/"),
+  }));
+}
+
 // 아직 Next.js로 이식되지 않은 화면용 플레이스홀더.
 // 명시적 라우트(dashboard/talent-search/assistant)가 우선하며, 그 외 메뉴는 여기로 떨어짐.
 export default async function Placeholder({

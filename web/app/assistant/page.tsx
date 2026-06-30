@@ -1,25 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader, Card, Badge } from "@/components/ui";
-
-interface AssistantResponse {
-  answer: string;
-  filters: Record<string, unknown>;
-  interpretedIntent: string | null;
-  unresolvedSkills: string[];
-  results: {
-    employee_id: string;
-    name: string;
-    division: string | null;
-    team: string | null;
-    role_level: string | null;
-    matched: { skill_name: string; level: number }[];
-  }[];
-  totalCount: number;
-  sources: { employee_id: string; name: string; team: string | null }[];
-  verification: "pass" | "fail" | "review";
-  grounded: boolean;
-}
+import { runAssistant, type AssistantResponse } from "@/lib/assistant";
 
 const EXAMPLES = [
   "GC 분석 L3 이상 보유한 연구직 찾아줘",
@@ -34,22 +16,32 @@ export default function AssistantPage() {
   const [error, setError] = useState<string | null>(null);
   const [resp, setResp] = useState<AssistantResponse | null>(null);
   const [copied, setCopied] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("gemini_key");
+    if (saved) setApiKey(saved);
+  }, []);
+
+  function saveKey(k: string) {
+    setApiKey(k);
+    localStorage.setItem("gemini_key", k);
+  }
 
   async function ask(q: string) {
     if (!q.trim()) return;
+    if (!apiKey.trim()) {
+      setError("Gemini API 키를 먼저 입력하세요. (Google AI Studio에서 무료 발급)");
+      return;
+    }
     setLoading(true);
     setError(null);
     setResp(null);
     setLastQuestion(q);
     try {
-      const res = await fetch("/api/assistant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q }),
-      });
-      const data = await res.json();
-      if (!res.ok) setError(data.error ?? "오류가 발생했습니다.");
-      else setResp(data);
+      // 정적 빌드: 브라우저에서 Gemini 직접 호출 (데모용 — 키는 브라우저에만 저장)
+      const data = await runAssistant(q, { apiKey });
+      setResp(data);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -79,6 +71,23 @@ export default function AssistantPage() {
         title="AI 인재 검색"
         desc="자연어로 질문하면 스킬·인재 DB를 근거로 답합니다 (Gemini 연동)"
       />
+
+      {/* Gemini 키 입력 (데모용 — 브라우저에만 저장) */}
+      <div className="mb-4 border border-info bg-info/[0.06] p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <Badge tone="info" label="설정: Gemini API 키" />
+          <span className="text-xs text-text-muted">
+            데모 방식 — 키는 이 브라우저에만 저장되며 서버로 전송되지 않습니다.
+          </span>
+        </div>
+        <input
+          type="password"
+          className="w-full border border-border-soft bg-white px-3 py-2 text-sm focus:border-info focus:outline-none"
+          placeholder="AIza... (Google AI Studio에서 무료 발급)"
+          value={apiKey}
+          onChange={(e) => saveKey(e.target.value)}
+        />
+      </div>
 
       {/* 질문 입력창 */}
       <Card className="mb-4">

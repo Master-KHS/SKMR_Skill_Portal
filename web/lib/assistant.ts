@@ -1,13 +1,21 @@
-// AI 인재 검색 — 하이브리드 RAG.
-// 1) Gemini가 자연어 질문 → 검색 조건(JSON)으로 해석 (보유 스킬명은 카탈로그로 그라운딩)
-// 2) 서버가 로컬 데이터에서 실제 검색 수행 (개인 데이터는 LLM으로 안 넘기고 코드로 처리)
-// 3) Gemini가 검색 결과를 근거로 자연어 요약 (출처 = 사번/이름)
-import { NextRequest, NextResponse } from "next/server";
-import { getProvider, isLlmConfigured } from "@/lib/llm/provider";
-import { getSkills, getMembers } from "@/lib/data";
-import { searchTalent, type SearchFilters, type SkillCondition } from "@/lib/search";
+// AI 인재 검색 로직 (프레임워크 비의존) — 정적 빌드에서 브라우저가 직접 호출.
+// 1) Gemini가 자연어 → 검색 조건(JSON) 해석  2) 로컬 데이터 검색  3) Gemini 결과 요약
+import { getSkills, getMembers } from "./data";
+import { searchTalent, type SearchFilters, type SkillCondition, type SearchResultRow } from "./search";
 
-export const runtime = "nodejs";
+const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+
+export interface AssistantResponse {
+  answer: string;
+  filters: SearchFilters;
+  interpretedIntent: string | null;
+  unresolvedSkills: string[];
+  results: SearchResultRow[];
+  totalCount: number;
+  sources: { employee_id: string; name: string; team: string | null }[];
+  verification: "pass" | "fail" | "review";
+  grounded: boolean;
+}
 
 interface InterpretResult {
   skill_queries?: { name: string; min_level?: number }[];
@@ -19,31 +27,49 @@ interface InterpretResult {
   intent?: string;
 }
 
-export async function POST(req: NextRequest) {
-  if (!isLlmConfigured()) {
-    return NextResponse.json(
-      {
-        error:
-          "LLM 미설정: web/.env.local 에 GEMINI_API_KEY 를 추가하세요. (예: GEMINI_API_KEY=...)",
-      },
-      { status: 503 }
-    );
+async function gemini(
+  apiKey: string,
+  model: string,
+  system: string,
+  userText: string,
+  jsonMode: boolean
+): Promise<string> {
+  const body = {
+    systemInstruction: { parts: [{ text: system }] },
+    contents: [{ role: "user", parts: [{ text: userText }] }],
+    generationConfig: {
+      temperature: 0.2,
+      ...(jsonMode ? { responseMimeType: "application/json" } : {}),
+    },
+  };
+  const res = await fetch(`${API_BASE}/${model}:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(`Gemini API 오류 ${res.status}: ${detail.slice(0, 200)}`);
   }
+  const data = await res.json();
+  return (
+    data?.candidates?.[0]?.content?.parts
+      ?.map((p: { text?: string }) => p.text ?? "")
+      .join("")
+      .trim() ?? ""
+  );
+}
 
-  const { question } = (await req.json()) as { question?: string };
-  if (!question?.trim()) {
-    return NextResponse.json({ error: "질문이 비어 있습니다." }, { status: 400 });
-  }
-
-  const provider = getProvider();
+export async function runAssistant(
+  question: string,
+  opts: { apiKey: string; model?: string }
+): Promise<AssistantResponse> {
+  const model = opts.model || "gemini-2.0-flash";
   const skills = getSkills();
-  const skillCatalog = skills
-    .map((s) => `${s.skill_id}|${s.skill_name}`)
-    .join("\n");
+  const skillCatalog = skills.map((s) => `${s.skill_id}|${s.skill_name}`).join("\n");
   const divisions = [...new Set(getMembers().map((m) => m.division).filter(Boolean))];
   const teams = [...new Set(getMembers().map((m) => m.team).filter(Boolean))];
 
-  // 1) 해석
   const interpretSystem = `당신은 SKMR 스킬 포탈의 인재 검색 해석기입니다.
 사용자의 자연어 질문을 검색 조건 JSON으로 변환하세요.
 보유 스킬은 반드시 아래 스킬 카탈로그의 이름 표현을 사용해 skill_queries.name 에 핵심 키워드로 넣으세요(부분 일치로 매칭됨).
@@ -59,19 +85,9 @@ ${skillCatalog}
 {"skill_queries":[{"name":"키워드","min_level":2}],"division":null,"team":null,"job_type":null,"role_level":null,"position":null,"intent":"한줄요약"}`;
 
   let interp: InterpretResult = {};
-  try {
-    const raw = await provider.completeJson(interpretSystem, [
-      { role: "user", text: question },
-    ]);
-    interp = JSON.parse(raw);
-  } catch (e) {
-    return NextResponse.json(
-      { error: `질문 해석 실패: ${(e as Error).message}` },
-      { status: 502 }
-    );
-  }
+  const raw = await gemini(opts.apiKey, model, interpretSystem, question, true);
+  interp = JSON.parse(raw);
 
-  // 2) 스킬명 → skill_id 해석 + 로컬 검색
   const conds: SkillCondition[] = [];
   const unresolved: string[] = [];
   for (const q of interp.skill_queries ?? []) {
@@ -91,12 +107,14 @@ ${skillCatalog}
   };
   const results = searchTalent(filters).sort((a, b) => b.avg_level - a.avg_level);
 
-  // 근거 부족 판단
-  const grounded = conds.length > 0 || Boolean(filters.division || filters.team || filters.role_level);
-  const verification: "pass" | "fail" | "review" =
-    !grounded ? "review" : results.length > 0 ? "pass" : "fail";
+  const grounded =
+    conds.length > 0 || Boolean(filters.division || filters.team || filters.role_level);
+  const verification: "pass" | "fail" | "review" = !grounded
+    ? "review"
+    : results.length > 0
+      ? "pass"
+      : "fail";
 
-  // 3) 요약 (결과를 근거로)
   const top = results.slice(0, 8);
   const resultContext = top
     .map(
@@ -117,12 +135,12 @@ ${resultContext || "(없음)"}`;
 
   let answer = "";
   try {
-    answer = await provider.complete(answerSystem, [{ role: "user", text: answerUser }]);
+    answer = await gemini(opts.apiKey, model, answerSystem, answerUser, false);
   } catch (e) {
     answer = `요약 생성 실패: ${(e as Error).message}`;
   }
 
-  return NextResponse.json({
+  return {
     answer,
     filters,
     interpretedIntent: interp.intent ?? null,
@@ -132,5 +150,5 @@ ${resultContext || "(없음)"}`;
     sources: top.map((r) => ({ employee_id: r.employee_id, name: r.name, team: r.team })),
     verification,
     grounded,
-  });
+  };
 }
