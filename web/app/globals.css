@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --sk-red: #ea002c;
+  --sk-orange: #ff7a00;
+  --bg-main: #f5f7fa;
+  --bg-surface: #ffffff;
+  --text-main: #1f2933;
+  --text-muted: #5f6b7a;
+  --border-soft: #d9dee7;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --info: #2563eb;
+}
+
+* {
+  border-radius: 0;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-feature-settings: "tnum";
+}

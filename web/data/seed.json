@@ -1,0 +1,5583 @@
+{
+  "skill_family": [
+    {
+      "family_id": "EXP",
+      "family_name": "전문지식",
+      "description": "산업·도메인 이해 — 알아야 하는 지식 영역"
+    },
+    {
+      "family_id": "WRK",
+      "family_name": "업무기술",
+      "description": "실제로 수행하는 업무 스킬"
+    },
+    {
+      "family_id": "ENB",
+      "family_name": "Enabler",
+      "description": "전사 공통 필요 스킬 — 디지털·협업 인프라"
+    }
+  ],
+  "sub_skill_family": [
+    {
+      "sub_family_id": "DOM",
+      "family_id": "EXP",
+      "sub_family_name": "Domain",
+      "description": "기초·응용 학문 도메인 이해"
+    },
+    {
+      "sub_family_id": "BIZ",
+      "family_id": "EXP",
+      "sub_family_name": "Business·Industry",
+      "description": "고객·산업·시장 이해"
+    },
+    {
+      "sub_family_id": "PRS",
+      "family_id": "EXP",
+      "sub_family_name": "Process & System",
+      "description": "공정·설비·시스템 이해"
+    },
+    {
+      "sub_family_id": "REG",
+      "family_id": "EXP",
+      "sub_family_name": "Regulatory",
+      "description": "법규·EHS·규제 이해"
+    },
+    {
+      "sub_family_id": "PLN",
+      "family_id": "WRK",
+      "sub_family_name": "Planning",
+      "description": "계획 수립·일정·예산·전략"
+    },
+    {
+      "sub_family_id": "DES",
+      "family_id": "WRK",
+      "sub_family_name": "Design",
+      "description": "설계·시험법·Recipe 도출"
+    },
+    {
+      "sub_family_id": "ANA",
+      "family_id": "WRK",
+      "sub_family_name": "Analysis",
+      "description": "분석·평가·진단·시뮬레이션"
+    },
+    {
+      "sub_family_id": "MGT",
+      "family_id": "WRK",
+      "sub_family_name": "Management",
+      "description": "운영 통제·표준화·문서 관리"
+    },
+    {
+      "sub_family_id": "OPS",
+      "family_id": "WRK",
+      "sub_family_name": "Operations",
+      "description": "직접 수행 작업·정비·점검"
+    },
+    {
+      "sub_family_id": "AIT",
+      "family_id": "ENB",
+      "sub_family_name": "AI/DT",
+      "description": "데이터 분석·AI 활용 역량"
+    },
+    {
+      "sub_family_id": "TMS",
+      "family_id": "ENB",
+      "sub_family_name": "Teamship",
+      "description": "디지털 협업·프로젝트 운영 역량"
+    }
+  ],
+  "skill": [
+    {
+      "skill_id": 1,
+      "sub_family_id": "DOM",
+      "skill_name": "유기화학·분석화학의 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 2,
+      "sub_family_id": "DOM",
+      "skill_name": "유기화학·화공학의 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 3,
+      "sub_family_id": "DOM",
+      "skill_name": "유기화학·무기화학의 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 4,
+      "sub_family_id": "DOM",
+      "skill_name": "유기화학의 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 5,
+      "sub_family_id": "DOM",
+      "skill_name": "유기 반도체 소재/소자 특성 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 6,
+      "sub_family_id": "DOM",
+      "skill_name": "기계공학의 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 7,
+      "sub_family_id": "DOM",
+      "skill_name": "전기·전자공학의 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 8,
+      "sub_family_id": "BIZ",
+      "skill_name": "고객 공정·소재의 기술적 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 9,
+      "sub_family_id": "PRS",
+      "skill_name": "공정 원리·시스템/설비 인프라 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 10,
+      "sub_family_id": "PRS",
+      "skill_name": "분석 장비에 대한 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 11,
+      "sub_family_id": "REG",
+      "skill_name": "EHS 규제 및 유해·위험물 관리 기준 이해",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 12,
+      "sub_family_id": "PLN",
+      "skill_name": "Application CTQ 평가 Protocol 정의",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 13,
+      "sub_family_id": "PLN",
+      "skill_name": "Project Planning & Coordination",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 14,
+      "sub_family_id": "PLN",
+      "skill_name": "생산 Scheduling & Sequencing",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 15,
+      "sub_family_id": "PLN",
+      "skill_name": "측정 계획 수립 및 표준화",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 16,
+      "sub_family_id": "PLN",
+      "skill_name": "설비 예방정비(PM) 계획 수립·관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 17,
+      "sub_family_id": "PLN",
+      "skill_name": "투자·유지보수 예산 계획 수립 및 통제",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 18,
+      "sub_family_id": "PLN",
+      "skill_name": "유지보수전략 수립 및 실행",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 19,
+      "sub_family_id": "PLN",
+      "skill_name": "Canister Valve 적합성 최적 기준 수립",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 20,
+      "sub_family_id": "PLN",
+      "skill_name": "Canister Valve 이력관리 체계 구축",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 21,
+      "sub_family_id": "DES",
+      "skill_name": "전처리 방법 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 22,
+      "sub_family_id": "DES",
+      "skill_name": "시험법 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 23,
+      "sub_family_id": "DES",
+      "skill_name": "시험법 Validation 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 24,
+      "sub_family_id": "DES",
+      "skill_name": "DoE 기반 최적화",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 25,
+      "sub_family_id": "DES",
+      "skill_name": "합성·정제 Process 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 26,
+      "sub_family_id": "DES",
+      "skill_name": "양산공정 설계·최적화",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 27,
+      "sub_family_id": "DES",
+      "skill_name": "Simulation 기반 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 28,
+      "sub_family_id": "DES",
+      "skill_name": "OLED 소재 분자 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 29,
+      "sub_family_id": "DES",
+      "skill_name": "분자 설계 Parameter Targeting",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 30,
+      "sub_family_id": "DES",
+      "skill_name": "합성 Recipe 도출·실행",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 31,
+      "sub_family_id": "DES",
+      "skill_name": "승화 정제 조건 최적화",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 32,
+      "sub_family_id": "DES",
+      "skill_name": "OLED 소재 설계·제작",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 33,
+      "sub_family_id": "DES",
+      "skill_name": "소재 QC 분석법 설정",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 34,
+      "sub_family_id": "DES",
+      "skill_name": "원재료 구조 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 35,
+      "sub_family_id": "DES",
+      "skill_name": "혼합물 조성 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 36,
+      "sub_family_id": "DES",
+      "skill_name": "중합 구조 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 37,
+      "sub_family_id": "DES",
+      "skill_name": "품질 분석 최적조건 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 38,
+      "sub_family_id": "DES",
+      "skill_name": "Process 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 39,
+      "sub_family_id": "DES",
+      "skill_name": "장치기술 엔지니어링",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 40,
+      "sub_family_id": "DES",
+      "skill_name": "기계기술 엔지니어링",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 41,
+      "sub_family_id": "DES",
+      "skill_name": "계기기술 엔지니어링",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 42,
+      "sub_family_id": "DES",
+      "skill_name": "전기기술 엔지니어링",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 43,
+      "sub_family_id": "DES",
+      "skill_name": "공조기술 엔지니어링",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 44,
+      "sub_family_id": "DES",
+      "skill_name": "건축/구조 기술 엔지니어링",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 45,
+      "sub_family_id": "DES",
+      "skill_name": "자동화/자동차 기술 엔지니어링",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 46,
+      "sub_family_id": "DES",
+      "skill_name": "CAPEX 설비 개선 기본 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 47,
+      "sub_family_id": "DES",
+      "skill_name": "설비 자동화 구조 설계",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 48,
+      "sub_family_id": "DES",
+      "skill_name": "공정/설비 개선 기술검토",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 49,
+      "sub_family_id": "ANA",
+      "skill_name": "VOC-to-CTQ Translation",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 50,
+      "sub_family_id": "ANA",
+      "skill_name": "Technical Feasibility 평가",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 51,
+      "sub_family_id": "ANA",
+      "skill_name": "분광 분석·검증",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 52,
+      "sub_family_id": "ANA",
+      "skill_name": "원소 분석·검증",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 53,
+      "sub_family_id": "ANA",
+      "skill_name": "형상 분석·검증",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 54,
+      "sub_family_id": "ANA",
+      "skill_name": "GC 분석·검증",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 55,
+      "sub_family_id": "ANA",
+      "skill_name": "LC 분석·검증",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 56,
+      "sub_family_id": "ANA",
+      "skill_name": "소재 분석·검증",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 57,
+      "sub_family_id": "ANA",
+      "skill_name": "박막·성능 검증",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 58,
+      "sub_family_id": "ANA",
+      "skill_name": "IP 기반 경쟁사 기술 분석 및 FTO 리스크 평가",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 59,
+      "sub_family_id": "ANA",
+      "skill_name": "제품개발 트렌드 및 기회 분석",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 60,
+      "sub_family_id": "ANA",
+      "skill_name": "구조 분석 Simulation",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 61,
+      "sub_family_id": "ANA",
+      "skill_name": "OLED 소자 측정·분석",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 62,
+      "sub_family_id": "ANA",
+      "skill_name": "고객 기술 서비스",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 63,
+      "sub_family_id": "ANA",
+      "skill_name": "성능 평가 결과 분석/해석",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 64,
+      "sub_family_id": "ANA",
+      "skill_name": "공정 Simulation",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 65,
+      "sub_family_id": "ANA",
+      "skill_name": "CAPEX/OPEX 평가",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 66,
+      "sub_family_id": "ANA",
+      "skill_name": "생산공정 최적화",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 67,
+      "sub_family_id": "ANA",
+      "skill_name": "상태진단 및 분석",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 68,
+      "sub_family_id": "ANA",
+      "skill_name": "통계적 공정관리(SPC)",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 69,
+      "sub_family_id": "ANA",
+      "skill_name": "OEE 및 Capacity 모델링",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 70,
+      "sub_family_id": "ANA",
+      "skill_name": "공정 이상 원인분석-CAPA 이행",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 71,
+      "sub_family_id": "ANA",
+      "skill_name": "설비 이상 원인분석-CAPA 이행",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 72,
+      "sub_family_id": "ANA",
+      "skill_name": "Canister Valve 필요 Spec 분석",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 73,
+      "sub_family_id": "ANA",
+      "skill_name": "측정 시스템 분석(MSA)",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 74,
+      "sub_family_id": "MGT",
+      "skill_name": "Lab-Pilot 단위 공정 관리 및 트러블슈팅",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 75,
+      "sub_family_id": "MGT",
+      "skill_name": "투자 경제성 분석 및 소규모 개선사업 수행/관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 76,
+      "sub_family_id": "MGT",
+      "skill_name": "프로젝트 기획 및 종합 통제",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 77,
+      "sub_family_id": "MGT",
+      "skill_name": "시공 및 SHE 관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 78,
+      "sub_family_id": "MGT",
+      "skill_name": "Process 관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 79,
+      "sub_family_id": "MGT",
+      "skill_name": "MOC 기반 설비관리·통제",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 80,
+      "sub_family_id": "MGT",
+      "skill_name": "MOC 기반 공정관리·통제",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 81,
+      "sub_family_id": "MGT",
+      "skill_name": "Canister Valve 안전·품질 리스크 식별·통제",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 82,
+      "sub_family_id": "MGT",
+      "skill_name": "MOC 기반 Canister Valve 관리 및 통제",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 83,
+      "sub_family_id": "MGT",
+      "skill_name": "Shop Floor 관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 84,
+      "sub_family_id": "MGT",
+      "skill_name": "공정/설비 엔지니어 문서 관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 85,
+      "sub_family_id": "MGT",
+      "skill_name": "정비·작업 표준화 작업 품질 관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 86,
+      "sub_family_id": "MGT",
+      "skill_name": "CMMS 기반 설비관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 87,
+      "sub_family_id": "OPS",
+      "skill_name": "원재료 입출고 처리 및 추적",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 88,
+      "sub_family_id": "OPS",
+      "skill_name": "밸브/펌프 조작 및 Lock-out/Tag-out(LOTO)",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 89,
+      "sub_family_id": "OPS",
+      "skill_name": "DCS 기반 단위 공정 운전",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 90,
+      "sub_family_id": "OPS",
+      "skill_name": "공정 파라미터 모니터링 및 이상 신호 판단/대응",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 91,
+      "sub_family_id": "OPS",
+      "skill_name": "오염/혼입 제어 및 방지",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 92,
+      "sub_family_id": "OPS",
+      "skill_name": "Glove Box 운영 및 이상 신호 판단/초기대응",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 93,
+      "sub_family_id": "OPS",
+      "skill_name": "공정 설비 부품 점검·교체",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 94,
+      "sub_family_id": "OPS",
+      "skill_name": "부적합 처리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 95,
+      "sub_family_id": "OPS",
+      "skill_name": "Cleaning 수행·오염 제거",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 96,
+      "sub_family_id": "OPS",
+      "skill_name": "분석 샘플링 처리 및 결과 추적",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 97,
+      "sub_family_id": "OPS",
+      "skill_name": "설비 이상 징후 판단 및 초기대응",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 98,
+      "sub_family_id": "OPS",
+      "skill_name": "설비 예방정비(PM) 점검",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 99,
+      "sub_family_id": "OPS",
+      "skill_name": "Lab-Pilot 단위 공정 운영 및 트러블슈팅",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 100,
+      "sub_family_id": "OPS",
+      "skill_name": "대기방지설비 운전 및 점검",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 101,
+      "sub_family_id": "OPS",
+      "skill_name": "분석 장비 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 102,
+      "sub_family_id": "OPS",
+      "skill_name": "샘플 충전 및 회수",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 103,
+      "sub_family_id": "OPS",
+      "skill_name": "설비 고장정비(CM)",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 104,
+      "sub_family_id": "OPS",
+      "skill_name": "설비 개선비(M)",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 105,
+      "sub_family_id": "OPS",
+      "skill_name": "정비소모 안전재고 점검 및 확보",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 106,
+      "sub_family_id": "OPS",
+      "skill_name": "설비 계기/센서 검교정",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 107,
+      "sub_family_id": "OPS",
+      "skill_name": "3정5S 기반 공무 Shop 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 108,
+      "sub_family_id": "OPS",
+      "skill_name": "Canister Valve 입출고 처리 및 추적",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 109,
+      "sub_family_id": "OPS",
+      "skill_name": "세정 설비 운전 및 이상 대응",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 110,
+      "sub_family_id": "OPS",
+      "skill_name": "Solvent Rinse 설비 운전 및 이상 대응",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 111,
+      "sub_family_id": "OPS",
+      "skill_name": "퍼지 설비 운전 및 이상 대응",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 112,
+      "sub_family_id": "OPS",
+      "skill_name": "충전 설비 운전 및 이상 대응",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 113,
+      "sub_family_id": "OPS",
+      "skill_name": "부품 조립 및 누설 점검",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 114,
+      "sub_family_id": "OPS",
+      "skill_name": "Canister 폐기장 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 115,
+      "sub_family_id": "OPS",
+      "skill_name": "Canister 해체 및 조립",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 116,
+      "sub_family_id": "OPS",
+      "skill_name": "Canister 배치 및 조립",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 117,
+      "sub_family_id": "OPS",
+      "skill_name": "CMMS 기반 설비 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 118,
+      "sub_family_id": "OPS",
+      "skill_name": "샘플 입고 관리·추적",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 119,
+      "sub_family_id": "OPS",
+      "skill_name": "평가 조건 Recipe 설정",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 120,
+      "sub_family_id": "OPS",
+      "skill_name": "Photo 공정 평가 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 121,
+      "sub_family_id": "OPS",
+      "skill_name": "패턴 CD 계측 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 122,
+      "sub_family_id": "OPS",
+      "skill_name": "기판 전처리 및 Plasma Cleaning 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 123,
+      "sub_family_id": "OPS",
+      "skill_name": "유기막 특성 측정 장비 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 124,
+      "sub_family_id": "OPS",
+      "skill_name": "진공 열증착 설비 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 125,
+      "sub_family_id": "OPS",
+      "skill_name": "OLED 소자 성능평가 장비 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 126,
+      "sub_family_id": "OPS",
+      "skill_name": "Clean Room 환경 제어",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 127,
+      "sub_family_id": "OPS",
+      "skill_name": "OLED Encapsulation 설비 운영",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 128,
+      "sub_family_id": "OPS",
+      "skill_name": "Lab 유틸리티 유지관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 129,
+      "sub_family_id": "OPS",
+      "skill_name": "설비 점검 및 기본 유지관리",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 130,
+      "sub_family_id": "OPS",
+      "skill_name": "측정 정도 점검",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 131,
+      "sub_family_id": "AIT",
+      "skill_name": "데이터 분석",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 132,
+      "sub_family_id": "AIT",
+      "skill_name": "생성형 AI Literacy",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 133,
+      "sub_family_id": "TMS",
+      "skill_name": "디지털 협업",
+      "description": null,
+      "is_critical": 0
+    },
+    {
+      "skill_id": 134,
+      "sub_family_id": "TMS",
+      "skill_name": "Project Management",
+      "description": null,
+      "is_critical": 0
+    }
+  ],
+  "level_criteria": [
+    {
+      "sub_family_id": "DOM",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "DOM",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "DOM",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "DOM",
+      "level": 4,
+      "expertise_criteria": "새로운 프레임·방법론 설계",
+      "impact_criteria": "전사 기술 전략 리드, 표준 수립"
+    },
+    {
+      "sub_family_id": "BIZ",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "BIZ",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "BIZ",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "BIZ",
+      "level": 4,
+      "expertise_criteria": "새로운 프레임·방법론 설계",
+      "impact_criteria": "전사 기술 전략 리드, 표준 수립"
+    },
+    {
+      "sub_family_id": "PRS",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "PRS",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "PRS",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "PRS",
+      "level": 4,
+      "expertise_criteria": "새로운 프레임·방법론 설계",
+      "impact_criteria": "전사 기술 전략 리드, 표준 수립"
+    },
+    {
+      "sub_family_id": "REG",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "REG",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "REG",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "REG",
+      "level": 4,
+      "expertise_criteria": "새로운 프레임·방법론 설계",
+      "impact_criteria": "전사 기술 전략 리드, 표준 수립"
+    },
+    {
+      "sub_family_id": "PLN",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "PLN",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "PLN",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "PLN",
+      "level": 4,
+      "expertise_criteria": "새로운 프레임·방법론 설계",
+      "impact_criteria": "전사 기술 전략 리드, 표준 수립"
+    },
+    {
+      "sub_family_id": "DES",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "DES",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "DES",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "DES",
+      "level": 4,
+      "expertise_criteria": "설계 산출 표준화·내재화, 전사 설계 품질 상향 표준화",
+      "impact_criteria": "전사 설계 가이드라인 수립, 후속 프로젝트의 기준점 제공"
+    },
+    {
+      "sub_family_id": "ANA",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "ANA",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "ANA",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "ANA",
+      "level": 4,
+      "expertise_criteria": "분석 프레임·해석 방법론 개발",
+      "impact_criteria": "데이터 기반 의사결정 표준 수립·전사 적용"
+    },
+    {
+      "sub_family_id": "MGT",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "MGT",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "MGT",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "MGT",
+      "level": 4,
+      "expertise_criteria": "새로운 프레임·방법론 설계",
+      "impact_criteria": "전사 기술 전략 리드, 표준 수립"
+    },
+    {
+      "sub_family_id": "OPS",
+      "level": 1,
+      "expertise_criteria": "작업 표준서대로 단위 작업 수행",
+      "impact_criteria": "자기 영역 안전·품질 기본 확보"
+    },
+    {
+      "sub_family_id": "OPS",
+      "level": 2,
+      "expertise_criteria": "일상 운영 독립 수행, 일반 이상 대응",
+      "impact_criteria": "교대조 단위 안정 운영 기여"
+    },
+    {
+      "sub_family_id": "OPS",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "OPS",
+      "level": 4,
+      "expertise_criteria": "새로운 프레임·방법론 설계",
+      "impact_criteria": "전사 기술 전략 리드, 표준 수립"
+    },
+    {
+      "sub_family_id": "AIT",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "AIT",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "AIT",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "AIT",
+      "level": 4,
+      "expertise_criteria": "새로운 프레임·방법론 설계",
+      "impact_criteria": "전사 기술 전략 리드, 표준 수립"
+    },
+    {
+      "sub_family_id": "TMS",
+      "level": 1,
+      "expertise_criteria": "표준 절차·가이드 기반 수행",
+      "impact_criteria": "개인 단위 영향, 상위 도움 일부 필요"
+    },
+    {
+      "sub_family_id": "TMS",
+      "level": 2,
+      "expertise_criteria": "독립 수행, 일반 문제 해결",
+      "impact_criteria": "팀 단위 운영 안정화 기여"
+    },
+    {
+      "sub_family_id": "TMS",
+      "level": 3,
+      "expertise_criteria": "비정형 상황 응용·최적화",
+      "impact_criteria": "동료 코칭, 사내 강사·전파"
+    },
+    {
+      "sub_family_id": "TMS",
+      "level": 4,
+      "expertise_criteria": "새로운 프레임·방법론 설계",
+      "impact_criteria": "전사 기술 전략 리드, 표준 수립"
+    }
+  ],
+  "member": [
+    {
+      "employee_id": "EMP001",
+      "name": "우성유",
+      "corporation": "SK머티리얼즈",
+      "division": "기업문화담당",
+      "team": "HR기획팀",
+      "role_level": "L6",
+      "position": "팀장",
+      "job_type": "사무직",
+      "persona_role": "hr_admin",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP002",
+      "name": "윤영찬",
+      "corporation": "SK머티리얼즈",
+      "division": "기업문화담당",
+      "team": "HR기획팀",
+      "role_level": "L5",
+      "position": "팀원",
+      "job_type": "사무직",
+      "persona_role": "hr_admin",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP003",
+      "name": "박규정",
+      "corporation": "SK머티리얼즈",
+      "division": "기업문화담당",
+      "team": "HR기획팀",
+      "role_level": "L5",
+      "position": "팀원",
+      "job_type": "사무직",
+      "persona_role": "hr_admin",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP004",
+      "name": "반선윤",
+      "corporation": "SK머티리얼즈",
+      "division": "기업문화담당",
+      "team": "HR기획팀",
+      "role_level": "L5",
+      "position": "팀원",
+      "job_type": "사무직",
+      "persona_role": "hr_admin",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP005",
+      "name": "김수현",
+      "corporation": "SK머티리얼즈",
+      "division": "기업문화담당",
+      "team": "HR기획팀",
+      "role_level": "L4",
+      "position": "팀원",
+      "job_type": "사무직",
+      "persona_role": "hr_admin",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP006",
+      "name": "박원정",
+      "corporation": "SK머티리얼즈",
+      "division": "기업문화담당",
+      "team": "HR기획팀",
+      "role_level": "L3",
+      "position": "팀원",
+      "job_type": "사무직",
+      "persona_role": "hr_admin",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP011",
+      "name": "이도현",
+      "corporation": "SK머티리얼즈",
+      "division": "R&D담당",
+      "team": "소재개발팀",
+      "role_level": "L6",
+      "position": "팀장",
+      "job_type": "연구직",
+      "persona_role": "team_leader",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP012",
+      "name": "최서연",
+      "corporation": "SK머티리얼즈",
+      "division": "R&D담당",
+      "team": "소재개발팀",
+      "role_level": "L5",
+      "position": "팀원",
+      "job_type": "연구직",
+      "persona_role": "calibration",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP013",
+      "name": "정민호",
+      "corporation": "SK머티리얼즈",
+      "division": "R&D담당",
+      "team": "소재개발팀",
+      "role_level": "L5",
+      "position": "팀원",
+      "job_type": "연구직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP014",
+      "name": "한지윤",
+      "corporation": "SK머티리얼즈",
+      "division": "R&D담당",
+      "team": "소재개발팀",
+      "role_level": "L4",
+      "position": "팀원",
+      "job_type": "연구직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP015",
+      "name": "오재훈",
+      "corporation": "SK머티리얼즈",
+      "division": "R&D담당",
+      "team": "소재개발팀",
+      "role_level": "L4",
+      "position": "팀원",
+      "job_type": "연구직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP016",
+      "name": "송예린",
+      "corporation": "SK머티리얼즈",
+      "division": "R&D담당",
+      "team": "소재개발팀",
+      "role_level": "L4",
+      "position": "팀원",
+      "job_type": "연구직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP017",
+      "name": "강시우",
+      "corporation": "SK머티리얼즈",
+      "division": "R&D담당",
+      "team": "소재개발팀",
+      "role_level": "L3",
+      "position": "팀원",
+      "job_type": "연구직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP018",
+      "name": "임수아",
+      "corporation": "SK머티리얼즈",
+      "division": "R&D담당",
+      "team": "소재개발팀",
+      "role_level": "L3",
+      "position": "팀원",
+      "job_type": "연구직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP021",
+      "name": "조태경",
+      "corporation": "SK머티리얼즈",
+      "division": "생산기술담당",
+      "team": "공정기술팀",
+      "role_level": "L6",
+      "position": "팀장",
+      "job_type": "기술직",
+      "persona_role": "team_leader",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP022",
+      "name": "권나래",
+      "corporation": "SK머티리얼즈",
+      "division": "생산기술담당",
+      "team": "공정기술팀",
+      "role_level": "L5",
+      "position": "팀원",
+      "job_type": "기술직",
+      "persona_role": "calibration",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP023",
+      "name": "백승준",
+      "corporation": "SK머티리얼즈",
+      "division": "생산기술담당",
+      "team": "공정기술팀",
+      "role_level": "L5",
+      "position": "팀원",
+      "job_type": "기술직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP024",
+      "name": "유미정",
+      "corporation": "SK머티리얼즈",
+      "division": "생산기술담당",
+      "team": "공정기술팀",
+      "role_level": "L4",
+      "position": "팀원",
+      "job_type": "기술직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP025",
+      "name": "신동우",
+      "corporation": "SK머티리얼즈",
+      "division": "생산기술담당",
+      "team": "공정기술팀",
+      "role_level": "L4",
+      "position": "팀원",
+      "job_type": "기술직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP026",
+      "name": "고은채",
+      "corporation": "SK머티리얼즈",
+      "division": "생산기술담당",
+      "team": "공정기술팀",
+      "role_level": "L4",
+      "position": "팀원",
+      "job_type": "기술직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP027",
+      "name": "황민재",
+      "corporation": "SK머티리얼즈",
+      "division": "생산기술담당",
+      "team": "공정기술팀",
+      "role_level": "L3",
+      "position": "팀원",
+      "job_type": "기술직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP028",
+      "name": "노수빈",
+      "corporation": "SK머티리얼즈",
+      "division": "생산기술담당",
+      "team": "공정기술팀",
+      "role_level": "L3",
+      "position": "팀원",
+      "job_type": "기술직",
+      "persona_role": "employee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EXE001",
+      "name": "박정우",
+      "corporation": "SK머티리얼즈",
+      "division": "경영진",
+      "team": "Skill Committee",
+      "role_level": "임원",
+      "position": "위원",
+      "job_type": "경영",
+      "persona_role": "committee",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EXE002",
+      "name": "강대표",
+      "corporation": "SK머티리얼즈",
+      "division": "경영진",
+      "team": "사업대표",
+      "role_level": "임원",
+      "position": "대표",
+      "job_type": "경영",
+      "persona_role": "executive",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "B2025060",
+      "name": "김현규",
+      "corporation": "SK트리켐",
+      "division": "사업운영담당",
+      "team": "HR팀",
+      "role_level": "L3",
+      "position": "팀원",
+      "job_type": "사무직",
+      "persona_role": "hr_viewer",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "B2024060",
+      "name": "정현수",
+      "corporation": "SK머티리얼즈퍼포먼스",
+      "division": "경영지원담당",
+      "team": "HR팀",
+      "role_level": "L4",
+      "position": "팀원",
+      "job_type": "사무직",
+      "persona_role": "hr_viewer",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP007",
+      "name": "이경주",
+      "corporation": "SK머티리얼즈",
+      "division": "기업문화담당",
+      "team": "HR기획팀",
+      "role_level": "L5",
+      "position": "팀원",
+      "job_type": "사무직",
+      "persona_role": "hr_admin",
+      "extra_attrs": null
+    },
+    {
+      "employee_id": "EMP008",
+      "name": "훈윤",
+      "corporation": "SK머티리얼즈",
+      "division": "기업문화담당",
+      "team": "HR기획팀",
+      "role_level": "L5",
+      "position": "팀원",
+      "job_type": "사무직",
+      "persona_role": "hr_admin",
+      "extra_attrs": null
+    }
+  ],
+  "required_skill": [
+    {
+      "org_or_individual": "company",
+      "target_id": "ALL",
+      "skill_id": 11,
+      "target_level": 2,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "company",
+      "target_id": "ALL",
+      "skill_id": 13,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "company",
+      "target_id": "ALL",
+      "skill_id": 131,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "company",
+      "target_id": "ALL",
+      "skill_id": 132,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "company",
+      "target_id": "ALL",
+      "skill_id": 133,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "company",
+      "target_id": "ALL",
+      "skill_id": 134,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "HR기획팀",
+      "skill_id": 13,
+      "target_level": 3,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "HR기획팀",
+      "skill_id": 17,
+      "target_level": 2,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "HR기획팀",
+      "skill_id": 76,
+      "target_level": 3,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "소재개발팀",
+      "skill_id": 1,
+      "target_level": 3,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "소재개발팀",
+      "skill_id": 5,
+      "target_level": 3,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "소재개발팀",
+      "skill_id": 28,
+      "target_level": 3,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "소재개발팀",
+      "skill_id": 30,
+      "target_level": 3,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "소재개발팀",
+      "skill_id": 49,
+      "target_level": 2,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "소재개발팀",
+      "skill_id": 22,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "소재개발팀",
+      "skill_id": 24,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "소재개발팀",
+      "skill_id": 63,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "공정기술팀",
+      "skill_id": 9,
+      "target_level": 3,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "공정기술팀",
+      "skill_id": 25,
+      "target_level": 3,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "공정기술팀",
+      "skill_id": 26,
+      "target_level": 3,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "공정기술팀",
+      "skill_id": 66,
+      "target_level": 2,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "공정기술팀",
+      "skill_id": 68,
+      "target_level": 2,
+      "is_core": 1,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "공정기술팀",
+      "skill_id": 12,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "공정기술팀",
+      "skill_id": 70,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    },
+    {
+      "org_or_individual": "department",
+      "target_id": "공정기술팀",
+      "skill_id": 73,
+      "target_level": 2,
+      "is_core": 0,
+      "status": "approved"
+    }
+  ],
+  "skill_profile": [
+    {
+      "member_id": "EMP001",
+      "skill_id": 49,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 85,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 75,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 84,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 81,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 82,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 68,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 52,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 64,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 79,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 76,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP001",
+      "skill_id": 55,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 12,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 78,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 54,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 60,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 57,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 74,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 66,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 15,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 68,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 80,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 75,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP002",
+      "skill_id": 63,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 57,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 86,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 69,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 75,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 77,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 80,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 51,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 16,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 81,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 8,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 15,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 83,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 85,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP003",
+      "skill_id": 76,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 14,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 63,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 72,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 82,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 74,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 17,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 15,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 12,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 73,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP004",
+      "skill_id": 51,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 56,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 15,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 81,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 55,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 85,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 54,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 13,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 80,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 75,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 84,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 83,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP005",
+      "skill_id": 11,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP006",
+      "skill_id": 15,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP006",
+      "skill_id": 70,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP006",
+      "skill_id": 80,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP006",
+      "skill_id": 67,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP006",
+      "skill_id": 85,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP006",
+      "skill_id": 16,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP006",
+      "skill_id": 81,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP006",
+      "skill_id": 55,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 28,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 116,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 92,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 60,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 42,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 71,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 85,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 62,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 119,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 36,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 21,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 53,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP011",
+      "skill_id": 54,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 42,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 2,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 13,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 3,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 22,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 65,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 56,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 112,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 38,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 72,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 58,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP012",
+      "skill_id": 62,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 52,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 36,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 55,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 67,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 13,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 59,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 15,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 18,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 37,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP013",
+      "skill_id": 62,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 21,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 59,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 7,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 26,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 3,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 92,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 79,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 77,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 39,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 52,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP014",
+      "skill_id": 69,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 25,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 59,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 22,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 99,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 116,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 73,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 80,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 64,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 71,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 57,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP015",
+      "skill_id": 6,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 23,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 34,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 53,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 39,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 122,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 25,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 69,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 1,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 59,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP016",
+      "skill_id": 48,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP017",
+      "skill_id": 12,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP017",
+      "skill_id": 36,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP017",
+      "skill_id": 13,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP017",
+      "skill_id": 81,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP017",
+      "skill_id": 6,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP017",
+      "skill_id": 31,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP017",
+      "skill_id": 35,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP017",
+      "skill_id": 20,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP017",
+      "skill_id": 49,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 41,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 24,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 73,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 28,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 64,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 38,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 72,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 43,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 76,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 40,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP018",
+      "skill_id": 21,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 115,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 105,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 123,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 78,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 64,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 28,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 44,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 41,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 118,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 85,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 4,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 67,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 33,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 42,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP021",
+      "skill_id": 76,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 9,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 121,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 12,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 67,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 63,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 32,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 122,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 58,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 80,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP022",
+      "skill_id": 44,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 81,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 92,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 38,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 59,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 16,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 63,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 65,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 42,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 41,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 44,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 25,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 129,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 109,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP023",
+      "skill_id": 24,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 97,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 98,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 68,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 99,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 109,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 36,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 39,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 101,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 21,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP024",
+      "skill_id": 125,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP025",
+      "skill_id": 17,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP025",
+      "skill_id": 71,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP025",
+      "skill_id": 84,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP025",
+      "skill_id": 101,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP025",
+      "skill_id": 34,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP025",
+      "skill_id": 91,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP025",
+      "skill_id": 24,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP025",
+      "skill_id": 28,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP025",
+      "skill_id": 102,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP026",
+      "skill_id": 111,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP026",
+      "skill_id": 29,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP026",
+      "skill_id": 27,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP026",
+      "skill_id": 90,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP026",
+      "skill_id": 46,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP026",
+      "skill_id": 81,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP026",
+      "skill_id": 82,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP026",
+      "skill_id": 18,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP026",
+      "skill_id": 30,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP027",
+      "skill_id": 126,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP027",
+      "skill_id": 56,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP027",
+      "skill_id": 73,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP027",
+      "skill_id": 71,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP027",
+      "skill_id": 118,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP027",
+      "skill_id": 80,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP027",
+      "skill_id": 40,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP027",
+      "skill_id": 33,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP027",
+      "skill_id": 82,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 21,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 18,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 16,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 66,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 36,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 126,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 90,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 14,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 74,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP028",
+      "skill_id": 22,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2025060",
+      "skill_id": 55,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2025060",
+      "skill_id": 12,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2025060",
+      "skill_id": 65,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2025060",
+      "skill_id": 16,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2025060",
+      "skill_id": 20,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2025060",
+      "skill_id": 73,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2025060",
+      "skill_id": 50,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2025060",
+      "skill_id": 66,
+      "current_level": 1,
+      "target_level": 1,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2025060",
+      "skill_id": 80,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 84,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 13,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 17,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 83,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 19,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 80,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 79,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 69,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 82,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 66,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "B2024060",
+      "skill_id": 12,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 75,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 72,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 18,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 81,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 67,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 17,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 57,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 13,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 12,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 62,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 74,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 63,
+      "current_level": 1,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 77,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP007",
+      "skill_id": 16,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 79,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 73,
+      "current_level": 4,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 75,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 18,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 54,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 19,
+      "current_level": 3,
+      "target_level": 4,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 49,
+      "current_level": 3,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 77,
+      "current_level": 2,
+      "target_level": 3,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 78,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    },
+    {
+      "member_id": "EMP008",
+      "skill_id": 68,
+      "current_level": 2,
+      "target_level": 2,
+      "last_assessed_date": "2026-01-15"
+    }
+  ],
+  "assessment": [],
+  "evidence": [
+    {
+      "evidence_id": 1,
+      "member_id": "EMP001",
+      "evidence_type": "training",
+      "title": "통계적 공정관리(SPC) 실무",
+      "description": "(교육) 통계적 공정관리(SPC) 실무 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-07-15"
+    },
+    {
+      "evidence_id": 2,
+      "member_id": "EMP001",
+      "evidence_type": "project",
+      "title": "Wet Chemical Particle 저감 TF",
+      "description": "(프로젝트) Wet Chemical Particle 저감 TF 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-01-08"
+    },
+    {
+      "evidence_id": 3,
+      "member_id": "EMP001",
+      "evidence_type": "project",
+      "title": "양산 수율 개선 6 Sigma 과제",
+      "description": "(프로젝트) 양산 수율 개선 6 Sigma 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-05-13"
+    },
+    {
+      "evidence_id": 4,
+      "member_id": "EMP002",
+      "evidence_type": "training",
+      "title": "MOC/MOI 변경 관리 교육",
+      "description": "(교육) MOC/MOI 변경 관리 교육 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-06-22"
+    },
+    {
+      "evidence_id": 5,
+      "member_id": "EMP002",
+      "evidence_type": "project",
+      "title": "OLED HTL 신규 합성 Recipe 도출 프로젝트",
+      "description": "(프로젝트) OLED HTL 신규 합성 Recipe 도출 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-10-17"
+    },
+    {
+      "evidence_id": 6,
+      "member_id": "EMP003",
+      "evidence_type": "project",
+      "title": "고객 Spec In 대응 과제",
+      "description": "(프로젝트) 고객 Spec In 대응 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-11-21"
+    },
+    {
+      "evidence_id": 7,
+      "member_id": "EMP003",
+      "evidence_type": "training",
+      "title": "RCA·8D 문제해결 워크숍",
+      "description": "(교육) RCA·8D 문제해결 워크숍 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-02-11"
+    },
+    {
+      "evidence_id": 8,
+      "member_id": "EMP003",
+      "evidence_type": "output",
+      "title": "분석 SOP v2.0 작성",
+      "description": "(산출물) 분석 SOP v2.0 작성 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-11-02"
+    },
+    {
+      "evidence_id": 9,
+      "member_id": "EMP003",
+      "evidence_type": "training",
+      "title": "공정 안전 관리 직무 교육",
+      "description": "(교육) 공정 안전 관리 직무 교육 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-07-02"
+    },
+    {
+      "evidence_id": 10,
+      "member_id": "EMP003",
+      "evidence_type": "certificate",
+      "title": "Six Sigma Black Belt",
+      "description": "(자격증) Six Sigma Black Belt 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-02-22"
+    },
+    {
+      "evidence_id": 11,
+      "member_id": "EMP004",
+      "evidence_type": "certificate",
+      "title": "위험물기능사",
+      "description": "(자격증) 위험물기능사 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-04-08"
+    },
+    {
+      "evidence_id": 12,
+      "member_id": "EMP004",
+      "evidence_type": "training",
+      "title": "Tableau/Power BI 데이터 시각화",
+      "description": "(교육) Tableau/Power BI 데이터 시각화 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-10-28"
+    },
+    {
+      "evidence_id": 13,
+      "member_id": "EMP004",
+      "evidence_type": "project",
+      "title": "OLED HTL 신규 합성 Recipe 도출 프로젝트",
+      "description": "(프로젝트) OLED HTL 신규 합성 Recipe 도출 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-12-23"
+    },
+    {
+      "evidence_id": 14,
+      "member_id": "EMP005",
+      "evidence_type": "project",
+      "title": "공정 SPC 시스템 구축 과제",
+      "description": "(프로젝트) 공정 SPC 시스템 구축 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-09-26"
+    },
+    {
+      "evidence_id": 15,
+      "member_id": "EMP005",
+      "evidence_type": "training",
+      "title": "SK 가치관·SKMS 이해 과정",
+      "description": "(교육) SK 가치관·SKMS 이해 과정 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-11-25"
+    },
+    {
+      "evidence_id": 16,
+      "member_id": "EMP005",
+      "evidence_type": "training",
+      "title": "사내 SK Univ. - Leadership Track",
+      "description": "(교육) 사내 SK Univ. - Leadership Track 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-01-17"
+    },
+    {
+      "evidence_id": 17,
+      "member_id": "EMP005",
+      "evidence_type": "training",
+      "title": "OLED 소재 디자인 심화 과정",
+      "description": "(교육) OLED 소재 디자인 심화 과정 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-12-22"
+    },
+    {
+      "evidence_id": 18,
+      "member_id": "EMP005",
+      "evidence_type": "training",
+      "title": "Tableau/Power BI 데이터 시각화",
+      "description": "(교육) Tableau/Power BI 데이터 시각화 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-11-15"
+    },
+    {
+      "evidence_id": 19,
+      "member_id": "EMP006",
+      "evidence_type": "certificate",
+      "title": "TRIZ Level 3",
+      "description": "(자격증) TRIZ Level 3 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-07-21"
+    },
+    {
+      "evidence_id": 20,
+      "member_id": "EMP006",
+      "evidence_type": "training",
+      "title": "사내 SK Univ. - Leadership Track",
+      "description": "(교육) 사내 SK Univ. - Leadership Track 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-12-12"
+    },
+    {
+      "evidence_id": 21,
+      "member_id": "EMP006",
+      "evidence_type": "output",
+      "title": "공정 트러블슈팅 사례집 기여",
+      "description": "(산출물) 공정 트러블슈팅 사례집 기여 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-09-04"
+    },
+    {
+      "evidence_id": 22,
+      "member_id": "EMP011",
+      "evidence_type": "project",
+      "title": "고객 A사 Precursor 품질 개선 과제",
+      "description": "(프로젝트) 고객 A사 Precursor 품질 개선 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-11-24"
+    },
+    {
+      "evidence_id": 23,
+      "member_id": "EMP011",
+      "evidence_type": "project",
+      "title": "고객 Spec In 대응 과제",
+      "description": "(프로젝트) 고객 Spec In 대응 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-02-26"
+    },
+    {
+      "evidence_id": 24,
+      "member_id": "EMP011",
+      "evidence_type": "project",
+      "title": "공정 SPC 시스템 구축 과제",
+      "description": "(프로젝트) 공정 SPC 시스템 구축 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-02-26"
+    },
+    {
+      "evidence_id": 25,
+      "member_id": "EMP011",
+      "evidence_type": "output",
+      "title": "사내 기술 보고서: OLED HTL 특성 비교",
+      "description": "(산출물) 사내 기술 보고서: OLED HTL 특성 비교 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-03-06"
+    },
+    {
+      "evidence_id": 26,
+      "member_id": "EMP012",
+      "evidence_type": "patent",
+      "title": "유기 반도체 소재 개선 (특허출원)",
+      "description": "(특허) 유기 반도체 소재 개선 (특허출원) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-08-25"
+    },
+    {
+      "evidence_id": 27,
+      "member_id": "EMP012",
+      "evidence_type": "output",
+      "title": "Best Practice 사내 발표",
+      "description": "(산출물) Best Practice 사내 발표 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-08-16"
+    },
+    {
+      "evidence_id": 28,
+      "member_id": "EMP012",
+      "evidence_type": "patent",
+      "title": "박막 형성용 전구체 조성물 (등록특허)",
+      "description": "(특허) 박막 형성용 전구체 조성물 (등록특허) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-10-16"
+    },
+    {
+      "evidence_id": 29,
+      "member_id": "EMP012",
+      "evidence_type": "output",
+      "title": "사내 학회 발표: Precursor 신규 합성",
+      "description": "(산출물) 사내 학회 발표: Precursor 신규 합성 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-05-25"
+    },
+    {
+      "evidence_id": 30,
+      "member_id": "EMP012",
+      "evidence_type": "patent",
+      "title": "Canister Valve 누설 검출 장치 (등록특허)",
+      "description": "(특허) Canister Valve 누설 검출 장치 (등록특허) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-06-17"
+    },
+    {
+      "evidence_id": 31,
+      "member_id": "EMP013",
+      "evidence_type": "output",
+      "title": "공정 트러블슈팅 사례집 기여",
+      "description": "(산출물) 공정 트러블슈팅 사례집 기여 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-11-08"
+    },
+    {
+      "evidence_id": 32,
+      "member_id": "EMP013",
+      "evidence_type": "training",
+      "title": "사내 SK Univ. - Leadership Track",
+      "description": "(교육) 사내 SK Univ. - Leadership Track 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-08-02"
+    },
+    {
+      "evidence_id": 33,
+      "member_id": "EMP013",
+      "evidence_type": "project",
+      "title": "OLED HTL 신규 합성 Recipe 도출 프로젝트",
+      "description": "(프로젝트) OLED HTL 신규 합성 Recipe 도출 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-12-01"
+    },
+    {
+      "evidence_id": 34,
+      "member_id": "EMP013",
+      "evidence_type": "patent",
+      "title": "박막 형성용 전구체 조성물 (등록특허)",
+      "description": "(특허) 박막 형성용 전구체 조성물 (등록특허) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-03-13"
+    },
+    {
+      "evidence_id": 35,
+      "member_id": "EMP014",
+      "evidence_type": "output",
+      "title": "분석 SOP v2.0 작성",
+      "description": "(산출물) 분석 SOP v2.0 작성 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-11-08"
+    },
+    {
+      "evidence_id": 36,
+      "member_id": "EMP014",
+      "evidence_type": "certificate",
+      "title": "ISO 9001 심사원",
+      "description": "(자격증) ISO 9001 심사원 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-12-15"
+    },
+    {
+      "evidence_id": 37,
+      "member_id": "EMP015",
+      "evidence_type": "project",
+      "title": "CMMS 도입·정비 데이터 체계화 과제",
+      "description": "(프로젝트) CMMS 도입·정비 데이터 체계화 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-12-23"
+    },
+    {
+      "evidence_id": 38,
+      "member_id": "EMP015",
+      "evidence_type": "project",
+      "title": "고객 Spec In 대응 과제",
+      "description": "(프로젝트) 고객 Spec In 대응 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-12-16"
+    },
+    {
+      "evidence_id": 39,
+      "member_id": "EMP015",
+      "evidence_type": "project",
+      "title": "Pilot Line CIP 자동화 프로젝트",
+      "description": "(프로젝트) Pilot Line CIP 자동화 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-01-13"
+    },
+    {
+      "evidence_id": 40,
+      "member_id": "EMP015",
+      "evidence_type": "project",
+      "title": "분석 장비 신규 도입·이관 프로젝트",
+      "description": "(프로젝트) 분석 장비 신규 도입·이관 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-02-20"
+    },
+    {
+      "evidence_id": 41,
+      "member_id": "EMP015",
+      "evidence_type": "output",
+      "title": "팀 내 Onboarding 가이드 작성",
+      "description": "(산출물) 팀 내 Onboarding 가이드 작성 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-01-26"
+    },
+    {
+      "evidence_id": 42,
+      "member_id": "EMP016",
+      "evidence_type": "output",
+      "title": "공정 트러블슈팅 사례집 기여",
+      "description": "(산출물) 공정 트러블슈팅 사례집 기여 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-06-23"
+    },
+    {
+      "evidence_id": 43,
+      "member_id": "EMP016",
+      "evidence_type": "output",
+      "title": "팀 내 Onboarding 가이드 작성",
+      "description": "(산출물) 팀 내 Onboarding 가이드 작성 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-06-04"
+    },
+    {
+      "evidence_id": 44,
+      "member_id": "EMP016",
+      "evidence_type": "project",
+      "title": "OLED HTL 신규 합성 Recipe 도출 프로젝트",
+      "description": "(프로젝트) OLED HTL 신규 합성 Recipe 도출 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-07-19"
+    },
+    {
+      "evidence_id": 45,
+      "member_id": "EMP016",
+      "evidence_type": "output",
+      "title": "공정 트러블슈팅 사례집 기여",
+      "description": "(산출물) 공정 트러블슈팅 사례집 기여 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-10-24"
+    },
+    {
+      "evidence_id": 46,
+      "member_id": "EMP016",
+      "evidence_type": "output",
+      "title": "기술 표준서 개정",
+      "description": "(산출물) 기술 표준서 개정 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-08-15"
+    },
+    {
+      "evidence_id": 47,
+      "member_id": "EMP017",
+      "evidence_type": "patent",
+      "title": "Canister Valve 누설 검출 장치 (등록특허)",
+      "description": "(특허) Canister Valve 누설 검출 장치 (등록특허) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-11-10"
+    },
+    {
+      "evidence_id": 48,
+      "member_id": "EMP017",
+      "evidence_type": "project",
+      "title": "신규 Customer Application 평가 프로젝트",
+      "description": "(프로젝트) 신규 Customer Application 평가 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-08-10"
+    },
+    {
+      "evidence_id": 49,
+      "member_id": "EMP017",
+      "evidence_type": "output",
+      "title": "사내 학회 발표: Precursor 신규 합성",
+      "description": "(산출물) 사내 학회 발표: Precursor 신규 합성 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-11-23"
+    },
+    {
+      "evidence_id": 50,
+      "member_id": "EMP017",
+      "evidence_type": "output",
+      "title": "Best Practice 사내 발표",
+      "description": "(산출물) Best Practice 사내 발표 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-06-13"
+    },
+    {
+      "evidence_id": 51,
+      "member_id": "EMP018",
+      "evidence_type": "output",
+      "title": "분석 SOP v2.0 작성",
+      "description": "(산출물) 분석 SOP v2.0 작성 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-11-09"
+    },
+    {
+      "evidence_id": 52,
+      "member_id": "EMP018",
+      "evidence_type": "project",
+      "title": "Pilot Line CIP 자동화 프로젝트",
+      "description": "(프로젝트) Pilot Line CIP 자동화 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-06-03"
+    },
+    {
+      "evidence_id": 53,
+      "member_id": "EMP018",
+      "evidence_type": "output",
+      "title": "사내 기술 보고서: OLED HTL 특성 비교",
+      "description": "(산출물) 사내 기술 보고서: OLED HTL 특성 비교 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-05-10"
+    },
+    {
+      "evidence_id": 54,
+      "member_id": "EMP021",
+      "evidence_type": "training",
+      "title": "RCA·8D 문제해결 워크숍",
+      "description": "(교육) RCA·8D 문제해결 워크숍 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-08-28"
+    },
+    {
+      "evidence_id": 55,
+      "member_id": "EMP021",
+      "evidence_type": "training",
+      "title": "통계적 공정관리(SPC) 실무",
+      "description": "(교육) 통계적 공정관리(SPC) 실무 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-03-27"
+    },
+    {
+      "evidence_id": 56,
+      "member_id": "EMP022",
+      "evidence_type": "certificate",
+      "title": "데이터분석 준전문가(ADsP)",
+      "description": "(자격증) 데이터분석 준전문가(ADsP) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-04-02"
+    },
+    {
+      "evidence_id": 57,
+      "member_id": "EMP022",
+      "evidence_type": "project",
+      "title": "양산 수율 개선 6 Sigma 과제",
+      "description": "(프로젝트) 양산 수율 개선 6 Sigma 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-11-22"
+    },
+    {
+      "evidence_id": 58,
+      "member_id": "EMP022",
+      "evidence_type": "output",
+      "title": "기술 표준서 개정",
+      "description": "(산출물) 기술 표준서 개정 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-07-08"
+    },
+    {
+      "evidence_id": 59,
+      "member_id": "EMP023",
+      "evidence_type": "project",
+      "title": "Pilot Line CIP 자동화 프로젝트",
+      "description": "(프로젝트) Pilot Line CIP 자동화 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-01-28"
+    },
+    {
+      "evidence_id": 60,
+      "member_id": "EMP023",
+      "evidence_type": "training",
+      "title": "Tableau/Power BI 데이터 시각화",
+      "description": "(교육) Tableau/Power BI 데이터 시각화 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-07-10"
+    },
+    {
+      "evidence_id": 61,
+      "member_id": "EMP024",
+      "evidence_type": "certificate",
+      "title": "데이터분석 준전문가(ADsP)",
+      "description": "(자격증) 데이터분석 준전문가(ADsP) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-06-24"
+    },
+    {
+      "evidence_id": 62,
+      "member_id": "EMP024",
+      "evidence_type": "patent",
+      "title": "고순도 정제 방법 (특허출원)",
+      "description": "(특허) 고순도 정제 방법 (특허출원) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-04-08"
+    },
+    {
+      "evidence_id": 63,
+      "member_id": "EMP024",
+      "evidence_type": "training",
+      "title": "OLED 소재 디자인 심화 과정",
+      "description": "(교육) OLED 소재 디자인 심화 과정 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-10-12"
+    },
+    {
+      "evidence_id": 64,
+      "member_id": "EMP024",
+      "evidence_type": "project",
+      "title": "OLED Encapsulation 신규 공정 개발",
+      "description": "(프로젝트) OLED Encapsulation 신규 공정 개발 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-07-14"
+    },
+    {
+      "evidence_id": 65,
+      "member_id": "EMP024",
+      "evidence_type": "patent",
+      "title": "박막 형성용 전구체 조성물 (등록특허)",
+      "description": "(특허) 박막 형성용 전구체 조성물 (등록특허) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-01-13"
+    },
+    {
+      "evidence_id": 66,
+      "member_id": "EMP025",
+      "evidence_type": "output",
+      "title": "기술 표준서 개정",
+      "description": "(산출물) 기술 표준서 개정 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-06-16"
+    },
+    {
+      "evidence_id": 67,
+      "member_id": "EMP025",
+      "evidence_type": "training",
+      "title": "사내 SK Univ. - Leadership Track",
+      "description": "(교육) 사내 SK Univ. - Leadership Track 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-03-10"
+    },
+    {
+      "evidence_id": 68,
+      "member_id": "EMP025",
+      "evidence_type": "project",
+      "title": "Canister Valve 적합성 표준화 TF",
+      "description": "(프로젝트) Canister Valve 적합성 표준화 TF 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-12-23"
+    },
+    {
+      "evidence_id": 69,
+      "member_id": "EMP025",
+      "evidence_type": "project",
+      "title": "Canister Valve 적합성 표준화 TF",
+      "description": "(프로젝트) Canister Valve 적합성 표준화 TF 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-04-01"
+    },
+    {
+      "evidence_id": 70,
+      "member_id": "EMP026",
+      "evidence_type": "project",
+      "title": "양산 수율 개선 6 Sigma 과제",
+      "description": "(프로젝트) 양산 수율 개선 6 Sigma 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-06-19"
+    },
+    {
+      "evidence_id": 71,
+      "member_id": "EMP026",
+      "evidence_type": "certificate",
+      "title": "Six Sigma Black Belt",
+      "description": "(자격증) Six Sigma Black Belt 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-07-08"
+    },
+    {
+      "evidence_id": 72,
+      "member_id": "EMP026",
+      "evidence_type": "project",
+      "title": "고객 Spec In 대응 과제",
+      "description": "(프로젝트) 고객 Spec In 대응 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-02-02"
+    },
+    {
+      "evidence_id": 73,
+      "member_id": "EMP026",
+      "evidence_type": "training",
+      "title": "통계적 공정관리(SPC) 실무",
+      "description": "(교육) 통계적 공정관리(SPC) 실무 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-02-09"
+    },
+    {
+      "evidence_id": 74,
+      "member_id": "EMP027",
+      "evidence_type": "project",
+      "title": "OLED Encapsulation 신규 공정 개발",
+      "description": "(프로젝트) OLED Encapsulation 신규 공정 개발 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-08-14"
+    },
+    {
+      "evidence_id": 75,
+      "member_id": "EMP027",
+      "evidence_type": "output",
+      "title": "기술 표준서 개정",
+      "description": "(산출물) 기술 표준서 개정 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-12-13"
+    },
+    {
+      "evidence_id": 76,
+      "member_id": "EMP027",
+      "evidence_type": "patent",
+      "title": "고순도 정제 방법 (특허출원)",
+      "description": "(특허) 고순도 정제 방법 (특허출원) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-05-27"
+    },
+    {
+      "evidence_id": 77,
+      "member_id": "EMP027",
+      "evidence_type": "training",
+      "title": "사내 SK Univ. - Leadership Track",
+      "description": "(교육) 사내 SK Univ. - Leadership Track 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-06-12"
+    },
+    {
+      "evidence_id": 78,
+      "member_id": "EMP028",
+      "evidence_type": "project",
+      "title": "분석 장비 신규 도입·이관 프로젝트",
+      "description": "(프로젝트) 분석 장비 신규 도입·이관 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-09-13"
+    },
+    {
+      "evidence_id": 79,
+      "member_id": "EMP028",
+      "evidence_type": "certificate",
+      "title": "산업안전기사",
+      "description": "(자격증) 산업안전기사 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-06-03"
+    },
+    {
+      "evidence_id": 80,
+      "member_id": "EMP028",
+      "evidence_type": "project",
+      "title": "OLED HTL 신규 합성 Recipe 도출 프로젝트",
+      "description": "(프로젝트) OLED HTL 신규 합성 Recipe 도출 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-12-05"
+    },
+    {
+      "evidence_id": 81,
+      "member_id": "EMP028",
+      "evidence_type": "certificate",
+      "title": "데이터분석 준전문가(ADsP)",
+      "description": "(자격증) 데이터분석 준전문가(ADsP) 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-04-16"
+    },
+    {
+      "evidence_id": 82,
+      "member_id": "EMP028",
+      "evidence_type": "project",
+      "title": "OLED HTL 신규 합성 Recipe 도출 프로젝트",
+      "description": "(프로젝트) OLED HTL 신규 합성 Recipe 도출 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-09-08"
+    },
+    {
+      "evidence_id": 83,
+      "member_id": "B2025060",
+      "evidence_type": "training",
+      "title": "Tableau/Power BI 데이터 시각화",
+      "description": "(교육) Tableau/Power BI 데이터 시각화 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-01-28"
+    },
+    {
+      "evidence_id": 84,
+      "member_id": "B2025060",
+      "evidence_type": "certificate",
+      "title": "화공기사",
+      "description": "(자격증) 화공기사 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-05-27"
+    },
+    {
+      "evidence_id": 85,
+      "member_id": "B2025060",
+      "evidence_type": "certificate",
+      "title": "ISO 9001 심사원",
+      "description": "(자격증) ISO 9001 심사원 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-02-12"
+    },
+    {
+      "evidence_id": 86,
+      "member_id": "B2025060",
+      "evidence_type": "certificate",
+      "title": "위험물기능사",
+      "description": "(자격증) 위험물기능사 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-11-26"
+    },
+    {
+      "evidence_id": 87,
+      "member_id": "B2025060",
+      "evidence_type": "training",
+      "title": "공정 안전 관리 직무 교육",
+      "description": "(교육) 공정 안전 관리 직무 교육 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-10-23"
+    },
+    {
+      "evidence_id": 88,
+      "member_id": "B2024060",
+      "evidence_type": "certificate",
+      "title": "위험물기능사",
+      "description": "(자격증) 위험물기능사 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-07-23"
+    },
+    {
+      "evidence_id": 89,
+      "member_id": "B2024060",
+      "evidence_type": "training",
+      "title": "MOC/MOI 변경 관리 교육",
+      "description": "(교육) MOC/MOI 변경 관리 교육 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-02-05"
+    },
+    {
+      "evidence_id": 90,
+      "member_id": "B2024060",
+      "evidence_type": "project",
+      "title": "OLED Encapsulation 신규 공정 개발",
+      "description": "(프로젝트) OLED Encapsulation 신규 공정 개발 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-06-02"
+    },
+    {
+      "evidence_id": 91,
+      "member_id": "B2024060",
+      "evidence_type": "certificate",
+      "title": "환경기사",
+      "description": "(자격증) 환경기사 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-06-22"
+    },
+    {
+      "evidence_id": 92,
+      "member_id": "EMP007",
+      "evidence_type": "project",
+      "title": "양산 수율 개선 6 Sigma 과제",
+      "description": "(프로젝트) 양산 수율 개선 6 Sigma 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-07-12"
+    },
+    {
+      "evidence_id": 93,
+      "member_id": "EMP007",
+      "evidence_type": "training",
+      "title": "통계적 공정관리(SPC) 실무",
+      "description": "(교육) 통계적 공정관리(SPC) 실무 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-12-07"
+    },
+    {
+      "evidence_id": 94,
+      "member_id": "EMP007",
+      "evidence_type": "certificate",
+      "title": "TRIZ Level 3",
+      "description": "(자격증) TRIZ Level 3 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-03-17"
+    },
+    {
+      "evidence_id": 95,
+      "member_id": "EMP007",
+      "evidence_type": "project",
+      "title": "CMMS 도입·정비 데이터 체계화 과제",
+      "description": "(프로젝트) CMMS 도입·정비 데이터 체계화 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2026-07-14"
+    },
+    {
+      "evidence_id": 96,
+      "member_id": "EMP007",
+      "evidence_type": "project",
+      "title": "신규 Customer Application 평가 프로젝트",
+      "description": "(프로젝트) 신규 Customer Application 평가 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-03-26"
+    },
+    {
+      "evidence_id": 97,
+      "member_id": "EMP008",
+      "evidence_type": "project",
+      "title": "Pilot Line CIP 자동화 프로젝트",
+      "description": "(프로젝트) Pilot Line CIP 자동화 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-05-26"
+    },
+    {
+      "evidence_id": 98,
+      "member_id": "EMP008",
+      "evidence_type": "project",
+      "title": "신규 Customer Application 평가 프로젝트",
+      "description": "(프로젝트) 신규 Customer Application 평가 프로젝트 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-02-09"
+    },
+    {
+      "evidence_id": 99,
+      "member_id": "EMP008",
+      "evidence_type": "output",
+      "title": "Best Practice 사내 발표",
+      "description": "(산출물) Best Practice 사내 발표 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2024-03-27"
+    },
+    {
+      "evidence_id": 100,
+      "member_id": "EMP008",
+      "evidence_type": "project",
+      "title": "양산 수율 개선 6 Sigma 과제",
+      "description": "(프로젝트) 양산 수율 개선 6 Sigma 과제 관련 활동·성과.",
+      "file_path": null,
+      "created_date": "2025-08-10"
+    }
+  ],
+  "evidence_skill_link": [
+    {
+      "evidence_id": 1,
+      "skill_id": 75
+    },
+    {
+      "evidence_id": 1,
+      "skill_id": 76
+    },
+    {
+      "evidence_id": 1,
+      "skill_id": 52
+    },
+    {
+      "evidence_id": 2,
+      "skill_id": 49
+    },
+    {
+      "evidence_id": 2,
+      "skill_id": 68
+    },
+    {
+      "evidence_id": 3,
+      "skill_id": 52
+    },
+    {
+      "evidence_id": 3,
+      "skill_id": 68
+    },
+    {
+      "evidence_id": 3,
+      "skill_id": 85
+    },
+    {
+      "evidence_id": 4,
+      "skill_id": 63
+    },
+    {
+      "evidence_id": 4,
+      "skill_id": 80
+    },
+    {
+      "evidence_id": 4,
+      "skill_id": 60
+    },
+    {
+      "evidence_id": 5,
+      "skill_id": 74
+    },
+    {
+      "evidence_id": 6,
+      "skill_id": 75
+    },
+    {
+      "evidence_id": 6,
+      "skill_id": 69
+    },
+    {
+      "evidence_id": 6,
+      "skill_id": 81
+    },
+    {
+      "evidence_id": 7,
+      "skill_id": 86
+    },
+    {
+      "evidence_id": 8,
+      "skill_id": 80
+    },
+    {
+      "evidence_id": 8,
+      "skill_id": 76
+    },
+    {
+      "evidence_id": 9,
+      "skill_id": 51
+    },
+    {
+      "evidence_id": 9,
+      "skill_id": 15
+    },
+    {
+      "evidence_id": 9,
+      "skill_id": 76
+    },
+    {
+      "evidence_id": 10,
+      "skill_id": 77
+    },
+    {
+      "evidence_id": 10,
+      "skill_id": 8
+    },
+    {
+      "evidence_id": 10,
+      "skill_id": 75
+    },
+    {
+      "evidence_id": 11,
+      "skill_id": 63
+    },
+    {
+      "evidence_id": 11,
+      "skill_id": 73
+    },
+    {
+      "evidence_id": 11,
+      "skill_id": 74
+    },
+    {
+      "evidence_id": 12,
+      "skill_id": 82
+    },
+    {
+      "evidence_id": 13,
+      "skill_id": 15
+    },
+    {
+      "evidence_id": 13,
+      "skill_id": 72
+    },
+    {
+      "evidence_id": 13,
+      "skill_id": 73
+    },
+    {
+      "evidence_id": 14,
+      "skill_id": 81
+    },
+    {
+      "evidence_id": 14,
+      "skill_id": 80
+    },
+    {
+      "evidence_id": 14,
+      "skill_id": 75
+    },
+    {
+      "evidence_id": 15,
+      "skill_id": 54
+    },
+    {
+      "evidence_id": 15,
+      "skill_id": 81
+    },
+    {
+      "evidence_id": 16,
+      "skill_id": 80
+    },
+    {
+      "evidence_id": 16,
+      "skill_id": 83
+    },
+    {
+      "evidence_id": 16,
+      "skill_id": 85
+    },
+    {
+      "evidence_id": 17,
+      "skill_id": 83
+    },
+    {
+      "evidence_id": 18,
+      "skill_id": 84
+    },
+    {
+      "evidence_id": 19,
+      "skill_id": 81
+    },
+    {
+      "evidence_id": 20,
+      "skill_id": 81
+    },
+    {
+      "evidence_id": 21,
+      "skill_id": 67
+    },
+    {
+      "evidence_id": 21,
+      "skill_id": 85
+    },
+    {
+      "evidence_id": 22,
+      "skill_id": 21
+    },
+    {
+      "evidence_id": 23,
+      "skill_id": 21
+    },
+    {
+      "evidence_id": 24,
+      "skill_id": 42
+    },
+    {
+      "evidence_id": 25,
+      "skill_id": 28
+    },
+    {
+      "evidence_id": 25,
+      "skill_id": 54
+    },
+    {
+      "evidence_id": 25,
+      "skill_id": 42
+    },
+    {
+      "evidence_id": 26,
+      "skill_id": 58
+    },
+    {
+      "evidence_id": 26,
+      "skill_id": 38
+    },
+    {
+      "evidence_id": 26,
+      "skill_id": 56
+    },
+    {
+      "evidence_id": 27,
+      "skill_id": 58
+    },
+    {
+      "evidence_id": 28,
+      "skill_id": 2
+    },
+    {
+      "evidence_id": 28,
+      "skill_id": 3
+    },
+    {
+      "evidence_id": 29,
+      "skill_id": 112
+    },
+    {
+      "evidence_id": 29,
+      "skill_id": 13
+    },
+    {
+      "evidence_id": 29,
+      "skill_id": 58
+    },
+    {
+      "evidence_id": 30,
+      "skill_id": 22
+    },
+    {
+      "evidence_id": 30,
+      "skill_id": 62
+    },
+    {
+      "evidence_id": 31,
+      "skill_id": 52
+    },
+    {
+      "evidence_id": 32,
+      "skill_id": 52
+    },
+    {
+      "evidence_id": 32,
+      "skill_id": 15
+    },
+    {
+      "evidence_id": 32,
+      "skill_id": 55
+    },
+    {
+      "evidence_id": 33,
+      "skill_id": 13
+    },
+    {
+      "evidence_id": 34,
+      "skill_id": 55
+    },
+    {
+      "evidence_id": 34,
+      "skill_id": 13
+    },
+    {
+      "evidence_id": 34,
+      "skill_id": 18
+    },
+    {
+      "evidence_id": 35,
+      "skill_id": 7
+    },
+    {
+      "evidence_id": 36,
+      "skill_id": 69
+    },
+    {
+      "evidence_id": 37,
+      "skill_id": 99
+    },
+    {
+      "evidence_id": 37,
+      "skill_id": 71
+    },
+    {
+      "evidence_id": 37,
+      "skill_id": 80
+    },
+    {
+      "evidence_id": 38,
+      "skill_id": 73
+    },
+    {
+      "evidence_id": 39,
+      "skill_id": 25
+    },
+    {
+      "evidence_id": 40,
+      "skill_id": 80
+    },
+    {
+      "evidence_id": 40,
+      "skill_id": 57
+    },
+    {
+      "evidence_id": 40,
+      "skill_id": 6
+    },
+    {
+      "evidence_id": 41,
+      "skill_id": 71
+    },
+    {
+      "evidence_id": 41,
+      "skill_id": 59
+    },
+    {
+      "evidence_id": 42,
+      "skill_id": 59
+    },
+    {
+      "evidence_id": 42,
+      "skill_id": 1
+    },
+    {
+      "evidence_id": 42,
+      "skill_id": 25
+    },
+    {
+      "evidence_id": 43,
+      "skill_id": 1
+    },
+    {
+      "evidence_id": 43,
+      "skill_id": 59
+    },
+    {
+      "evidence_id": 43,
+      "skill_id": 39
+    },
+    {
+      "evidence_id": 44,
+      "skill_id": 23
+    },
+    {
+      "evidence_id": 45,
+      "skill_id": 23
+    },
+    {
+      "evidence_id": 45,
+      "skill_id": 53
+    },
+    {
+      "evidence_id": 45,
+      "skill_id": 69
+    },
+    {
+      "evidence_id": 46,
+      "skill_id": 48
+    },
+    {
+      "evidence_id": 46,
+      "skill_id": 1
+    },
+    {
+      "evidence_id": 46,
+      "skill_id": 59
+    },
+    {
+      "evidence_id": 47,
+      "skill_id": 36
+    },
+    {
+      "evidence_id": 47,
+      "skill_id": 20
+    },
+    {
+      "evidence_id": 47,
+      "skill_id": 13
+    },
+    {
+      "evidence_id": 48,
+      "skill_id": 36
+    },
+    {
+      "evidence_id": 48,
+      "skill_id": 35
+    },
+    {
+      "evidence_id": 48,
+      "skill_id": 12
+    },
+    {
+      "evidence_id": 49,
+      "skill_id": 13
+    },
+    {
+      "evidence_id": 49,
+      "skill_id": 81
+    },
+    {
+      "evidence_id": 49,
+      "skill_id": 12
+    },
+    {
+      "evidence_id": 50,
+      "skill_id": 6
+    },
+    {
+      "evidence_id": 50,
+      "skill_id": 13
+    },
+    {
+      "evidence_id": 51,
+      "skill_id": 76
+    },
+    {
+      "evidence_id": 51,
+      "skill_id": 43
+    },
+    {
+      "evidence_id": 51,
+      "skill_id": 38
+    },
+    {
+      "evidence_id": 52,
+      "skill_id": 40
+    },
+    {
+      "evidence_id": 52,
+      "skill_id": 38
+    },
+    {
+      "evidence_id": 53,
+      "skill_id": 24
+    },
+    {
+      "evidence_id": 53,
+      "skill_id": 72
+    },
+    {
+      "evidence_id": 54,
+      "skill_id": 33
+    },
+    {
+      "evidence_id": 54,
+      "skill_id": 85
+    },
+    {
+      "evidence_id": 54,
+      "skill_id": 64
+    },
+    {
+      "evidence_id": 55,
+      "skill_id": 4
+    },
+    {
+      "evidence_id": 55,
+      "skill_id": 118
+    },
+    {
+      "evidence_id": 56,
+      "skill_id": 58
+    },
+    {
+      "evidence_id": 57,
+      "skill_id": 32
+    },
+    {
+      "evidence_id": 57,
+      "skill_id": 44
+    },
+    {
+      "evidence_id": 57,
+      "skill_id": 58
+    },
+    {
+      "evidence_id": 58,
+      "skill_id": 44
+    },
+    {
+      "evidence_id": 58,
+      "skill_id": 63
+    },
+    {
+      "evidence_id": 58,
+      "skill_id": 12
+    },
+    {
+      "evidence_id": 59,
+      "skill_id": 63
+    },
+    {
+      "evidence_id": 60,
+      "skill_id": 92
+    },
+    {
+      "evidence_id": 60,
+      "skill_id": 41
+    },
+    {
+      "evidence_id": 60,
+      "skill_id": 63
+    },
+    {
+      "evidence_id": 61,
+      "skill_id": 39
+    },
+    {
+      "evidence_id": 61,
+      "skill_id": 36
+    },
+    {
+      "evidence_id": 62,
+      "skill_id": 98
+    },
+    {
+      "evidence_id": 62,
+      "skill_id": 99
+    },
+    {
+      "evidence_id": 62,
+      "skill_id": 101
+    },
+    {
+      "evidence_id": 63,
+      "skill_id": 39
+    },
+    {
+      "evidence_id": 63,
+      "skill_id": 101
+    },
+    {
+      "evidence_id": 63,
+      "skill_id": 125
+    },
+    {
+      "evidence_id": 64,
+      "skill_id": 68
+    },
+    {
+      "evidence_id": 65,
+      "skill_id": 21
+    },
+    {
+      "evidence_id": 65,
+      "skill_id": 36
+    },
+    {
+      "evidence_id": 65,
+      "skill_id": 39
+    },
+    {
+      "evidence_id": 66,
+      "skill_id": 24
+    },
+    {
+      "evidence_id": 66,
+      "skill_id": 84
+    },
+    {
+      "evidence_id": 67,
+      "skill_id": 101
+    },
+    {
+      "evidence_id": 67,
+      "skill_id": 84
+    },
+    {
+      "evidence_id": 68,
+      "skill_id": 17
+    },
+    {
+      "evidence_id": 68,
+      "skill_id": 24
+    },
+    {
+      "evidence_id": 68,
+      "skill_id": 84
+    },
+    {
+      "evidence_id": 69,
+      "skill_id": 102
+    },
+    {
+      "evidence_id": 69,
+      "skill_id": 28
+    },
+    {
+      "evidence_id": 70,
+      "skill_id": 81
+    },
+    {
+      "evidence_id": 71,
+      "skill_id": 111
+    },
+    {
+      "evidence_id": 71,
+      "skill_id": 46
+    },
+    {
+      "evidence_id": 72,
+      "skill_id": 27
+    },
+    {
+      "evidence_id": 73,
+      "skill_id": 81
+    },
+    {
+      "evidence_id": 74,
+      "skill_id": 126
+    },
+    {
+      "evidence_id": 74,
+      "skill_id": 118
+    },
+    {
+      "evidence_id": 74,
+      "skill_id": 40
+    },
+    {
+      "evidence_id": 75,
+      "skill_id": 82
+    },
+    {
+      "evidence_id": 75,
+      "skill_id": 73
+    },
+    {
+      "evidence_id": 75,
+      "skill_id": 118
+    },
+    {
+      "evidence_id": 76,
+      "skill_id": 73
+    },
+    {
+      "evidence_id": 77,
+      "skill_id": 118
+    },
+    {
+      "evidence_id": 77,
+      "skill_id": 33
+    },
+    {
+      "evidence_id": 78,
+      "skill_id": 16
+    },
+    {
+      "evidence_id": 79,
+      "skill_id": 16
+    },
+    {
+      "evidence_id": 79,
+      "skill_id": 36
+    },
+    {
+      "evidence_id": 80,
+      "skill_id": 14
+    },
+    {
+      "evidence_id": 81,
+      "skill_id": 126
+    },
+    {
+      "evidence_id": 81,
+      "skill_id": 90
+    },
+    {
+      "evidence_id": 82,
+      "skill_id": 126
+    },
+    {
+      "evidence_id": 83,
+      "skill_id": 12
+    },
+    {
+      "evidence_id": 83,
+      "skill_id": 16
+    },
+    {
+      "evidence_id": 83,
+      "skill_id": 55
+    },
+    {
+      "evidence_id": 84,
+      "skill_id": 65
+    },
+    {
+      "evidence_id": 85,
+      "skill_id": 73
+    },
+    {
+      "evidence_id": 85,
+      "skill_id": 65
+    },
+    {
+      "evidence_id": 85,
+      "skill_id": 12
+    },
+    {
+      "evidence_id": 86,
+      "skill_id": 50
+    },
+    {
+      "evidence_id": 86,
+      "skill_id": 55
+    },
+    {
+      "evidence_id": 86,
+      "skill_id": 73
+    },
+    {
+      "evidence_id": 87,
+      "skill_id": 50
+    },
+    {
+      "evidence_id": 88,
+      "skill_id": 79
+    },
+    {
+      "evidence_id": 88,
+      "skill_id": 80
+    },
+    {
+      "evidence_id": 88,
+      "skill_id": 17
+    },
+    {
+      "evidence_id": 89,
+      "skill_id": 12
+    },
+    {
+      "evidence_id": 89,
+      "skill_id": 66
+    },
+    {
+      "evidence_id": 90,
+      "skill_id": 80
+    },
+    {
+      "evidence_id": 91,
+      "skill_id": 79
+    },
+    {
+      "evidence_id": 91,
+      "skill_id": 19
+    },
+    {
+      "evidence_id": 91,
+      "skill_id": 12
+    },
+    {
+      "evidence_id": 92,
+      "skill_id": 74
+    },
+    {
+      "evidence_id": 92,
+      "skill_id": 63
+    },
+    {
+      "evidence_id": 93,
+      "skill_id": 75
+    },
+    {
+      "evidence_id": 93,
+      "skill_id": 67
+    },
+    {
+      "evidence_id": 94,
+      "skill_id": 75
+    },
+    {
+      "evidence_id": 94,
+      "skill_id": 77
+    },
+    {
+      "evidence_id": 94,
+      "skill_id": 13
+    },
+    {
+      "evidence_id": 95,
+      "skill_id": 81
+    },
+    {
+      "evidence_id": 96,
+      "skill_id": 72
+    },
+    {
+      "evidence_id": 96,
+      "skill_id": 13
+    },
+    {
+      "evidence_id": 96,
+      "skill_id": 18
+    },
+    {
+      "evidence_id": 97,
+      "skill_id": 75
+    },
+    {
+      "evidence_id": 97,
+      "skill_id": 77
+    },
+    {
+      "evidence_id": 97,
+      "skill_id": 54
+    },
+    {
+      "evidence_id": 98,
+      "skill_id": 19
+    },
+    {
+      "evidence_id": 99,
+      "skill_id": 79
+    },
+    {
+      "evidence_id": 99,
+      "skill_id": 18
+    },
+    {
+      "evidence_id": 99,
+      "skill_id": 75
+    },
+    {
+      "evidence_id": 100,
+      "skill_id": 77
+    },
+    {
+      "evidence_id": 100,
+      "skill_id": 19
+    },
+    {
+      "evidence_id": 100,
+      "skill_id": 73
+    }
+  ]
+}
