@@ -7,7 +7,7 @@ export default function CommitteePage() {
   return (
     <StageAssess
       title="Committee"
-      desc="Skill Committee 최종 심의 — 확정 시 최종 결과(skill_profile)에 반영됩니다"
+      desc="최종 심의 결과를 확정하고 Skill Profile에 반영합니다."
       stage="committee"
       members={evaluableMemberOptions()}
       confirmLabel="Committee 최종 확정"

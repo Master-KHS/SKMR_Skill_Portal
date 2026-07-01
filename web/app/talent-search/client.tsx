@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { PageHeader, Card } from "@/components/ui";
 import type { SearchResultRow } from "@/lib/search";
 
@@ -22,14 +23,15 @@ export function TalentSearchClient({ facets }: { facets: Facets }) {
   const [team, setTeam] = useState("");
   const [jobType, setJobType] = useState("");
   const [roleLevel, setRoleLevel] = useState("");
+  const [position, setPosition] = useState("");
   const [conds, setConds] = useState<SkillCond[]>([{ skill_id: "", min_level: 2 }]);
   const [rows, setRows] = useState<SearchResultRow[]>([]);
   const [count, setCount] = useState(0);
 
   const run = useCallback(async () => {
     const skills = conds
-      .filter((c) => c.skill_id !== "")
-      .map((c) => ({ skill_id: Number(c.skill_id), min_level: c.min_level }));
+      .filter((cond) => cond.skill_id !== "")
+      .map((cond) => ({ skill_id: Number(cond.skill_id), min_level: cond.min_level }));
     const res = await fetch("/api/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -38,88 +40,144 @@ export function TalentSearchClient({ facets }: { facets: Facets }) {
         team: team || undefined,
         job_type: jobType || undefined,
         role_level: roleLevel || undefined,
+        position: position || undefined,
         skills,
       }),
     });
     const data = await res.json();
-    setRows(data.results);
-    setCount(data.count);
-  }, [division, team, jobType, roleLevel, conds]);
+    setRows(data.results ?? []);
+    setCount(data.count ?? 0);
+  }, [conds, division, jobType, position, roleLevel, team]);
 
   useEffect(() => {
     run();
   }, [run]);
 
-  const sel = "border border-border-soft bg-white px-2 py-1.5 text-sm w-full";
+  const activeConditions = useMemo(
+    () => conds.filter((cond) => cond.skill_id !== ""),
+    [conds],
+  );
+
+  function exportCsv() {
+    const header = ["사번", "이름", "담당", "팀", "R/L", "직책", "직종", "보유 Skill", "평균 Level"];
+    const body = rows.map((row) => [
+      row.employee_id,
+      row.name,
+      row.division ?? "",
+      row.team ?? "",
+      row.role_level ?? "",
+      row.position ?? "",
+      row.job_type ?? "",
+      String(row.n_skills),
+      String(row.avg_level),
+    ]);
+    const csv = [header, ...body]
+      .map((line) => line.map((cell) => `"${String(cell).replaceAll("\"", "\"\"")}"`).join(","))
+      .join("\r\n");
+    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "talent_search.csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div>
-      <PageHeader title="Talent Search" desc="다중 조건 필터로 인재 검색 (Skill 보유 + Level + 조직)" />
+      <PageHeader title="Talent Search" desc="다양한 조건 필터로 인재를 검색합니다." />
 
       <Card title="검색 조건" className="mb-4">
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-5 gap-3 mb-4">
           <Filter label="담당" value={division} onChange={setDivision} opts={facets.divisions} />
           <Filter label="팀" value={team} onChange={setTeam} opts={facets.teams} />
           <Filter label="직종" value={jobType} onChange={setJobType} opts={facets.jobTypes} />
           <Filter label="R/L" value={roleLevel} onChange={setRoleLevel} opts={facets.roleLevels} />
+          <Filter label="직책" value={position} onChange={setPosition} opts={facets.positions} />
         </div>
 
         <div className="text-xs text-text-muted mb-2">
-          보유 Skill 조건 (AND 결합 — 모두 만족하는 인원만 추출)
+          보유 Skill 조건은 AND 결합이며, 입력한 모든 조건을 만족하는 인원만 검색합니다.
         </div>
-        {conds.map((c, i) => (
-          <div key={i} className="flex gap-2 mb-2">
+        {conds.map((cond, index) => (
+          <div key={index} className="flex gap-2 mb-2">
             <select
-              className={sel}
-              value={c.skill_id}
-              onChange={(e) => {
+              className="border border-border-soft bg-white px-2 py-1.5 text-sm w-full"
+              value={cond.skill_id}
+              onChange={(event) => {
                 const next = [...conds];
-                next[i].skill_id = e.target.value === "" ? "" : Number(e.target.value);
+                next[index].skill_id = event.target.value === "" ? "" : Number(event.target.value);
                 setConds(next);
               }}
             >
               <option value="">(스킬 선택)</option>
-              {facets.skills.map((s) => (
-                <option key={s.id} value={s.id}>
-                  #{String(s.id).padStart(3, "0")} {s.name}
+              {facets.skills.map((skill) => (
+                <option key={skill.id} value={skill.id}>
+                  #{String(skill.id).padStart(3, "0")} {skill.name}
                 </option>
               ))}
             </select>
             <select
               className="border border-border-soft bg-white px-2 py-1.5 text-sm w-28"
-              value={c.min_level}
-              onChange={(e) => {
+              value={cond.min_level}
+              onChange={(event) => {
                 const next = [...conds];
-                next[i].min_level = Number(e.target.value);
+                next[index].min_level = Number(event.target.value);
                 setConds(next);
               }}
             >
-              {[1, 2, 3, 4].map((l) => (
-                <option key={l} value={l}>
-                  최소 L{l}
+              {[1, 2, 3, 4].map((level) => (
+                <option key={level} value={level}>
+                  최소 L{level}
                 </option>
               ))}
             </select>
             <button
               className="border border-sk-red text-sk-red px-3 text-sm"
-              onClick={() => setConds(conds.filter((_, j) => j !== i))}
+              onClick={() => setConds(conds.filter((_, i) => i !== index))}
             >
               삭제
             </button>
           </div>
         ))}
-        <button
-          className="border border-border-soft px-3 py-1.5 text-sm text-text-muted"
-          onClick={() => setConds([...conds, { skill_id: "", min_level: 2 }])}
-        >
-          + Skill 조건 추가
-        </button>
+        <div className="flex gap-2">
+          <button
+            className="border border-border-soft px-3 py-1.5 text-sm text-text-muted"
+            onClick={() => setConds([...conds, { skill_id: "", min_level: 2 }])}
+          >
+            + Skill 조건 추가
+          </button>
+          <button
+            className="border border-border-soft px-3 py-1.5 text-sm text-text-muted"
+            onClick={() => setConds([{ skill_id: "", min_level: 2 }])}
+          >
+            조건 초기화
+          </button>
+        </div>
       </Card>
 
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-sm font-semibold">
-          검색 결과 — <span className="text-sk-orange">{count}명</span>
-        </h2>
+        <div>
+          <h2 className="text-sm font-semibold">
+            검색 결과 · <span className="text-sk-orange">{count}명</span>
+          </h2>
+          {activeConditions.length > 0 && (
+            <div className="text-xs text-text-muted mt-1">
+              Skill 조건:{" "}
+              {activeConditions
+                .map((cond) => {
+                  const skill = facets.skills.find((item) => item.id === cond.skill_id);
+                  return `${skill?.name ?? `#${cond.skill_id}`} ≥ L${cond.min_level}`;
+                })
+                .join(" · ")}
+            </div>
+          )}
+        </div>
+        {rows.length > 0 && (
+          <button className="border border-border-soft px-3 py-1.5 text-sm" onClick={exportCsv}>
+            검색 결과 CSV 다운로드
+          </button>
+        )}
       </div>
 
       <Card>
@@ -135,21 +193,23 @@ export function TalentSearchClient({ facets }: { facets: Facets }) {
                 <th className="py-2 pr-3">팀</th>
                 <th className="py-2 pr-3">R/L</th>
                 <th className="py-2 pr-3">직책</th>
+                <th className="py-2 pr-3">직종</th>
                 <th className="py-2 pr-3 text-right">보유 Skill</th>
                 <th className="py-2 text-right">평균 Level</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.employee_id} className="border-b border-border-soft">
-                  <td className="py-2 pr-3 font-mono text-xs">{r.employee_id}</td>
-                  <td className="py-2 pr-3 font-medium">{r.name}</td>
-                  <td className="py-2 pr-3">{r.division}</td>
-                  <td className="py-2 pr-3">{r.team}</td>
-                  <td className="py-2 pr-3">{r.role_level}</td>
-                  <td className="py-2 pr-3">{r.position}</td>
-                  <td className="py-2 pr-3 text-right">{r.n_skills}</td>
-                  <td className="py-2 text-right">{r.avg_level}</td>
+              {rows.map((row) => (
+                <tr key={row.employee_id} className="border-b border-border-soft">
+                  <td className="py-2 pr-3 font-mono text-xs">{row.employee_id}</td>
+                  <td className="py-2 pr-3 font-medium">{row.name}</td>
+                  <td className="py-2 pr-3">{row.division}</td>
+                  <td className="py-2 pr-3">{row.team}</td>
+                  <td className="py-2 pr-3">{row.role_level}</td>
+                  <td className="py-2 pr-3">{row.position}</td>
+                  <td className="py-2 pr-3">{row.job_type}</td>
+                  <td className="py-2 pr-3 text-right">{row.n_skills}</td>
+                  <td className="py-2 text-right">{row.avg_level}</td>
                 </tr>
               ))}
             </tbody>
@@ -180,9 +240,9 @@ function Filter({
         onChange={(e) => onChange(e.target.value)}
       >
         <option value="">전체</option>
-        {opts.map((o) => (
-          <option key={o} value={o}>
-            {o}
+        {opts.map((option) => (
+          <option key={option} value={option}>
+            {option}
           </option>
         ))}
       </select>

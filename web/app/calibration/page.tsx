@@ -7,7 +7,7 @@ export default function CalibrationPage() {
   return (
     <StageAssess
       title="Calibration"
-      desc="리더 진단 결과를 조직 간 눈높이로 보정하여 확정합니다 (DB 영구 저장)"
+      desc="리더 진단 결과를 비교하고 조직 기준에 맞게 보정합니다."
       stage="calibration"
       members={evaluableMemberOptions()}
       confirmLabel="Calibration 확정"
