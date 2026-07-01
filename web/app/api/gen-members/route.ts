@@ -42,9 +42,30 @@ export async function POST(req: NextRequest) {
 
   const skillIds = query<{ skill_id: number }>(`SELECT skill_id FROM skill`).map((r) => r.skill_id);
   const current = (query<{ c: number }>(`SELECT COUNT(*) c FROM member`)[0]?.c) ?? 0;
+
+  // 목표보다 많으면 생성분(G로 시작)을 감축해서 목표에 맞춤 (원본 인원은 보존)
+  if (goal < current) {
+    const removeN = current - goal;
+    const gIds = query<{ employee_id: string }>(
+      `SELECT employee_id FROM member WHERE employee_id LIKE 'G%' ORDER BY employee_id DESC LIMIT ?`, [removeN]
+    ).map((r) => r.employee_id);
+    tx(() => {
+      for (const id of gIds) {
+        run(`DELETE FROM skill_profile WHERE member_id=?`, [id]);
+        run(`DELETE FROM assessment WHERE member_id=?`, [id]);
+        run(`DELETE FROM member WHERE employee_id=?`, [id]);
+      }
+    });
+    const total = (query<{ c: number }>(`SELECT COUNT(*) c FROM member`)[0]?.c) ?? 0;
+    const msg = gIds.length < removeN
+      ? `생성 인원만 감축 가능(원본 보존). 총 ${total}명 — 목표(${goal})보다 원본이 많으면 더 못 줄입니다.`
+      : `목표에 맞춰 ${gIds.length}명 감축 · 총 ${total}명`;
+    return NextResponse.json({ ok: true, added: -gIds.length, total, message: msg });
+  }
+
   const toAdd = Math.max(goal - current, 0);
   if (toAdd === 0) {
-    return NextResponse.json({ ok: true, added: 0, total: current, message: "이미 목표 인원 이상입니다." });
+    return NextResponse.json({ ok: true, added: 0, total: current, message: "이미 목표 인원입니다." });
   }
 
   // 사번 시작 번호
