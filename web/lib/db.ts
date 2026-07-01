@@ -64,6 +64,19 @@ CREATE TABLE IF NOT EXISTS evidence (
 CREATE TABLE IF NOT EXISTS evidence_skill_link (
   evidence_id INTEGER, skill_id INTEGER, PRIMARY KEY (evidence_id, skill_id)
 );
+-- 발령 이력 (SKILL 챗봇 추천 근거)
+CREATE TABLE IF NOT EXISTS appointment (
+  appt_id INTEGER PRIMARY KEY AUTOINCREMENT, member_id TEXT, appt_date TEXT,
+  from_team TEXT, to_team TEXT, role TEXT, note TEXT
+);
+-- 인재별 직무기술/경력요약 문서 (비정형, RAG 근거)
+CREATE TABLE IF NOT EXISTS member_doc (
+  member_id TEXT PRIMARY KEY, job_title TEXT, summary TEXT, responsibilities TEXT
+);
+-- 시스템 참고 문서 (제도/평가 맥락 등, RAG 근거)
+CREATE TABLE IF NOT EXISTS reference_doc (
+  doc_id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, category TEXT, content TEXT
+);
 `;
 
 type Row = Record<string, unknown>;
