@@ -2,33 +2,9 @@
 import "server-only";
 import { getMembers, getSkillProfiles, getSkills } from "./data";
 import type { Member, Skill } from "./types";
+import type { SearchFilters, SearchResultRow } from "./assistant-types";
 
-export interface SkillCondition {
-  skill_id: number;
-  min_level: number;
-}
-
-export interface SearchFilters {
-  division?: string;
-  team?: string;
-  job_type?: string;
-  role_level?: string;
-  position?: string;
-  skills?: SkillCondition[];
-}
-
-export interface SearchResultRow {
-  employee_id: string;
-  name: string;
-  division: string | null;
-  team: string | null;
-  role_level: string | null;
-  position: string | null;
-  job_type: string | null;
-  n_skills: number;
-  avg_level: number;
-  matched: { skill_id: number; skill_name: string; level: number }[];
-}
+export type { SkillCondition, SearchFilters, SearchResultRow } from "./assistant-types";
 
 function skillMap(): Map<number, Skill> {
   return new Map(getSkills().map((s) => [s.skill_id, s]));
