@@ -11,6 +11,7 @@ export default function LeaderAssessPage() {
       stage="leader"
       members={evaluableMemberOptions()}
       confirmLabel="리더 확정"
+      scope="team"
     />
   );
 }

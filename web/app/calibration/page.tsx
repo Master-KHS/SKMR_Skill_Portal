@@ -11,6 +11,7 @@ export default function CalibrationPage() {
       stage="calibration"
       members={evaluableMemberOptions()}
       confirmLabel="Calibration 확정"
+      scope="division"
     />
   );
 }

@@ -16,7 +16,7 @@ const PERSONAS: PersonaCode[] = [
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {
-  const { persona, setPersona } = usePersona();
+  const { persona, setPersona, members, currentMember, setCurrentMemberId } = usePersona();
   const pathname = usePathname();
   const nav = visibleNav(persona);
 
@@ -76,20 +76,40 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="h-3 w-1 bg-sk-red inline-block" />
             <span className="text-text-muted">Skill 관리 시스템</span>
           </div>
-          <label className="flex items-center gap-2 text-sm">
-            <span className="text-text-muted text-xs">역할</span>
-            <select
-              value={persona}
-              onChange={(e) => setPersona(e.target.value as PersonaCode)}
-              className="border border-border-soft bg-white px-2.5 py-1.5 text-sm text-text-main focus:border-sk-red focus:outline-none"
-            >
-              {PERSONAS.map((p) => (
-                <option key={p} value={p}>
-                  {PERSONA_LABELS[p]}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-sm">
+              <span className="text-text-muted text-xs">권한</span>
+              <select
+                value={persona}
+                onChange={(e) => setPersona(e.target.value as PersonaCode)}
+                className="border border-border-soft bg-white px-2.5 py-1.5 text-sm text-text-main focus:border-sk-red focus:outline-none"
+              >
+                {PERSONAS.map((p) => (
+                  <option key={p} value={p}>
+                    {PERSONA_LABELS[p]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <span className="text-text-muted text-xs">사람</span>
+              {members.length === 0 ? (
+                <span className="text-xs text-warning border border-warning px-2 py-1.5">매핑된 인원 없음</span>
+              ) : (
+                <select
+                  value={currentMember?.employee_id ?? ""}
+                  onChange={(e) => setCurrentMemberId(e.target.value)}
+                  className="border border-border-soft bg-white px-2.5 py-1.5 text-sm text-text-main focus:border-sk-red focus:outline-none"
+                >
+                  {members.map((m) => (
+                    <option key={m.employee_id} value={m.employee_id}>
+                      {m.name} ({m.team ?? m.division} · {m.role_level})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </label>
+          </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>

@@ -11,6 +11,7 @@ export default function CommitteePage() {
       stage="committee"
       members={evaluableMemberOptions()}
       confirmLabel="Committee 최종 확정"
+      scope="none"
     />
   );
 }

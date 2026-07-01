@@ -1,6 +1,8 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { PageHeader, Card, Badge, Stat } from "@/components/ui";
+import { usePersona } from "@/components/PersonaContext";
+import type { MemberOption } from "@/lib/member-options";
 
 interface Prof { skill_id: number; current_level: number; target_level: number | null; last_assessed_date: string | null; skill_name: string; is_critical: number; sub_family_name: string; family_name: string }
 interface Gap { skill_id: number; skill_name: string; target_level: number; is_core: number; current_level: number; gap: number }
@@ -39,8 +41,27 @@ function Radar({ data }: { data: { sub_family_name: string; avg_lv: number }[] }
   );
 }
 
-export function SkillProfileClient({ members }: { members: { id: string; label: string }[] }) {
-  const [memberId, setMemberId] = useState(members[0]?.id ?? "");
+// 원본 skill_profile.py 범위 규칙: employee→본인만, team_leader→본인 팀, 그 외(hr_admin 등)→전체 자유 선택.
+export function SkillProfileClient({ members }: { members: MemberOption[] }) {
+  const { persona, currentMember } = usePersona();
+
+  const visible = useMemo(() => {
+    if (persona === "employee" && currentMember) {
+      return members.filter((m) => m.id === currentMember.employee_id);
+    }
+    if (persona === "team_leader" && currentMember) {
+      return members.filter((m) => m.team === currentMember.team);
+    }
+    return members;
+  }, [members, persona, currentMember]);
+
+  const [memberId, setMemberId] = useState(currentMember?.employee_id ?? visible[0]?.id ?? "");
+  useEffect(() => {
+    const preferred = currentMember && visible.find((m) => m.id === currentMember.employee_id) ? currentMember.employee_id : visible[0]?.id ?? "";
+    setMemberId(preferred);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+
   const [d, setD] = useState<Data | null>(null);
 
   const load = useCallback(async () => {
@@ -60,9 +81,13 @@ export function SkillProfileClient({ members }: { members: { id: string; label: 
 
       <Card className="mb-4">
         <label className="text-sm text-text-muted mr-3">구성원</label>
-        <select className="border border-border-soft bg-white px-3 py-1.5 text-sm" value={memberId} onChange={(e) => setMemberId(e.target.value)}>
-          {members.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
-        </select>
+        {persona === "employee" ? (
+          <span className="text-sm font-semibold">{visible[0]?.label ?? "-"}</span>
+        ) : (
+          <select className="border border-border-soft bg-white px-3 py-1.5 text-sm" value={memberId} onChange={(e) => setMemberId(e.target.value)}>
+            {visible.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+          </select>
+        )}
         {d?.member && <span className="ml-3 text-xs text-text-muted">{d.member.division} · {d.member.team} · {d.member.role_level}</span>}
       </Card>
 

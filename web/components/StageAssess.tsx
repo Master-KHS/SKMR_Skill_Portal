@@ -1,7 +1,9 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { PageHeader, Card, Badge } from "@/components/ui";
 import { EvidenceBlock } from "@/components/EvidenceBlock";
+import { usePersona } from "@/components/PersonaContext";
+import type { MemberOption } from "@/lib/member-options";
 
 interface Row {
   skill_id: number;
@@ -17,12 +19,40 @@ interface Props {
   title: string;
   desc: string;
   stage: "leader" | "calibration" | "committee";
-  members: { id: string; label: string }[];
-  confirmLabel: string; // 예: "리더 확정" / "Calibration 확정" / "Committee 최종 확정"
+  members: MemberOption[];
+  confirmLabel: string;
+  // team: team_leader 페르소나면 본인 팀으로 고정(원본: leader_assess.py)
+  // division: calibration/team_leader 페르소나면 본인 담당으로 고정(원본: calibration.py)
+  // none: 범위 제한 없음(committee — 전사 심의 대상)
+  scope: "team" | "division" | "none";
 }
 
-export function StageAssess({ title, desc, stage, members, confirmLabel }: Props) {
-  const [memberId, setMemberId] = useState(members[0]?.id ?? "");
+export function StageAssess({ title, desc, stage, members, confirmLabel, scope }: Props) {
+  const { persona, currentMember } = usePersona();
+
+  // 페르소나별 범위 제한 — team_leader/calibration은 자기 조직으로 고정, hr_admin 등은 자유 선택(운영용).
+  const isLocked =
+    (scope === "team" && persona === "team_leader" && !!currentMember) ||
+    (scope === "division" && (persona === "calibration" || persona === "team_leader") && !!currentMember);
+
+  const scopedMembers = useMemo(() => {
+    if (scope === "team" && persona === "team_leader" && currentMember) {
+      return members.filter((m) => m.team === currentMember.team);
+    }
+    if (scope === "division" && (persona === "calibration" || persona === "team_leader") && currentMember) {
+      return members.filter((m) => m.division === currentMember.division);
+    }
+    return members;
+  }, [members, scope, persona, currentMember]);
+
+  const [memberId, setMemberId] = useState(scopedMembers[0]?.id ?? "");
+  useEffect(() => {
+    if (!scopedMembers.find((m) => m.id === memberId)) {
+      setMemberId(scopedMembers[0]?.id ?? "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scopedMembers]);
+
   const [rows, setRows] = useState<Row[]>([]);
   const [edits, setEdits] = useState<Record<number, number>>({});
   const [saving, setSaving] = useState(false);
@@ -54,7 +84,7 @@ export function StageAssess({ title, desc, stage, members, confirmLabel }: Props
     const res = await fetch("/api/assess", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ member_id: memberId, stage, assessor_id: memberId, updates }),
+      body: JSON.stringify({ member_id: memberId, stage, assessor_id: currentMember?.employee_id ?? memberId, updates }),
     });
     const data = await res.json();
     setSaving(false);
@@ -72,24 +102,51 @@ export function StageAssess({ title, desc, stage, members, confirmLabel }: Props
     (groups.get(r.sub_family_name) ?? groups.set(r.sub_family_name, []).get(r.sub_family_name)!).push(r);
   }
 
+  const scopeLabel =
+    scope === "team" && isLocked
+      ? `팀: ${currentMember?.team ?? "-"}`
+      : scope === "division" && isLocked
+        ? `담당: ${currentMember?.division ?? "-"}`
+        : null;
+
   return (
     <div className="max-w-5xl">
       <PageHeader title={title} desc={desc} />
 
       <Card className="mb-4">
         <div className="flex items-center gap-3 flex-wrap">
-          <label className="text-sm text-text-muted">대상 구성원</label>
-          <select
-            className="border border-border-soft bg-white px-3 py-1.5 text-sm"
-            value={memberId}
-            onChange={(e) => setMemberId(e.target.value)}
-          >
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.label}
-              </option>
-            ))}
-          </select>
+          {isLocked ? (
+            <>
+              <label className="text-sm text-text-muted">대상 구성원</label>
+              <span className="text-sm font-semibold text-text-main">{scopeLabel}</span>
+              <select
+                className="border border-border-soft bg-white px-3 py-1.5 text-sm"
+                value={memberId}
+                onChange={(e) => setMemberId(e.target.value)}
+              >
+                {scopedMembers.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </>
+          ) : (
+            <>
+              <label className="text-sm text-text-muted">대상 구성원 (운영용 · 전체 선택 가능)</label>
+              <select
+                className="border border-border-soft bg-white px-3 py-1.5 text-sm"
+                value={memberId}
+                onChange={(e) => setMemberId(e.target.value)}
+              >
+                {scopedMembers.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
           <span className="text-xs text-text-muted">보유 Skill {rows.length}개</span>
           <button
             className="ml-auto bg-sk-orange text-white px-4 py-1.5 text-sm font-bold disabled:opacity-40"
@@ -99,6 +156,11 @@ export function StageAssess({ title, desc, stage, members, confirmLabel }: Props
             {saving ? "저장 중…" : confirmLabel}
           </button>
         </div>
+        {scopedMembers.length === 0 && (
+          <div className="mt-3 text-xs text-[#9A6500] border border-warning bg-warning/[0.08] p-2">
+            범위 내 대상 구성원이 없습니다.
+          </div>
+        )}
         {msg && (
           <div className="mt-3 border border-success bg-success/[0.06] p-2 text-sm text-success">
             <span className="font-semibold">완료 · </span>

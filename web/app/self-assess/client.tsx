@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { PageHeader, Card, Badge } from "@/components/ui";
 import { EvidenceBlock } from "@/components/EvidenceBlock";
+import { usePersona } from "@/components/PersonaContext";
 
 interface Row {
   skill_id: number;
@@ -20,25 +21,23 @@ const LEVEL_NAMES: Record<number, string> = {
   4: "L4 Jedi Master",
 };
 
-export function SelfAssessClient({
-  members,
-}: {
-  members: { id: string; label: string }[];
-}) {
-  const [memberId, setMemberId] = useState(members[0]?.id ?? "");
+// 자가 진단 — 원본 Streamlit과 동일하게 "현재 로그인된 사람"(상단 페르소나의 2단계에서 고른 사람)
+// 본인만 진단한다. 다른 사람을 골라볼 수 있는 드롭다운은 없음.
+export function SelfAssessClient() {
+  const { currentMember } = usePersona();
   const [rows, setRows] = useState<Row[]>([]);
   const [edits, setEdits] = useState<Record<number, number>>({});
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!memberId) return;
-    const res = await fetch(`/api/self-assess?member_id=${memberId}`);
+    if (!currentMember) return;
+    const res = await fetch(`/api/self-assess?member_id=${currentMember.employee_id}`);
     const data = await res.json();
     setRows(data.rows ?? []);
     setEdits({});
     setSavedMsg(null);
-  }, [memberId]);
+  }, [currentMember]);
 
   useEffect(() => {
     load();
@@ -49,6 +48,7 @@ export function SelfAssessClient({
   }
 
   async function save() {
+    if (!currentMember) return;
     const updates = Object.entries(edits).map(([skill_id, current_level]) => ({
       skill_id: Number(skill_id),
       current_level,
@@ -58,7 +58,7 @@ export function SelfAssessClient({
     const res = await fetch("/api/self-assess", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ member_id: memberId, updates }),
+      body: JSON.stringify({ member_id: currentMember.employee_id, updates }),
     });
     const data = await res.json();
     setSaving(false);
@@ -70,11 +70,21 @@ export function SelfAssessClient({
 
   const dirtyCount = Object.keys(edits).length;
 
-  // sub_family 별로 그룹화
   const groups = new Map<string, Row[]>();
   for (const r of rows) {
     const key = `${r.family_name} / ${r.sub_family_name}`;
     (groups.get(key) ?? groups.set(key, []).get(key)!).push(r);
+  }
+
+  if (!currentMember) {
+    return (
+      <div className="max-w-5xl">
+        <PageHeader title="자가 진단" desc="본인 보유 Skill 레벨을 진단하여 저장합니다" />
+        <div className="border border-warning bg-warning/[0.08] p-3 text-sm text-[#9A6500]">
+          현재 페르소나에 매핑된 인원이 없습니다. 상단 &lsquo;사람&rsquo; 선택을 확인하세요.
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -83,18 +93,10 @@ export function SelfAssessClient({
 
       <Card className="mb-4">
         <div className="flex items-center gap-3 flex-wrap">
-          <label className="text-sm text-text-muted">대상 구성원</label>
-          <select
-            className="border border-border-soft bg-white px-3 py-1.5 text-sm"
-            value={memberId}
-            onChange={(e) => setMemberId(e.target.value)}
-          >
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.label}
-              </option>
-            ))}
-          </select>
+          <span className="text-sm text-text-muted">평가 대상</span>
+          <span className="text-sm font-semibold text-text-main">
+            {currentMember.name} <span className="text-text-muted font-normal">({currentMember.team ?? currentMember.division} · {currentMember.role_level})</span>
+          </span>
           <span className="text-xs text-text-muted">보유 Skill {rows.length}개</span>
           <div className="ml-auto flex items-center gap-2">
             {dirtyCount > 0 && <Badge tone="orange" label={`변경 ${dirtyCount}건`} />}
@@ -157,7 +159,7 @@ export function SelfAssessClient({
                         ))}
                       </select>
                       <div className="mt-1">
-                        <EvidenceBlock memberId={memberId} skillId={r.skill_id} />
+                        <EvidenceBlock memberId={currentMember.employee_id} skillId={r.skill_id} />
                       </div>
                     </td>
                   </tr>
