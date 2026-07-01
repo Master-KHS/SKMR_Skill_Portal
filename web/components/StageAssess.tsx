@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { PageHeader, Card, Badge } from "@/components/ui";
+import { EvidenceBlock } from "@/components/EvidenceBlock";
 
 interface Row {
   skill_id: number;
@@ -143,6 +144,7 @@ export function StageAssess({ title, desc, stage, members, confirmLabel }: Props
                         </select>
                         {r.stage_level ? <Badge tone="success" label="확정됨" /> : null}
                       </div>
+                      <div className="mt-1"><EvidenceBlock memberId={memberId} skillId={r.skill_id} /></div>
                     </td>
                   </tr>
                 );

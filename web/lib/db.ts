@@ -117,6 +117,33 @@ export function run(sql: string, params: unknown[] = []) {
   return getDb().prepare(sql).run(...params);
 }
 
+// 전체 데이터를 시드 상태로 초기화 (Admin DB 리셋).
+export function resetToSeed() {
+  const db = getDb();
+  const tables = [
+    "evidence_skill_link", "evidence", "assessment", "skill_profile",
+    "required_skill", "member", "level_criteria", "skill", "sub_skill_family", "skill_family",
+  ];
+  db.exec("BEGIN");
+  try {
+    for (const t of tables) db.exec(`DELETE FROM ${t}`);
+    db.exec("COMMIT");
+  } catch (e) {
+    db.exec("ROLLBACK");
+    throw e;
+  }
+  const s = seed as unknown as Record<string, Row[]>;
+  seedTable(db, "skill_family", s.skill_family);
+  seedTable(db, "sub_skill_family", s.sub_skill_family);
+  seedTable(db, "skill", s.skill);
+  seedTable(db, "level_criteria", s.level_criteria);
+  seedTable(db, "member", s.member);
+  seedTable(db, "required_skill", s.required_skill);
+  seedTable(db, "skill_profile", s.skill_profile);
+  seedTable(db, "evidence", s.evidence);
+  seedTable(db, "evidence_skill_link", s.evidence_skill_link);
+}
+
 // 트랜잭션 헬퍼 (node:sqlite에는 db.transaction이 없어 BEGIN/COMMIT로 구현).
 export function tx(fn: () => void) {
   const db = getDb();
