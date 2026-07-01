@@ -7,10 +7,10 @@ export default function CalibrationPage() {
   return (
     <StageAssess
       title="Calibration"
-      desc="리더 진단 결과를 비교하고 조직 기준에 맞게 보정합니다."
+      desc="Leader 제출 건만 대상으로 검토합니다. Lv3는 Calibration에서 확정되고, Lv4만 Committee 후보로 상정됩니다."
       stage="calibration"
       members={evaluableMemberOptions()}
-      confirmLabel="Calibration 확정"
+      confirmLabel="Calibration 처리 저장"
       scope="division"
     />
   );

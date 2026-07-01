@@ -7,10 +7,10 @@ export default function LeaderAssessPage() {
   return (
     <StageAssess
       title="리더 진단"
-      desc="팀원의 자가 진단 결과를 검토하고 리더 레벨을 확정합니다."
+      desc="Self 제출 건만 대상으로 검토합니다. Lv1-Lv2는 리더 단계에서 확정되고, Lv3-Lv4는 Calibration 안건으로 넘어갑니다."
       stage="leader"
       members={evaluableMemberOptions()}
-      confirmLabel="리더 확정"
+      confirmLabel="리더 처리 저장"
       scope="team"
     />
   );

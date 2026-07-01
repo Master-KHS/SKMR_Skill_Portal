@@ -18,9 +18,9 @@ export async function GET() {
   const candidates = query<Candidate>(
     `WITH calib_done AS (
        SELECT member_id, skill_id, MAX(assessment_id) AS aid,
-              MAX(confirmed_level) AS calib_lv, MAX(narrative) AS narrative
+              MAX(proposed_level) AS calib_lv, MAX(narrative) AS narrative
        FROM assessment
-       WHERE stage='calibration' AND confirmed_level=4
+       WHERE stage='calibration' AND status='submitted' AND proposed_level=4
        GROUP BY member_id, skill_id
      ),
      commit_done AS (

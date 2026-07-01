@@ -1,4 +1,3 @@
-// 서버/클라이언트 공용 타입 (server-only 아님).
 export interface SkillCondition {
   skill_id: number;
   min_level: number;
@@ -26,6 +25,19 @@ export interface SearchResultRow {
   matched: { skill_id: number; skill_name: string; level: number }[];
 }
 
+export interface AssistantDocEvidence {
+  file: string;
+  loc: string;
+  text: string;
+}
+
+export interface AssistantDataSlot {
+  key: string;
+  label: string;
+  status: "ready" | "pending_definition";
+  note: string;
+}
+
 export interface AssistantResponse {
   answer: string;
   filters: SearchFilters;
@@ -36,4 +48,7 @@ export interface AssistantResponse {
   sources: { employee_id: string; name: string; team: string | null }[];
   verification: "pass" | "fail" | "review";
   grounded: boolean;
+  docEvidence: AssistantDocEvidence[];
+  dataSlots: AssistantDataSlot[];
+  followUpSuggestions: string[];
 }

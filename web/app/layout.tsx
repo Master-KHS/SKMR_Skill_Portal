@@ -4,7 +4,7 @@ import { PersonaProvider } from "@/components/PersonaContext";
 import { Shell } from "@/components/Shell";
 
 export const metadata: Metadata = {
-  title: "SKMR Skill Portal",
+  title: "SKMR Skill Agent",
   description: "SK머티리얼즈 Skill 관리 시스템",
 };
 

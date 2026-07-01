@@ -30,7 +30,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </span>
           <div>
             <div className="text-[15px] font-extrabold tracking-tight text-text-main leading-none">
-              Skill Portal
+              Skill Agent
             </div>
             <div className="text-[11px] text-text-muted mt-1">SK머티리얼즈</div>
           </div>

@@ -1,22 +1,10 @@
-// AI 인재 검색 로직 (서버 전용).
-// 1) Gemini가 자연어 → 검색 조건(JSON) 해석  2) 로컬 DB 검색  3) Gemini 결과 요약
 import "server-only";
-import { getSkills, getMembers } from "./data";
+import { getMembers, getSkills } from "./data";
 import { searchTalent, type SearchFilters, type SkillCondition, type SearchResultRow } from "./search";
-
-const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-
-export interface AssistantResponse {
-  answer: string;
-  filters: SearchFilters;
-  interpretedIntent: string | null;
-  unresolvedSkills: string[];
-  results: SearchResultRow[];
-  totalCount: number;
-  sources: { employee_id: string; name: string; team: string | null }[];
-  verification: "pass" | "fail" | "review";
-  grounded: boolean;
-}
+import { searchDocs } from "./docs";
+import { getProvider } from "./llm/provider";
+import { getAssistantDataSlots } from "./raw-data";
+import type { AssistantResponse } from "./assistant-types";
 
 interface InterpretResult {
   skill_queries?: { name: string; min_level?: number }[];
@@ -28,128 +16,173 @@ interface InterpretResult {
   intent?: string;
 }
 
-async function gemini(
-  apiKey: string,
-  model: string,
-  system: string,
-  userText: string,
-  jsonMode: boolean
-): Promise<string> {
-  const body = {
-    systemInstruction: { parts: [{ text: system }] },
-    contents: [{ role: "user", parts: [{ text: userText }] }],
-    generationConfig: {
-      temperature: 0.2,
-      ...(jsonMode ? { responseMimeType: "application/json" } : {}),
-    },
-  };
-  const res = await fetch(`${API_BASE}/${model}:generateContent?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Gemini API 오류 ${res.status}: ${detail.slice(0, 200)}`);
-  }
-  const data = await res.json();
-  return (
-    data?.candidates?.[0]?.content?.parts
-      ?.map((p: { text?: string }) => p.text ?? "")
-      .join("")
-      .trim() ?? ""
-  );
+function cleanText(value: string | null | undefined): string {
+  return (value ?? "").trim();
 }
 
-export async function runAssistant(
-  question: string,
-  opts: { apiKey: string; model?: string }
-): Promise<AssistantResponse> {
-  const model = opts.model || "gemini-2.5-flash";
+function normalizeOneOf(value: string | undefined, options: string[]): string | undefined {
+  const target = cleanText(value).toLowerCase();
+  if (!target) return undefined;
+  return options.find((option) => option.toLowerCase() === target);
+}
+
+function buildFollowUps(filters: SearchFilters, unresolvedSkills: string[], results: SearchResultRow[]): string[] {
+  const suggestions: string[] = [];
+
+  if (unresolvedSkills.length > 0) {
+    suggestions.push(`매칭되지 않은 스킬명을 사내 Skill Library 기준 명칭으로 다시 입력하세요: ${unresolvedSkills.join(", ")}`);
+  }
+  if (!filters.division && !filters.team && !filters.position) {
+    suggestions.push("조직 범위를 추가하면 추천 결과를 더 빠르게 좁힐 수 있습니다.");
+  }
+  if ((filters.skills?.length ?? 0) === 0) {
+    suggestions.push("필수 스킬과 최소 레벨을 명시하면 추천 품질이 크게 올라갑니다.");
+  }
+  if (results.length === 0) {
+    suggestions.push("최소 레벨을 한 단계 낮추거나, 팀/직급 필터를 완화해서 다시 검색해 보세요.");
+  } else {
+    suggestions.push("추천 결과는 Talent Search와 동일한 필터 결과이므로, 필요한 경우 Talent Search에서 수동 비교로 검증하세요.");
+  }
+
+  return suggestions.slice(0, 3);
+}
+
+export async function runAssistant(question: string): Promise<AssistantResponse> {
+  const provider = getProvider();
   const skills = getSkills();
+  const members = getMembers();
+  const divisions = [...new Set(members.map((m) => m.division).filter(Boolean))] as string[];
+  const teams = [...new Set(members.map((m) => m.team).filter(Boolean))] as string[];
+  const jobTypes = [...new Set(members.map((m) => m.job_type).filter(Boolean))] as string[];
+  const roleLevels = [...new Set(members.map((m) => m.role_level).filter(Boolean))] as string[];
+  const positions = [...new Set(members.map((m) => m.position).filter(Boolean))] as string[];
   const skillCatalog = skills.map((s) => `${s.skill_id}|${s.skill_name}`).join("\n");
-  const divisions = [...new Set(getMembers().map((m) => m.division).filter(Boolean))];
-  const teams = [...new Set(getMembers().map((m) => m.team).filter(Boolean))];
 
-  const interpretSystem = `당신은 SKMR 스킬 포탈의 인재 검색 해석기입니다.
-사용자의 자연어 질문을 검색 조건 JSON으로 변환하세요.
-보유 스킬은 반드시 아래 스킬 카탈로그의 이름 표현을 사용해 skill_queries.name 에 핵심 키워드로 넣으세요(부분 일치로 매칭됨).
-min_level 은 1~4(언급 없으면 생략). 조직 필터는 아래 목록 값과 일치할 때만 채우세요.
+  const interpretSystem = `You interpret Korean HR talent-search questions into strict JSON filters.
+Return JSON only.
 
-[스킬 카탈로그 id|name]
+Rules:
+- skill_queries should contain user-mentioned skill keywords with min_level 1-4 when stated.
+- division/team/job_type/role_level/position must be set only when they exactly match one of the allowed values.
+- Keep unknown values as null.
+- intent should be a short Korean sentence.
+
+[Skill Catalog id|name]
 ${skillCatalog}
 
-[담당(division) 목록] ${divisions.join(", ")}
-[팀(team) 목록] ${teams.join(", ")}
+[Divisions] ${divisions.join(", ")}
+[Teams] ${teams.join(", ")}
+[Job Types] ${jobTypes.join(", ")}
+[Role Levels] ${roleLevels.join(", ")}
+[Positions] ${positions.join(", ")}
 
-반드시 다음 JSON 스키마로만 답하세요:
-{"skill_queries":[{"name":"키워드","min_level":2}],"division":null,"team":null,"job_type":null,"role_level":null,"position":null,"intent":"한줄요약"}`;
+Schema:
+{"skill_queries":[{"name":"keyword","min_level":2}],"division":null,"team":null,"job_type":null,"role_level":null,"position":null,"intent":"짧은 의도 요약"}`;
 
-  let interp: InterpretResult = {};
-  const raw = await gemini(opts.apiKey, model, interpretSystem, question, true);
-  interp = JSON.parse(raw);
+  const raw = await provider.completeJson(interpretSystem, [{ role: "user", text: question }]);
+  const interpreted = JSON.parse(raw) as InterpretResult;
 
-  const conds: SkillCondition[] = [];
-  const unresolved: string[] = [];
-  for (const q of interp.skill_queries ?? []) {
-    const ql = q.name.trim().toLowerCase();
-    const hit = skills.find((s) => s.skill_name.toLowerCase().includes(ql));
-    if (hit) conds.push({ skill_id: hit.skill_id, min_level: q.min_level ?? 1 });
-    else unresolved.push(q.name);
+  const conditions: SkillCondition[] = [];
+  const unresolvedSkills: string[] = [];
+
+  for (const query of interpreted.skill_queries ?? []) {
+    const keyword = cleanText(query.name).toLowerCase();
+    if (!keyword) continue;
+
+    const exact = skills.find((skill) => skill.skill_name.toLowerCase() === keyword);
+    const partial = skills.find((skill) => skill.skill_name.toLowerCase().includes(keyword));
+    const hit = exact ?? partial;
+
+    if (hit) {
+      conditions.push({
+        skill_id: hit.skill_id,
+        min_level: Math.min(Math.max(query.min_level ?? 1, 1), 4),
+      });
+    } else {
+      unresolvedSkills.push(query.name);
+    }
   }
 
   const filters: SearchFilters = {
-    division: interp.division || undefined,
-    team: interp.team || undefined,
-    job_type: interp.job_type || undefined,
-    role_level: interp.role_level || undefined,
-    position: interp.position || undefined,
-    skills: conds,
+    division: normalizeOneOf(interpreted.division, divisions),
+    team: normalizeOneOf(interpreted.team, teams),
+    job_type: normalizeOneOf(interpreted.job_type, jobTypes),
+    role_level: normalizeOneOf(interpreted.role_level, roleLevels),
+    position: normalizeOneOf(interpreted.position, positions),
+    skills: conditions,
   };
+
   const results = searchTalent(filters).sort((a, b) => b.avg_level - a.avg_level);
+  const top = results.slice(0, 8);
+  const docEvidence = searchDocs(
+    [
+      question,
+      interpreted.intent ?? "",
+      ...top.flatMap((row) => [row.name, row.team ?? "", ...row.matched.map((matched) => matched.skill_name)]),
+    ]
+      .filter(Boolean)
+      .join(" "),
+    5
+  );
 
   const grounded =
-    conds.length > 0 || Boolean(filters.division || filters.team || filters.role_level);
-  const verification: "pass" | "fail" | "review" = !grounded
-    ? "review"
-    : results.length > 0
-      ? "pass"
-      : "fail";
+    (filters.skills?.length ?? 0) > 0 ||
+    Boolean(filters.division || filters.team || filters.role_level || filters.position || filters.job_type);
+  const verification: "pass" | "fail" | "review" = !grounded ? "review" : results.length > 0 ? "pass" : "fail";
 
-  const top = results.slice(0, 8);
   const resultContext = top
-    .map(
-      (r) =>
-        `${r.name}(${r.employee_id}) ${r.division}/${r.team} ${r.role_level} ${r.position} · 보유스킬 ${r.n_skills}개 평균L${r.avg_level}` +
-        (r.matched.length
-          ? ` · 매칭: ${r.matched.map((m) => `${m.skill_name} L${m.level}`).join(", ")}`
-          : "")
-    )
+    .map((row, index) => {
+      const matched = row.matched.length
+        ? `matched=${row.matched.map((item) => `${item.skill_name} L${item.level}`).join(", ")}`
+        : "matched=none";
+      return `${index + 1}. ${row.name}(${row.employee_id}) | ${row.division ?? "-"} / ${row.team ?? "-"} | ${row.role_level ?? "-"} / ${row.position ?? "-"} | avg=L${row.avg_level} | skills=${row.n_skills} | ${matched}`;
+    })
     .join("\n");
 
-  const answerSystem = `당신은 SKMR HR 인재 검색 도우미입니다. 아래 '검색 결과'에 있는 사실만 근거로 한국어로 간결히 답하세요.
-결과에 없는 내용을 지어내지 마세요. 결과가 없으면 조건 완화를 제안하세요. 추천 인재는 이름과 사번을 함께 언급하세요.`;
+  const docContext = docEvidence
+    .map((chunk, index) => `${index + 1}. ${chunk.file} / ${chunk.loc} / ${chunk.text}`)
+    .join("\n");
+
+  const answerSystem = `You are an HR talent-search assistant for SKMR.
+Write in concise Korean.
+Only use the provided search results and document evidence.
+Do not invent facts.
+Output should have 3 short sections:
+1. 검색 해석
+2. 추천 결과
+3. 추가 확인
+If no results exist, explain that clearly and suggest how to relax the filters.`;
+
   const answerUser = `질문: ${question}
-해석된 조건: ${JSON.stringify(filters)}
-${unresolved.length ? `매칭 실패 스킬: ${unresolved.join(", ")}\n` : ""}검색 결과(${results.length}명, 상위 ${top.length}명):
-${resultContext || "(없음)"}`;
+의도: ${interpreted.intent ?? "-"}
+정규화된 필터: ${JSON.stringify(filters)}
+해결되지 않은 스킬: ${unresolvedSkills.join(", ") || "-"}
+
+검색 결과 ${results.length}명 중 상위 ${top.length}명:
+${resultContext || "(none)"}
+
+문서 근거:
+${docContext || "(none)"}`;
 
   let answer = "";
   try {
-    answer = await gemini(opts.apiKey, model, answerSystem, answerUser, false);
-  } catch (e) {
-    answer = `요약 생성 실패: ${(e as Error).message}`;
+    answer = await provider.complete(answerSystem, [{ role: "user", text: answerUser }]);
+  } catch (error) {
+    answer = `검색 결과 요약을 생성하지 못했습니다. ${(error as Error).message}`;
   }
 
   return {
     answer,
     filters,
-    interpretedIntent: interp.intent ?? null,
-    unresolvedSkills: unresolved,
+    interpretedIntent: interpreted.intent ?? null,
+    unresolvedSkills,
     results: top,
     totalCount: results.length,
-    sources: top.map((r) => ({ employee_id: r.employee_id, name: r.name, team: r.team })),
+    sources: top.map((row) => ({ employee_id: row.employee_id, name: row.name, team: row.team })),
     verification,
     grounded,
+    docEvidence,
+    dataSlots: getAssistantDataSlots(),
+    followUpSuggestions: buildFollowUps(filters, unresolvedSkills, results),
   };
 }

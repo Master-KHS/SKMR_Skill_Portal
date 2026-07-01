@@ -1,28 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runAssistant } from "@/lib/assistant";
+import { isLlmConfigured } from "@/lib/llm/provider";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  if (!isLlmConfigured()) {
     return NextResponse.json(
-      { error: "GEMINI_API_KEY 미설정: web/.env.local 에 키를 추가하세요." },
+      { error: "GEMINI_API_KEY is not configured. Add it to web/.env.local to enable AI talent search." },
       { status: 503 }
     );
   }
+
   const { question } = (await req.json()) as { question?: string };
   if (!question?.trim()) {
-    return NextResponse.json({ error: "질문이 비어 있습니다." }, { status: 400 });
+    return NextResponse.json({ error: "Question is required." }, { status: 400 });
   }
+
   try {
-    const data = await runAssistant(question, {
-      apiKey,
-      model: process.env.GEMINI_MODEL,
-    });
+    const data = await runAssistant(question);
     return NextResponse.json(data);
-  } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 502 });
+  } catch (error) {
+    return NextResponse.json({ error: (error as Error).message }, { status: 502 });
   }
 }

@@ -151,5 +151,8 @@ ${resultContext || "(없음)"}`;
     sources: top.map((r) => ({ employee_id: r.employee_id, name: r.name, team: r.team })),
     verification,
     grounded,
+    docEvidence: [],
+    dataSlots: [],
+    followUpSuggestions: [],
   };
 }
