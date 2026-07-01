@@ -65,7 +65,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
         <div className="px-5 py-3 border-t border-border-soft text-[10px] uppercase tracking-wider text-text-muted">
-          prototype · <span className="text-sk-red font-bold">BUILD R11 (2026-07-01)</span>
+          prototype · <span className="text-sk-red font-bold">BUILD R12 (2026-07-01)</span>
         </div>
       </aside>
 
