@@ -89,9 +89,43 @@ export function MemberMgmtClient() {
 
   const inp = "border border-border-soft bg-white px-1.5 py-1 text-xs w-full";
 
+  const [target, setTarget] = useState(300);
+  const [genning, setGenning] = useState(false);
+  async function generate() {
+    setGenning(true); setErr(null); setMsg(null);
+    const res = await fetch("/api/gen-members", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ target }) });
+    const data = await res.json();
+    setGenning(false);
+    if (data.ok) { setMsg(`대량 생성 완료 · 총 ${data.total}명 (추가 ${data.added}명, 스킬 프로필 포함)`); load(); }
+    else setErr(data.error ?? "생성 실패");
+  }
+  async function removeGenerated() {
+    if (!confirm("자동 생성된(G로 시작) 인원을 모두 삭제할까요?")) return;
+    setGenning(true);
+    const res = await fetch("/api/gen-members", { method: "DELETE" });
+    const data = await res.json();
+    setGenning(false);
+    if (data.ok) { setMsg(`생성 인원 삭제 완료 · 총 ${data.total}명`); load(); }
+  }
+
   return (
     <div>
       <PageHeader title="구성원 Master Data" desc="구성원 조회·편집(추가/수정/삭제) — 저장 시 DB 영구 반영" />
+
+      <Card title="샘플 인원 대량 생성" className="mb-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-sm text-text-muted">목표 인원</span>
+          <input type="number" min={1} max={2000} className="border border-border-soft bg-white px-2 py-1.5 text-sm w-24"
+            value={target} onChange={(e) => setTarget(Number(e.target.value))} />
+          <button className="bg-sk-orange text-white px-4 py-1.5 text-sm font-bold disabled:opacity-40" onClick={generate} disabled={genning}>
+            {genning ? "생성 중…" : "대량 생성"}
+          </button>
+          <button className="border border-sk-red text-sk-red px-3 py-1.5 text-sm" onClick={removeGenerated} disabled={genning}>
+            생성 인원 삭제
+          </button>
+          <span className="text-xs text-text-muted">현재 부족분만 자동 추가됩니다 (스킬 프로필 8~16개 자동 부여).</span>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-4 gap-4 mb-4">
         <Stat label="총 인원" value={`${rows.length}명`} accent />
