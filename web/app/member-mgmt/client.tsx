@@ -1,8 +1,15 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
+import * as XLSX from "xlsx";
 import { PageHeader, Card, Stat, Badge } from "@/components/ui";
 import { PERSONA_LABELS } from "@/lib/nav";
 import type { Member, PersonaCode } from "@/lib/types";
+
+// 엑셀 헤더 ↔ 필드 매핑
+const XLS_COLS: [keyof Member, string][] = [
+  ["employee_id", "사번"], ["name", "이름"], ["corporation", "법인"], ["division", "담당"],
+  ["team", "팀"], ["role_level", "R/L"], ["position", "직책"], ["job_type", "직종"], ["persona_role", "페르소나"],
+];
 
 const RL = ["L6", "L5", "L4", "L3", "L2", "임원"];
 const POS = ["팀장", "팀원", "위원", "대표"];
@@ -108,6 +115,47 @@ export function MemberMgmtClient() {
     if (data.ok) { setMsg(`생성 인원 삭제 완료 · 총 ${data.total}명`); load(); }
   }
 
+  // --- 엑셀 다운로드 ---
+  function exportExcel() {
+    const aoa = [
+      XLS_COLS.map(([, label]) => label),
+      ...rows.map((r) => XLS_COLS.map(([field]) => (r[field] ?? "") as string)),
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "members");
+    XLSX.writeFile(wb, "members.xlsx");
+  }
+
+  // --- 엑셀 업로드 (덮어쓰기: 그리드에 반영 후 '변경사항 저장'으로 확정) ---
+  function importExcel(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target?.result, { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
+        const label2field = new Map(XLS_COLS.map(([f, l]) => [l, f]));
+        const parsed: Row[] = json.map((obj) => {
+          const m: Partial<Member> = {};
+          for (const [key, val] of Object.entries(obj)) {
+            const field = label2field.get(key.trim()) ?? (XLS_COLS.find(([f]) => f === key)?.[0]);
+            if (field) (m as Record<string, unknown>)[field] = String(val).trim() || null;
+          }
+          return { corporation: "SK머티리얼즈", ...m } as Row;
+        }).filter((m) => m.employee_id && m.name);
+        if (!parsed.length) { setErr("엑셀에서 유효한 행(사번/이름)을 찾지 못했습니다."); return; }
+        setRows(parsed);
+        setDirty(true);
+        setErr(null);
+        setMsg(`엑셀 ${parsed.length}행 로드됨 — 확인 후 '변경사항 저장'을 누르세요.`);
+      } catch (ex) {
+        setErr(`엑셀 읽기 실패: ${(ex as Error).message}`);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
   return (
     <div>
       <PageHeader title="구성원 Master Data" desc="구성원 조회·편집(추가/수정/삭제) — 저장 시 DB 영구 반영" />
@@ -124,6 +172,18 @@ export function MemberMgmtClient() {
             생성 인원 삭제
           </button>
           <span className="text-xs text-text-muted">현재 부족분만 자동 추가됩니다 (스킬 프로필 8~16개 자동 부여).</span>
+        </div>
+      </Card>
+
+      <Card title="엑셀 업로드 / 다운로드" className="mb-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <button className="border border-border-soft px-3 py-1.5 text-sm" onClick={exportExcel}>엑셀 다운로드</button>
+          <label className="border border-sk-orange text-[#C45E00] px-3 py-1.5 text-sm font-medium cursor-pointer">
+            엑셀 업로드
+            <input type="file" accept=".xlsx,.xls" className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) importExcel(f); e.target.value = ""; }} />
+          </label>
+          <span className="text-xs text-text-muted">업로드 시 그리드에 반영 → 확인 후 &lsquo;변경사항 저장&rsquo;으로 DB 확정. (헤더: 사번·이름·법인·담당·팀·R/L·직책·직종·페르소나)</span>
         </div>
       </Card>
 
