@@ -76,36 +76,62 @@ export function DashboardClient() {
       {/* 조직별 필수 스킬 현황 */}
       <SectionHeader title="조직별 필수 스킬 현황" />
       <div className="grid grid-cols-2 gap-4">
-        {d.teamStatus.map((t) => (
+        {d.teamStatus.map((t) => {
+          const coverAvg = t.skills.length
+            ? Math.round((t.skills.reduce((s, x) => s + (t.nTeam ? x.holders / t.nTeam : 0), 0) / t.skills.length) * 100)
+            : 0;
+          return (
           <Card key={t.team}>
             <div className="flex items-center justify-between mb-3 pb-2 border-b border-border-soft">
               <div className="font-bold text-text-main">
                 {t.team} <span className="text-xs text-text-muted font-normal">· {t.nTeam}명</span>
               </div>
-              <div className={`text-lg font-extrabold ${pctColor(t.overall)}`}>{t.overall}%</div>
+              <div className="text-right">
+                <span className={`text-lg font-extrabold ${pctColor(coverAvg)}`}>{coverAvg}%</span>
+                <span className="text-[10px] text-text-muted ml-1">평균 보유율</span>
+              </div>
             </div>
             {t.skills.length === 0 ? (
               <div className="text-xs text-text-muted">매핑된 필수 스킬이 없습니다.</div>
             ) : (
-              <div className="space-y-2">
-                {t.skills.map((s) => (
-                  <div key={s.skill_id}>
-                    <div className="flex justify-between text-xs mb-0.5">
-                      <span className="text-text-main">
-                        {s.is_core ? <span className="text-sk-red font-bold mr-1">[CORE]</span> : <span className="text-text-muted mr-1">[일반]</span>}
-                        #{String(s.skill_id).padStart(3, "0")} {s.skill_name.slice(0, 22)}
-                      </span>
-                      <span className="text-text-muted">L{s.avg_lv}/L{s.target_level} · {s.holders}/{t.nTeam}명</span>
+              <div>
+                {t.skills.map((s) => {
+                  const cover = t.nTeam ? s.holders / t.nTeam : 0;
+                  const coverPct = Math.round(cover * 100);
+                  const coverColor = cover < 0.3 ? "#EA002C" : cover < 0.6 ? "#F59E0B" : "#16A34A";
+                  const met = s.avg_lv >= s.target_level;
+                  return (
+                    <div key={s.skill_id} className="py-2 border-b border-border-soft last:border-0">
+                      <div className="flex justify-between items-center text-xs mb-1.5">
+                        <span className="text-text-main truncate pr-2">
+                          {s.is_core
+                            ? <span className="inline-block bg-sk-red text-white px-1.5 py-0.5 text-[9px] font-bold mr-1.5 align-middle">CORE</span>
+                            : <span className="inline-block border border-border-soft text-text-muted px-1.5 py-0.5 text-[9px] mr-1.5 align-middle">일반</span>}
+                          #{String(s.skill_id).padStart(3, "0")} {s.skill_name.slice(0, 20)}
+                        </span>
+                        <span className="shrink-0 flex items-center gap-1.5">
+                          <span className="text-text-muted">평균 L{s.avg_lv}/L{s.target_level}</span>
+                          {met
+                            ? <span className="text-success text-[9px] font-bold border border-success px-1">레벨달성</span>
+                            : <span className="text-[#9A6500] text-[9px] font-bold border border-warning px-1">레벨미달</span>}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-[#E1E7EF] h-2.5">
+                          <div className="h-2.5" style={{ width: `${Math.max(coverPct, 2)}%`, background: coverColor }} />
+                        </div>
+                        <span className="text-[11px] font-semibold w-16 text-right" style={{ color: coverColor }}>
+                          보유 {s.holders}/{t.nTeam}
+                        </span>
+                      </div>
                     </div>
-                    <div className="bg-bg-main h-1.5 overflow-hidden">
-                      <div className="bg-sk-red h-1.5" style={{ width: `${Math.min(s.metPct, 100)}%` }} />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </Card>
-        ))}
+          );
+        })}
       </div>
 
       {/* Funnel + Top holders */}
