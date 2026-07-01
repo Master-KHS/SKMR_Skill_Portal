@@ -8,8 +8,10 @@ WHAT
   Streamlit local version.
 
 REQUIREMENTS
-  - Node.js installed (you said it's already installed).
+  - Node.js 24+ (uses built-in node:sqlite - no native build, no compiler needed).
+    (Node 20/22 also OK if started with --experimental-sqlite.)
   - Python NOT required in this mode.
+  - No native modules -> npm install will not try to compile anything.
 
 WINDOWS - HOW TO RUN
   1) Unzip. You will see 'run-server.bat' and the project files.

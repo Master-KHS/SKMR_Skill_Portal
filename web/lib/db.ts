@@ -1,15 +1,29 @@
-// 로컬 SQLite 데이터 레이어 (서버 전용).
+// 로컬 SQLite 데이터 레이어 (서버 전용) — Node 내장 node:sqlite 사용(네이티브 빌드 불필요).
 // 최초 실행 시 web/data/skmr.db 를 생성하고 seed.json 으로 시드.
 // 이후 입력/수정은 이 .db 파일에 영구 저장됨 (Streamlit 로컬 SQLite와 동일).
-import Database from "better-sqlite3";
+// 요구 Node: 24+ (node:sqlite 기본 활성). Node 22 사용 시 --experimental-sqlite 필요.
 import path from "path";
 import fs from "fs";
 import seed from "@/data/seed.json";
+// node:sqlite 타입이 없을 수 있어 느슨하게 로드
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { DatabaseSync } = require("node:sqlite") as {
+  DatabaseSync: new (p: string) => SqliteDb;
+};
+
+interface SqliteStmt {
+  all(...params: unknown[]): unknown[];
+  get(...params: unknown[]): unknown;
+  run(...params: unknown[]): { changes: number; lastInsertRowid: number | bigint };
+}
+interface SqliteDb {
+  exec(sql: string): void;
+  prepare(sql: string): SqliteStmt;
+}
 
 const DB_DIR = path.join(process.cwd(), "data");
 const DB_PATH = path.join(DB_DIR, "skmr.db");
 
-// 기존 schema.py 의 스키마를 그대로 이식.
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS skill_family (
   family_id TEXT PRIMARY KEY, family_name TEXT NOT NULL, description TEXT
@@ -53,33 +67,33 @@ CREATE TABLE IF NOT EXISTS evidence_skill_link (
 `;
 
 type Row = Record<string, unknown>;
+let _db: SqliteDb | null = null;
 
-let _db: Database.Database | null = null;
-
-function seedTable(db: Database.Database, table: string, rows: Row[]) {
+function seedTable(db: SqliteDb, table: string, rows: Row[]) {
   if (!rows?.length) return;
   const existing = db.prepare(`SELECT COUNT(*) c FROM ${table}`).get() as { c: number };
-  if (existing.c > 0) return; // 이미 시드됨
+  if (existing.c > 0) return;
   const cols = Object.keys(rows[0]);
   const placeholders = cols.map(() => "?").join(",");
-  const stmt = db.prepare(
-    `INSERT INTO ${table} (${cols.join(",")}) VALUES (${placeholders})`
-  );
-  const insertMany = db.transaction((items: Row[]) => {
-    for (const r of items) stmt.run(cols.map((c) => r[c] as never));
-  });
-  insertMany(rows);
+  const stmt = db.prepare(`INSERT INTO ${table} (${cols.join(",")}) VALUES (${placeholders})`);
+  db.exec("BEGIN");
+  try {
+    for (const r of rows) stmt.run(...cols.map((c) => r[c] ?? null));
+    db.exec("COMMIT");
+  } catch (e) {
+    db.exec("ROLLBACK");
+    throw e;
+  }
 }
 
-export function getDb(): Database.Database {
+export function getDb(): SqliteDb {
   if (_db) return _db;
   fs.mkdirSync(DB_DIR, { recursive: true });
-  const db = new Database(DB_PATH);
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
+  const db = new DatabaseSync(DB_PATH);
+  db.exec("PRAGMA journal_mode = WAL");
+  db.exec("PRAGMA foreign_keys = ON");
   db.exec(SCHEMA);
 
-  // 시드 (테이블이 비어 있을 때만)
   const s = seed as unknown as Record<string, Row[]>;
   seedTable(db, "skill_family", s.skill_family);
   seedTable(db, "sub_skill_family", s.sub_skill_family);
@@ -101,4 +115,17 @@ export function query<T = Row>(sql: string, params: unknown[] = []): T[] {
 
 export function run(sql: string, params: unknown[] = []) {
   return getDb().prepare(sql).run(...params);
+}
+
+// 트랜잭션 헬퍼 (node:sqlite에는 db.transaction이 없어 BEGIN/COMMIT로 구현).
+export function tx(fn: () => void) {
+  const db = getDb();
+  db.exec("BEGIN");
+  try {
+    fn();
+    db.exec("COMMIT");
+  } catch (e) {
+    db.exec("ROLLBACK");
+    throw e;
+  }
 }

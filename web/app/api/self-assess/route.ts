@@ -1,6 +1,6 @@
 // 자가 진단 — 구성원의 보유 Skill 레벨 조회/저장. 저장 시 로컬 DB에 영구 반영.
 import { NextRequest, NextResponse } from "next/server";
-import { query, run, getDb } from "@/lib/db";
+import { query, run, tx } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,8 +43,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
   }
   const today = new Date().toISOString().slice(0, 10);
-  const db = getDb();
-  const tx = db.transaction(() => {
+  tx(() => {
     for (const u of updates) {
       run(
         `UPDATE skill_profile SET current_level = ?, last_assessed_date = ?
@@ -58,6 +57,5 @@ export async function POST(req: NextRequest) {
       );
     }
   });
-  tx();
   return NextResponse.json({ ok: true, saved: updates.length, date: today });
 }
