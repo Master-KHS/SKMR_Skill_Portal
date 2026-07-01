@@ -41,9 +41,10 @@ function readChunks(file: string): DocChunk[] {
       const paras = raw.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
       paras.forEach((p, i) => chunks.push({ file, loc: `문단 ${i + 1}`, text: p.slice(0, 800) }));
     } else if (TABLE_EXT.has(ext)) {
+      // XLSX.readFile()은 Next.js 번들 환경에서 fs 감지가 깨질 수 있어, 버퍼를 직접 넘김.
       const wb = ext === ".csv"
         ? XLSX.read(fs.readFileSync(full, "utf-8"), { type: "string" })
-        : XLSX.readFile(full);
+        : XLSX.read(fs.readFileSync(full), { type: "buffer" });
       for (const sheetName of wb.SheetNames) {
         const ws = wb.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });

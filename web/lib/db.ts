@@ -5,6 +5,8 @@
 import path from "path";
 import fs from "fs";
 import seed from "@/data/seed.json";
+import { readMembersFromXlsx, membersXlsxExists } from "./members-xlsx";
+import type { Member } from "./types";
 // node:sqlite 타입이 없을 수 있어 느슨하게 로드
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { DatabaseSync } = require("node:sqlite") as {
@@ -118,8 +120,87 @@ export function getDb(): SqliteDb {
   seedTable(db, "evidence", s.evidence);
   seedTable(db, "evidence_skill_link", s.evidence_skill_link);
 
+  // data/members.xlsx 가 원본(SSOT) — 있으면 부팅 시 1회 DB에 반영.
+  if (membersXlsxExists()) {
+    try {
+      applyMembersToDb(db, readMembersFromXlsx());
+    } catch {
+      // 엑셀 읽기 실패 시 조용히 무시 (기존 DB 유지)
+    }
+  }
+
   _db = db;
   return db;
+}
+
+// member 테이블을 주어진 Member[] 로 교체(upsert + 목록에 없는 인원 삭제).
+// 엑셀이 정제된 원본이라는 전제 하에 값 자체를 임의 보정하지 않음(있는 그대로 반영).
+function applyMembersToDb(db: SqliteDb, members: Member[]) {
+  if (!members.length) return;
+  const keepIds = new Set(members.map((m) => m.employee_id));
+  const existing = (db.prepare("SELECT employee_id FROM member").all() as { employee_id: string }[]).map(
+    (r) => r.employee_id
+  );
+
+  db.exec("BEGIN");
+  try {
+    for (const id of existing) {
+      if (!keepIds.has(id)) db.prepare("DELETE FROM member WHERE employee_id=?").run(id);
+    }
+    const ins = db.prepare(
+      `INSERT INTO member (employee_id, name, corporation, division, team, role_level, position, job_type, persona_role, extra_attrs)
+       VALUES (?,?,?,?,?,?,?,?,?,NULL)
+       ON CONFLICT(employee_id) DO UPDATE SET
+         name=excluded.name, corporation=excluded.corporation, division=excluded.division,
+         team=excluded.team, role_level=excluded.role_level, position=excluded.position,
+         job_type=excluded.job_type, persona_role=excluded.persona_role`
+    );
+    for (const m of members) {
+      ins.run(
+        m.employee_id, m.name, m.corporation ?? null, m.division ?? null, m.team ?? null,
+        m.role_level ?? null, m.position ?? null, m.job_type ?? null, m.persona_role ?? null
+      );
+    }
+    db.exec("COMMIT");
+  } catch (e) {
+    db.exec("ROLLBACK");
+    throw e;
+  }
+
+  // 프로필이 아직 없는 신규 구성원에만 데모용 스킬 프로필을 부여(평가대상 직종만).
+  // 이름/사번 등 원본 필드는 건드리지 않음 — 스킬 진단 시스템이 바로 동작하게 하기 위한 보강일 뿐.
+  const skillIds = (db.prepare("SELECT skill_id FROM skill").all() as { skill_id: number }[]).map((r) => r.skill_id);
+  const today = new Date().toISOString().slice(0, 10);
+  const need = db.prepare(
+    `SELECT employee_id FROM member m
+     WHERE m.job_type IN ('사무직','기술직','연구직')
+       AND NOT EXISTS (SELECT 1 FROM skill_profile sp WHERE sp.member_id=m.employee_id)`
+  ).all() as { employee_id: string }[];
+  if (need.length && skillIds.length) {
+    db.exec("BEGIN");
+    try {
+      const insP = db.prepare(
+        `INSERT OR IGNORE INTO skill_profile (member_id, skill_id, current_level, target_level, last_assessed_date) VALUES (?,?,?,?,?)`
+      );
+      for (const { employee_id } of need) {
+        const n = 8 + Math.floor(Math.random() * 9);
+        const shuffled = [...skillIds].sort(() => Math.random() - 0.5).slice(0, n);
+        for (const sid of shuffled) {
+          const r = Math.random();
+          const cur = r < 0.3 ? 1 : r < 0.65 ? 2 : r < 0.9 ? 3 : 4;
+          insP.run(employee_id, sid, cur, Math.min(cur + (Math.random() < 0.5 ? 1 : 0), 4), today);
+        }
+      }
+      db.exec("COMMIT");
+    } catch {
+      db.exec("ROLLBACK");
+    }
+  }
+}
+
+// API 라우트 등 외부에서 "이 목록을 DB에 반영" 하고 싶을 때 쓰는 공개 함수.
+export function syncMembersToDb(members: Member[]) {
+  applyMembersToDb(getDb(), members);
 }
 
 export function query<T = Row>(sql: string, params: unknown[] = []): T[] {

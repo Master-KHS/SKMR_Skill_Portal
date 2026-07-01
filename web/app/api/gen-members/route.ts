@@ -2,6 +2,13 @@
 // 기존 인원은 유지하고 부족분만 추가. 대시보드/검색/AI가 대규모 데이터로 동작하게 함.
 import { NextRequest, NextResponse } from "next/server";
 import { query, run, tx } from "@/lib/db";
+import { writeMembersToXlsx } from "@/lib/members-xlsx";
+import type { Member } from "@/lib/types";
+
+// data/members.xlsx 가 SoT이므로, 이 라우트로 member 테이블을 바꾼 뒤에는 항상 엑셀에도 반영한다.
+function persistCurrentMembersToXlsx() {
+  writeMembersToXlsx(query<Member>("SELECT * FROM member ORDER BY employee_id"));
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,6 +63,7 @@ export async function POST(req: NextRequest) {
         run(`DELETE FROM member WHERE employee_id=?`, [id]);
       }
     });
+    persistCurrentMembersToXlsx();
     const total = (query<{ c: number }>(`SELECT COUNT(*) c FROM member`)[0]?.c) ?? 0;
     const msg = gIds.length < removeN
       ? `생성 인원만 감축 가능(원본 보존). 총 ${total}명 — 목표(${goal})보다 원본이 많으면 더 못 줄입니다.`
@@ -100,6 +108,7 @@ export async function POST(req: NextRequest) {
     }
   });
 
+  persistCurrentMembersToXlsx();
   const total = (query<{ c: number }>(`SELECT COUNT(*) c FROM member`)[0]?.c) ?? 0;
   return NextResponse.json({ ok: true, added: toAdd, total });
 }
@@ -114,6 +123,7 @@ export async function DELETE() {
       run(`DELETE FROM member WHERE employee_id=?`, [id]);
     }
   });
+  persistCurrentMembersToXlsx();
   const total = (query<{ c: number }>(`SELECT COUNT(*) c FROM member`)[0]?.c) ?? 0;
   return NextResponse.json({ ok: true, total });
 }
