@@ -5,6 +5,8 @@ import { TEAM_REQUIRED_DUMMY } from "@/lib/required-dummy";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const MAX_INDIVIDUAL_REQUIRED_SKILLS = 5;
+
 type Persona =
   | "employee"
   | "team_leader"
@@ -230,6 +232,19 @@ export async function POST(req: NextRequest) {
     if (existing.length) {
       return NextResponse.json({ ok: false, error: "Skill already exists in individual scope." });
     }
+    const currentCount = query<{ n: number }>(
+      `SELECT COUNT(*) n
+         FROM required_skill
+        WHERE org_or_individual = 'individual'
+          AND target_id = ?`,
+      [member_id]
+    )[0]?.n ?? 0;
+    if (currentCount >= MAX_INDIVIDUAL_REQUIRED_SKILLS) {
+      return NextResponse.json({
+        ok: false,
+        error: `Individual required skills are limited to ${MAX_INDIVIDUAL_REQUIRED_SKILLS}.`,
+      });
+    }
     const status = persona === "hr_admin" ? "approved" : "pending";
     run(
       `INSERT INTO required_skill
@@ -247,6 +262,28 @@ export async function POST(req: NextRequest) {
     }
     if (!isIndividualScopeAllowed(persona, actor, member_id)) {
       return NextResponse.json({ error: "Approval scope is not allowed." }, { status: 403 });
+    }
+    const approvedCount = query<{ n: number }>(
+      `SELECT COUNT(*) n
+         FROM required_skill
+        WHERE org_or_individual = 'individual'
+          AND target_id = ?
+          AND status = 'approved'`,
+      [member_id]
+    )[0]?.n ?? 0;
+    const targetStatus = query<{ status: string }>(
+      `SELECT status
+         FROM required_skill
+        WHERE org_or_individual = 'individual'
+          AND target_id = ?
+          AND skill_id = ?`,
+      [member_id, skill_id]
+    )[0]?.status;
+    if (targetStatus !== "approved" && approvedCount >= MAX_INDIVIDUAL_REQUIRED_SKILLS) {
+      return NextResponse.json({
+        ok: false,
+        error: `Approved individual skills are limited to ${MAX_INDIVIDUAL_REQUIRED_SKILLS}.`,
+      });
     }
     run(
       `UPDATE required_skill
