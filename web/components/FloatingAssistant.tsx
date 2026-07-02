@@ -63,14 +63,14 @@ export function FloatingAssistant() {
   if (!open) {
     return (
       <button
-        className="fixed bottom-5 right-5 z-50 flex h-32 w-32 items-center justify-center bg-transparent p-0 transition hover:scale-105"
+        className="fixed bottom-4 right-4 z-50 block h-36 w-36 border-0 bg-transparent p-0 shadow-none outline-none ring-0 transition hover:scale-105 focus:outline-none"
         onClick={() => setOpen(true)}
         title="AI 인재검색 챗봇 열기"
       >
         <img
           src="/assets/chatbot-robot.png"
           alt="AI 인재검색 챗봇"
-          className="h-28 w-28 object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.28)]"
+          className="h-full w-full object-contain mix-blend-multiply drop-shadow-[0_14px_24px_rgba(0,0,0,0.28)]"
         />
       </button>
     );
@@ -84,7 +84,7 @@ export function FloatingAssistant() {
     >
       <div className="flex items-center justify-between border-b border-[#F4D7B8] bg-[#FFF8F1] px-4 py-3">
         <div className="flex items-center gap-3">
-          <img src="/assets/chatbot-robot.png" alt="AI 인재검색 챗봇" className="h-12 w-12 object-contain" />
+          <img src="/assets/chatbot-robot.png" alt="AI 인재검색 챗봇" className="h-12 w-12 object-contain mix-blend-multiply" />
           <div>
             <div className="text-sm font-extrabold text-text-main">AI 인재검색 챗봇</div>
             <div className="text-xs text-text-muted">Skill Profile 기반 후보 추천</div>

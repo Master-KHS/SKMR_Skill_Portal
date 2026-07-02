@@ -41,12 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
   v("skill-insight", "Skill Insight", "Reporting", [F, T, T, T, T, T, T]),
 ];
 
-function v(
-  key: string,
-  title: string,
-  section: string,
-  vis: boolean[]
-): NavItem {
+function v(key: string, title: string, section: string, vis: boolean[]): NavItem {
   return {
     key,
     href: `/${key}`,
@@ -65,7 +60,7 @@ function v(
 }
 
 export function visibleNav(persona: PersonaCode): NavItem[] {
-  return NAV_ITEMS.filter((i) => i.visibility[persona]);
+  return NAV_ITEMS.filter((item) => item.visibility[persona]);
 }
 
 export const SECTIONS = ["Foundation", "Assessment", "Reporting"];
