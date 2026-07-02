@@ -101,7 +101,7 @@ export function DashboardClient() {
   return (
     <div>
       <PageHeader
-        title="Dashboard"
+        title="전사 Dashboard"
         desc="정형화된 Skill 진단 결과, 조직별 평균 Level, 요구 Level 충족률, 핵심 Skill Gap을 요약합니다."
       />
 

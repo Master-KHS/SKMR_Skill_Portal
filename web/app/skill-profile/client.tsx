@@ -42,7 +42,15 @@ function Radar({ data }: { data: { sub_family_name: string; avg_lv: number }[] }
 }
 
 // 원본 skill_profile.py 범위 규칙: employee→본인만, team_leader→본인 팀, 그 외(hr_admin 등)→전체 자유 선택.
-export function SkillProfileClient({ members }: { members: MemberOption[] }) {
+export function SkillProfileClient({
+  members,
+  title = "최종 결과 확인",
+  desc = "구성원별 확정 Skill 보유 현황 · Radar · Gap · 평가 이력",
+}: {
+  members: MemberOption[];
+  title?: string;
+  desc?: string;
+}) {
   const { persona, currentMember, loadingMembers } = usePersona();
 
   const visible = useMemo(() => {
@@ -86,7 +94,7 @@ export function SkillProfileClient({ members }: { members: MemberOption[] }) {
 
   return (
     <div className="max-w-5xl">
-      <PageHeader title="최종 결과 확인" desc="구성원별 확정 Skill 보유 현황 · Radar · Gap · 평가 이력" />
+      <PageHeader title={title} desc={desc} />
 
       <Card className="mb-4">
         <label className="text-sm text-text-muted mr-3">구성원</label>

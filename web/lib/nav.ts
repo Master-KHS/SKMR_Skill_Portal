@@ -36,12 +36,10 @@ export const NAV_ITEMS: NavItem[] = [
   v("committee", "Committee", "Assessment", [F, F, F, T, T, F, F]),
   v("skill-profile", "최종 결과 확인", "Assessment", [T, T, T, T, T, T, F]),
 
-  v("dashboard", "Dashboard", "Reporting", [T, T, T, T, T, T, T]),
-  v("report-personal", "개인별 분석 리포트", "Reporting", [T, T, T, T, T, T, F]),
-  v("report-team", "팀별 분석 리포트", "Reporting", [F, T, T, T, T, T, T]),
-  v("report-company", "전사 분석 리포트", "Reporting", [F, F, T, T, T, T, T]),
+  v("dashboard", "전사 Dashboard", "Reporting", [T, T, T, T, T, T, T]),
+  v("report-personal", "인별 리포트", "Reporting", [T, T, T, T, T, T, F]),
+  v("report-team", "조직별 리포트", "Reporting", [F, T, T, T, T, T, T]),
   v("talent-search", "Talent Search", "Reporting", [F, T, T, T, T, T, T]),
-  v("skill-insight", "Skill Insight", "Reporting", [F, T, T, T, T, T, T]),
 ];
 
 function v(key: string, title: string, section: string, vis: boolean[]): NavItem {

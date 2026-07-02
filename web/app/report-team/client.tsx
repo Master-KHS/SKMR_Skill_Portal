@@ -58,8 +58,8 @@ export function TeamReportClient() {
   return (
     <div>
       <PageHeader
-        title="팀별 분석 리포트"
-        desc="팀 단위 Required Skill 충족률, Core Skill 평균 Level, 우선 보완 Skill을 확인합니다."
+        title="조직별 리포트"
+        desc="조직 단위 Required Skill 충족률, Core Skill 평균 Level, 우선 보완 Skill을 확인합니다."
       />
 
       <div className="mb-4 flex items-center justify-between gap-3">
