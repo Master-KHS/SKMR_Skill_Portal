@@ -24,7 +24,7 @@ export function Card({
   return (
     <div className={`bg-bg-surface border border-border-soft ${className}`}>
       {title && (
-        <div className="border-b border-border-soft bg-bg-main/60 px-4 py-2.5 text-[13px] font-extrabold tracking-wide text-text-main">
+        <div className="border-b border-border-soft bg-bg-main/60 px-4 py-3 text-[15px] font-extrabold tracking-wide text-text-main">
           {title}
         </div>
       )}

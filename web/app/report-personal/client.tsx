@@ -222,6 +222,7 @@ export function PersonalReportClient({ members }: { members: MemberOption[] }) {
             <div className="grid gap-3 lg:grid-cols-2">
               {sortedGaps.map((gap) => {
                 const currentPct = Math.min(100, (gap.current_level / Math.max(gap.target_level, 1)) * 100);
+                const gapPct = Math.min(100, (gap.gap / Math.max(gap.target_level, 1)) * 100);
                 return (
                   <div key={gap.skill_id} className="border border-border-soft bg-white p-4">
                     <div className="mb-3 flex items-start justify-between gap-3">
@@ -236,8 +237,24 @@ export function PersonalReportClient({ members }: { members: MemberOption[] }) {
                       </div>
                       <Badge tone={toneByGap(gap.gap)} label={gap.gap <= 0 ? "충족" : `Gap ${gap.gap.toFixed(1)}`} />
                     </div>
-                    <div className="relative h-3 bg-bg-main">
-                      <div className="h-3 bg-sk-red" style={{ width: `${currentPct}%` }} />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-[12px] font-semibold text-text-muted">
+                        <span>현재 보유</span>
+                        <span>L{gap.current_level.toFixed(1)}</span>
+                      </div>
+                      <div className="relative h-3 bg-bg-main">
+                        <div className="h-3 bg-sk-red" style={{ width: `${currentPct}%` }} />
+                      </div>
+                      <div className="flex items-center justify-between text-[12px] font-semibold text-text-muted">
+                        <span>부족 Gap</span>
+                        <span>{gap.gap <= 0 ? "충족" : `-${gap.gap.toFixed(1)}`}</span>
+                      </div>
+                      <div className="relative h-3 bg-bg-main">
+                        <div
+                          className={`h-3 ${gap.gap <= 0 ? "bg-success" : "bg-warning"}`}
+                          style={{ width: `${gap.gap <= 0 ? 100 : gapPct}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
                 );
