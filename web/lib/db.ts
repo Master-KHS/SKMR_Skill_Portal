@@ -307,6 +307,145 @@ export function seedEvidenceFromSeed(force = false) {
   });
 }
 
+function roleBaseLevel(roleLevel: string | null): number {
+  if (!roleLevel) return 2;
+  const normalized = roleLevel.toUpperCase().replace(/\s/g, "");
+  if (normalized.includes("L3") || normalized === "3") return 1.5;
+  if (normalized.includes("L4") || normalized === "4") return 2;
+  if (normalized.includes("L5") || normalized === "5") return 2.5;
+  if (normalized.includes("L2") || normalized === "2") return 1.2;
+  if (normalized.includes("L6") || normalized === "6") return 3;
+  return 2;
+}
+
+function demoLevelFor(roleLevel: string | null, skillId: number): number {
+  const base = roleBaseLevel(roleLevel);
+  const adjustment = [-0.2, 0, 0.2][skillId % 3] ?? 0;
+  return Math.max(1, Math.min(4, Math.round((base + adjustment) * 10) / 10));
+}
+
+function committeeLevelFor(roleLevel: string | null, skillId: number): number {
+  const base = roleBaseLevel(roleLevel);
+  return base >= 2.5 || skillId % 7 === 0 ? 4 : 3;
+}
+
+export function seedDemoCompletedAssessments() {
+  const db = getDb();
+  const today = new Date().toISOString().slice(0, 10);
+  const members = db.prepare(
+    `SELECT employee_id, name, team, division, role_level
+       FROM member
+      WHERE job_type IN ('사무직','기술직','연구직')
+      ORDER BY employee_id`
+  ).all() as { employee_id: string; name: string; team: string | null; division: string | null; role_level: string | null }[];
+  const fallbackSkillIds = (db.prepare(`SELECT skill_id FROM skill ORDER BY skill_id`).all() as { skill_id: number }[])
+    .map((row) => row.skill_id)
+    .slice(0, 10);
+  const leaders = db.prepare(
+    `SELECT employee_id, team FROM member WHERE persona_role='team_leader'`
+  ).all() as { employee_id: string; team: string | null }[];
+  const calibrationActors = db.prepare(
+    `SELECT employee_id, division FROM member WHERE persona_role='calibration'`
+  ).all() as { employee_id: string; division: string | null }[];
+  const committeeActor =
+    (db.prepare(`SELECT employee_id FROM member WHERE persona_role='committee' ORDER BY employee_id LIMIT 1`).get() as
+      | { employee_id: string }
+      | undefined)?.employee_id ??
+    (db.prepare(`SELECT employee_id FROM member WHERE persona_role='hr_admin' ORDER BY employee_id LIMIT 1`).get() as
+      | { employee_id: string }
+      | undefined)?.employee_id ??
+    "demo_committee";
+  const hrActor =
+    (db.prepare(`SELECT employee_id FROM member WHERE persona_role='hr_admin' ORDER BY employee_id LIMIT 1`).get() as
+      | { employee_id: string }
+      | undefined)?.employee_id ?? committeeActor;
+
+  const leaderByTeam = new Map(leaders.map((leader) => [leader.team ?? "", leader.employee_id]));
+  const calibrationByDivision = new Map(calibrationActors.map((actor) => [actor.division ?? "", actor.employee_id]));
+  const effectiveReq = db.prepare(
+    `SELECT r.skill_id, MAX(r.target_level) AS target_level
+       FROM required_skill r
+      WHERE r.status='approved'
+        AND (
+          (r.org_or_individual='company' AND r.target_id='ALL')
+          OR (r.org_or_individual='department' AND r.target_id=?)
+          OR (r.org_or_individual='individual' AND r.target_id=?)
+        )
+      GROUP BY r.skill_id
+      ORDER BY r.skill_id`
+  );
+  const upsertProfile = db.prepare(
+    `INSERT INTO skill_profile (member_id, skill_id, current_level, target_level, last_assessed_date)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(member_id, skill_id) DO UPDATE SET
+       current_level=excluded.current_level,
+       target_level=excluded.target_level,
+       last_assessed_date=excluded.last_assessed_date`
+  );
+  const memberProfiles = db.prepare(
+    `SELECT skill_id, target_level FROM skill_profile WHERE member_id=? ORDER BY skill_id`
+  );
+  const insertAssessment = db.prepare(
+    `INSERT INTO assessment
+       (member_id, skill_id, stage, assessor_id, proposed_level, confirmed_level, rationale, assessed_date, status, narrative)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+
+  tx(() => {
+    db.exec("DELETE FROM assessment");
+    for (const member of members) {
+      const reqRows = effectiveReq.all(member.team, member.employee_id) as { skill_id: number; target_level: number }[];
+      const reqs = reqRows.length
+        ? reqRows
+        : fallbackSkillIds.map((skillId) => ({ skill_id: skillId, target_level: 3 }));
+      const leaderId = leaderByTeam.get(member.team ?? "") ?? hrActor;
+      const calibrationId = calibrationByDivision.get(member.division ?? "") ?? hrActor;
+
+      for (const req of reqs) {
+        const skillLevel = demoLevelFor(member.role_level, req.skill_id);
+        upsertProfile.run(member.employee_id, req.skill_id, skillLevel, req.target_level ?? 3, today);
+      }
+
+      const profiles = memberProfiles.all(member.employee_id) as { skill_id: number; target_level: number }[];
+      for (const profile of profiles) {
+        const skillLevel = demoLevelFor(member.role_level, profile.skill_id);
+        const committeeLevel = committeeLevelFor(member.role_level, profile.skill_id);
+        const selfLevel = Math.max(1, Math.round((skillLevel - 0.2) * 10) / 10);
+        const narrative =
+          committeeLevel === 4
+            ? `${member.name} 후보는 ${member.team ?? member.division ?? "소속 조직"}에서 핵심 Skill을 안정적으로 발휘한 데모 Narrative입니다. 역할 수준과 보유 Skill을 고려해 Lv4 후보로 상정합니다.`
+            : `Calibration 결과 Lv3 확정 대상입니다. 현재 역할 수준 기준으로 기본 수행 역량을 충족한 데모 평가입니다.`;
+
+        upsertProfile.run(member.employee_id, profile.skill_id, skillLevel, profile.target_level ?? 3, today);
+        insertAssessment.run(member.employee_id, profile.skill_id, "self", member.employee_id, selfLevel, selfLevel, "데모 완료 데이터: 자가진단 제출", today, "submitted", null);
+        insertAssessment.run(member.employee_id, profile.skill_id, "leader", leaderId, skillLevel, skillLevel, "데모 완료 데이터: 리더 진단 제출", today, "submitted", null);
+        insertAssessment.run(
+          member.employee_id,
+          profile.skill_id,
+          "calibration",
+          calibrationId,
+          committeeLevel,
+          committeeLevel === 3 ? 3 : null,
+          "데모 완료 데이터: Calibration 검토",
+          today,
+          committeeLevel === 4 ? "submitted" : "confirmed",
+          narrative
+        );
+        if (committeeLevel === 4) {
+          insertAssessment.run(member.employee_id, profile.skill_id, "committee", committeeActor, 4, 4, "데모 완료 데이터: Committee 최종 확정", today, "confirmed", narrative);
+        }
+      }
+    }
+  });
+
+  return {
+    members: members.length,
+    profiles: (db.prepare(`SELECT COUNT(*) c FROM skill_profile`).get() as { c: number }).c,
+    assessments: (db.prepare(`SELECT COUNT(*) c FROM assessment`).get() as { c: number }).c,
+    committee: (db.prepare(`SELECT COUNT(*) c FROM assessment WHERE stage='committee'`).get() as { c: number }).c,
+  };
+}
+
 export function tx(fn: () => void) {
   const db = getDb();
   db.exec("BEGIN");

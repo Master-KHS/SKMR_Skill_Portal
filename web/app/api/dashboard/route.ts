@@ -84,11 +84,82 @@ export async function GET() {
     return { team, nTeam, skills, overall };
   });
 
+  const companySkillOptions = query<{ skill_id: number; skill_name: string; target_level: number }>(
+    `SELECT r.skill_id, s.skill_name, MAX(r.target_level) target_level
+       FROM required_skill r
+       JOIN skill s ON r.skill_id=s.skill_id
+      WHERE r.org_or_individual='company'
+        AND r.target_id='ALL'
+        AND r.status='approved'
+      GROUP BY r.skill_id, s.skill_name
+      ORDER BY r.skill_id`
+  );
+
+  const companySkillTeams = companySkillOptions.map((skill) => ({
+    ...skill,
+    teams: teams.map((team) => {
+      const members = query<{ employee_id: string }>(
+        `SELECT employee_id FROM member WHERE team=? AND job_type IN ${EVAL}`,
+        [team]
+      ).map((r) => r.employee_id);
+      if (!members.length) return { team, nTeam: 0, avg_lv: 0, holders: 0 };
+      const ph = members.map(() => "?").join(",");
+      const stat = query<{ avg_lv: number; holders: number }>(
+        `SELECT AVG(current_level) avg_lv, COUNT(*) holders
+           FROM skill_profile
+          WHERE skill_id=? AND member_id IN (${ph})`,
+        [skill.skill_id, ...members]
+      )[0];
+      return {
+        team,
+        nTeam: members.length,
+        avg_lv: Math.round((stat?.avg_lv ?? 0) * 10) / 10,
+        holders: stat?.holders ?? 0,
+      };
+    }),
+  }));
+
+  const teamCoreStatus = teams.map((team) => {
+    const members = query<{ employee_id: string }>(
+      `SELECT employee_id FROM member WHERE team=? AND job_type IN ${EVAL}`,
+      [team]
+    ).map((r) => r.employee_id);
+    const nTeam = members.length;
+    const ph = members.map(() => "?").join(",");
+    const coreSkills = query<{ skill_id: number; skill_name: string; target_level: number }>(
+      `SELECT r.skill_id, s.skill_name, MAX(r.target_level) target_level
+         FROM required_skill r
+         JOIN skill s ON r.skill_id=s.skill_id
+        WHERE r.org_or_individual='department'
+          AND r.target_id=?
+          AND r.status='approved'
+          AND r.is_core=1
+        GROUP BY r.skill_id, s.skill_name
+        ORDER BY r.skill_id`,
+      [team]
+    ).map((skill) => {
+      const stat = nTeam
+        ? query<{ avg_lv: number; holders: number }>(
+            `SELECT AVG(current_level) avg_lv, COUNT(*) holders
+               FROM skill_profile
+              WHERE skill_id=? AND member_id IN (${ph})`,
+            [skill.skill_id, ...members]
+          )[0]
+        : null;
+      return {
+        ...skill,
+        avg_lv: Math.round((stat?.avg_lv ?? 0) * 10) / 10,
+        holders: stat?.holders ?? 0,
+      };
+    });
+    return { team, nTeam, skills: coreSkills };
+  });
+
   // ---- 상위 보유자 Top 5 ----
   const topHolders = query<{
-    name: string; team: string; role_level: string; n_skills: number; avg_lv: number; critical_held: number;
+    name: string; division: string; team: string; role_level: string; position: string; n_skills: number; avg_lv: number; critical_held: number;
   }>(
-    `SELECT m.name, m.team, m.role_level,
+    `SELECT m.name, m.division, m.team, m.role_level, m.position,
             COUNT(sp.skill_id) n_skills, AVG(sp.current_level) avg_lv,
             SUM(CASE WHEN s.is_critical=1 THEN 1 ELSE 0 END) critical_held
      FROM member m
@@ -108,17 +179,6 @@ export async function GET() {
     stage: s,
     cnt: funnelMap.get(s) ?? 0,
   }));
-
-  // ---- Sub-family 평균 ----
-  const subAvg = query<{ sub_family_name: string; avg_lv: number; cnt: number }>(
-    `SELECT sf.sub_family_name, AVG(sp.current_level) avg_lv, COUNT(*) cnt
-     FROM skill_profile sp
-     JOIN skill s ON sp.skill_id=s.skill_id
-     JOIN sub_skill_family sf ON s.sub_family_id=sf.sub_family_id
-     JOIN member m ON sp.member_id=m.employee_id
-     WHERE m.job_type IN ${EVAL}
-     GROUP BY sf.sub_family_name ORDER BY avg_lv DESC`
-  ).map((r) => ({ ...r, avg_lv: Math.round(r.avg_lv * 100) / 100 }));
 
   // ---- 부족 Skill Top 5 (우선도 = Gap × (1+Scarcity) × Core가중) ----
   const reqAll = query<{ skill_id: number; target_level: number; is_core: number }>(
@@ -188,5 +248,15 @@ export async function GET() {
      ORDER BY a.assessment_id DESC LIMIT 8`
   );
 
-  return NextResponse.json({ kpi, teamStatus, topHolders, funnel, subAvg, gaps, critical, recent });
+  return NextResponse.json({
+    kpi,
+    teamStatus,
+    companySkillTeams,
+    teamCoreStatus,
+    topHolders,
+    funnel,
+    gaps,
+    critical,
+    recent,
+  });
 }

@@ -1,9 +1,11 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { usePersona } from "./PersonaContext";
 import { visibleNav, SECTIONS, PERSONA_LABELS } from "@/lib/nav";
 import type { PersonaCode } from "@/lib/types";
+import { FloatingAssistant } from "./FloatingAssistant";
+import { usePersona } from "./PersonaContext";
 
 const PERSONAS: PersonaCode[] = [
   "hr_admin",
@@ -22,26 +24,30 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      {/* 사이드바 — 흰색 베이스 + SK Red 브랜드 */}
       <aside className="w-64 shrink-0 bg-white border-r border-border-soft flex flex-col">
-        <div className="px-5 py-4 border-b-2 border-sk-red flex items-center gap-3">
-          <span className="inline-flex h-8 w-8 items-center justify-center bg-sk-red text-white text-sm font-black tracking-tight">
-            SK
-          </span>
+        <div className="px-4 py-5 border-b-2 border-sk-red flex flex-col items-center gap-3 text-center">
+          <img
+            src="/assets/skill-logo.png"
+            alt="Skill logo"
+            className="h-24 w-24 shrink-0 object-contain"
+          />
           <div>
-            <div className="text-[15px] font-extrabold tracking-tight text-text-main leading-none">
-              Skill Agent
+            <div className="text-[16px] font-extrabold tracking-tight text-text-main leading-tight">
+              Skill 기반 인재관리
+              <br />
+              에이전트
             </div>
-            <div className="text-[11px] text-text-muted mt-1">SK머티리얼즈</div>
+            <div className="text-[11px] text-text-muted mt-1">Talent Management</div>
           </div>
         </div>
+
         <nav className="flex-1 overflow-y-auto py-3">
           {SECTIONS.map((section) => {
             const items = nav.filter((i) => i.section === section);
             if (!items.length) return null;
             return (
-              <div key={section} className="mb-4">
-                <div className="px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">
+              <div key={section} className="mb-5">
+                <div className="px-5 py-2 text-[14px] font-extrabold uppercase tracking-[0.04em] text-text-main">
                   {section}
                 </div>
                 {items.map((item) => {
@@ -64,17 +70,20 @@ export function Shell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+
         <div className="px-5 py-3 border-t border-border-soft text-[10px] uppercase tracking-wider text-text-muted">
           prototype · <span className="text-sk-red font-bold">BUILD R12 (2026-07-01)</span>
         </div>
       </aside>
 
-      {/* 본문 */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 shrink-0 bg-white border-b border-border-soft flex items-center justify-between px-6">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="h-3 w-1 bg-sk-red inline-block" />
-            <span className="text-text-muted">Skill 관리 시스템</span>
+          <div className="flex min-w-[220px] items-center gap-2 text-sm">
+            <span className="h-7 w-[2px] shrink-0 bg-sk-red inline-block" />
+            <span className="leading-tight text-text-muted">
+              <span className="block whitespace-nowrap">Skill 기반 인재관리</span>
+              <span className="block whitespace-nowrap">시스템</span>
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-sm">
@@ -91,10 +100,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 ))}
               </select>
             </label>
+
             <label className="flex items-center gap-2 text-sm">
               <span className="text-text-muted text-xs">사람</span>
               {members.length === 0 ? (
-                <span className="text-xs text-warning border border-warning px-2 py-1.5">매핑된 인원 없음</span>
+                <span className="text-xs text-warning border border-warning px-2 py-1.5">
+                  매핑된 인원 없음
+                </span>
               ) : persona === "team_leader" ? (
                 <div className="flex max-w-[620px] items-center gap-1.5 overflow-x-auto">
                   {members.map((m) => {
@@ -139,6 +151,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </header>
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
+      <FloatingAssistant />
     </div>
   );
 }

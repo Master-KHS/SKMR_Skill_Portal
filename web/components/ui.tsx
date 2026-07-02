@@ -4,12 +4,12 @@ import type { ReactNode } from "react";
 
 export function PageHeader({ title, desc }: { title: string; desc?: string }) {
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-2.5">
-        <span className="h-5 w-1.5 bg-sk-red inline-block" />
-        <h1 className="text-xl font-extrabold tracking-tight text-text-main">{title}</h1>
+    <div className="mb-6 border border-border-soft bg-bg-main/70 px-5 py-4">
+      <div className="mb-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-text-muted">
+        Skill Portal
       </div>
-      {desc && <p className="text-sm text-text-muted mt-1.5 ml-4">{desc}</p>}
+      <h1 className="text-2xl font-extrabold tracking-tight text-text-main">{title}</h1>
+      {desc && <p className="mt-1.5 text-sm leading-relaxed text-text-muted">{desc}</p>}
     </div>
   );
 }
@@ -26,7 +26,7 @@ export function Card({
   return (
     <div className={`bg-bg-surface border border-border-soft ${className}`}>
       {title && (
-        <div className="px-4 py-2.5 border-b border-border-soft bg-bg-main/60 text-[13px] font-bold text-text-main uppercase tracking-wide">
+        <div className="border-b border-border-soft bg-bg-main/60 px-4 py-2.5 text-[13px] font-extrabold tracking-wide text-text-main">
           {title}
         </div>
       )}

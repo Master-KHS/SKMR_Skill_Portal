@@ -9,6 +9,7 @@ import {
   seedRequiredFromSeed,
   seedProfilesFromSeed,
   seedEvidenceFromSeed,
+  seedDemoCompletedAssessments,
 } from "@/lib/db";
 import { MEMBERS_XLSX_PATH } from "@/lib/members-xlsx";
 
@@ -95,6 +96,11 @@ export async function POST(req: NextRequest) {
   if (body.action === "seedEvidence") {
     seedEvidenceFromSeed(true);
     return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === "seedDemoCompletedAssessments") {
+    const result = seedDemoCompletedAssessments();
+    return NextResponse.json({ ok: true, ...result });
   }
 
   return NextResponse.json({ error: "unknown action" }, { status: 400 });
