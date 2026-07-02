@@ -63,11 +63,15 @@ export function FloatingAssistant() {
   if (!open) {
     return (
       <button
-        className="fixed bottom-6 right-6 z-50 flex h-20 w-20 items-center justify-center border-2 border-[#F4D7B8] bg-white shadow-[0_12px_32px_rgba(0,0,0,0.18)] transition hover:border-sk-orange"
+        className="fixed bottom-5 right-5 z-50 flex h-32 w-32 items-center justify-center bg-transparent p-0 transition hover:scale-105"
         onClick={() => setOpen(true)}
         title="AI 인재검색 챗봇 열기"
       >
-        <img src="/assets/chatbot-robot.png" alt="AI 인재검색 챗봇" className="h-16 w-16 object-contain" />
+        <img
+          src="/assets/chatbot-robot.png"
+          alt="AI 인재검색 챗봇"
+          className="h-28 w-28 object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.28)]"
+        />
       </button>
     );
   }
@@ -80,7 +84,7 @@ export function FloatingAssistant() {
     >
       <div className="flex items-center justify-between border-b border-[#F4D7B8] bg-[#FFF8F1] px-4 py-3">
         <div className="flex items-center gap-3">
-          <img src="/assets/chatbot-robot.png" alt="AI 인재검색 챗봇" className="h-10 w-10 object-contain" />
+          <img src="/assets/chatbot-robot.png" alt="AI 인재검색 챗봇" className="h-12 w-12 object-contain" />
           <div>
             <div className="text-sm font-extrabold text-text-main">AI 인재검색 챗봇</div>
             <div className="text-xs text-text-muted">Skill Profile 기반 후보 추천</div>
@@ -109,9 +113,7 @@ export function FloatingAssistant() {
           </BotBubble>
 
           {lastQuestion && <UserBubble>{lastQuestion}</UserBubble>}
-
           {loading && <BotBubble>내부 Skill Profile과 Raw Data를 확인하는 중입니다...</BotBubble>}
-
           {error && <div className="border border-sk-red bg-sk-red/[0.06] p-3 text-sm text-sk-red">{error}</div>}
 
           {response && (
@@ -190,25 +192,6 @@ export function FloatingAssistant() {
                   </div>
                 )}
               </Panel>
-
-              {response.followUpSuggestions.length > 0 && (
-                <Panel title="후속 질문">
-                  <div className="space-y-2">
-                    {response.followUpSuggestions.map((item) => (
-                      <button
-                        key={item}
-                        className="block w-full border border-[#F4D7B8] bg-white px-3 py-2 text-left text-xs hover:border-sk-orange"
-                        onClick={() => {
-                          setQuestion(item);
-                          ask(item);
-                        }}
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                </Panel>
-              )}
             </>
           )}
         </div>
