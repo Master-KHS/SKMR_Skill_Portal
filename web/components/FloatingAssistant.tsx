@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui";
 import type { AssistantResponse, SearchFilters } from "@/lib/assistant-types";
 
 const EXAMPLES = [
-  "GC 분석 스킬 L3 이상 보유자를 찾아줘",
-  "OLED 소재 설계가 가능한 후보를 보여줘",
-  "공정 개선 경험이 있을 만한 인재를 추천해줘",
+  "GC 분석 경험이 있는 후보를 찾아줘",
+  "OLED 소재 설계가 가능한 인재를 추천해줘",
+  "Photo Resist 평가 경험자를 보여줘",
 ];
 
 function filterEntries(filters: SearchFilters) {
@@ -18,7 +18,7 @@ function filterEntries(filters: SearchFilters) {
     filters.role_level ? ["R/L", filters.role_level] : null,
     filters.position ? ["직책", filters.position] : null,
     (filters.skills?.length ?? 0) > 0
-      ? ["스킬", filters.skills!.map((skill) => `#${skill.skill_id} L${skill.min_level}+`).join(", ")]
+      ? ["Skill", filters.skills!.map((skill) => `#${skill.skill_id} L${skill.min_level}+`).join(", ")]
       : null,
   ].filter(Boolean) as [string, string][];
 }
@@ -32,10 +32,7 @@ export function FloatingAssistant() {
   const [error, setError] = useState<string | null>(null);
   const [response, setResponse] = useState<AssistantResponse | null>(null);
 
-  const summary = useMemo(() => {
-    if (!response) return [];
-    return filterEntries(response.filters);
-  }, [response]);
+  const summary = useMemo(() => (response ? filterEntries(response.filters) : []), [response]);
 
   async function ask(nextQuestion: string) {
     const trimmed = nextQuestion.trim();
@@ -108,18 +105,14 @@ export function FloatingAssistant() {
       <div className="flex-1 overflow-y-auto bg-white p-4">
         <div className="space-y-4">
           <BotBubble>
-            찾고 싶은 인재 조건을 입력하세요. 스킬, 팀, R/L, 직책, 경험 키워드를 자연어로 물어볼 수 있습니다.
+            Skill 기반으로 인재를 추천해드립니다. 스킬, 팀, R/L, 직책, 경험 키워드를 자연어로 입력하세요.
           </BotBubble>
 
           {lastQuestion && <UserBubble>{lastQuestion}</UserBubble>}
 
-          {loading && <BotBubble>조건을 해석하고 후보를 찾는 중입니다...</BotBubble>}
+          {loading && <BotBubble>내부 Skill Profile과 Raw Data를 확인하는 중입니다...</BotBubble>}
 
-          {error && (
-            <div className="border border-sk-red bg-sk-red/[0.06] p-3 text-sm text-sk-red">
-              {error}
-            </div>
-          )}
+          {error && <div className="border border-sk-red bg-sk-red/[0.06] p-3 text-sm text-sk-red">{error}</div>}
 
           {response && (
             <>
@@ -136,9 +129,9 @@ export function FloatingAssistant() {
                       }
                       label={
                         response.verification === "pass"
-                          ? "검증 Pass"
+                          ? "근거 확인"
                           : response.verification === "fail"
-                            ? "검증 Fail"
+                            ? "후보 없음"
                             : "검토 필요"
                       }
                     />
@@ -146,7 +139,7 @@ export function FloatingAssistant() {
                     {!response.grounded && <Badge tone="warning" label="조건 해석 약함" />}
                   </div>
                   {response.interpretedIntent && (
-                    <div className="text-xs text-text-muted">의도: {response.interpretedIntent}</div>
+                    <div className="text-xs text-text-muted">해석: {response.interpretedIntent}</div>
                   )}
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">{response.answer}</div>
                 </div>
@@ -154,7 +147,7 @@ export function FloatingAssistant() {
 
               <Panel title="해석된 조건">
                 {summary.length === 0 ? (
-                  <div className="text-sm text-text-muted">구조화된 조건이 충분히 추출되지 않았습니다.</div>
+                  <div className="text-sm text-text-muted">구조화된 조건을 충분히 추출하지 못했습니다.</div>
                 ) : (
                   <div className="grid gap-2 text-sm">
                     {summary.map(([label, value]) => (
@@ -184,13 +177,13 @@ export function FloatingAssistant() {
                           <div className="text-right text-xs text-text-muted">
                             Skill {row.n_skills}
                             <br />
-                            Avg {row.avg_level}
+                            Avg L{row.avg_level}
                           </div>
                         </div>
                         <div className="mt-2 text-xs leading-relaxed text-text-muted">
                           {row.matched.length > 0
                             ? row.matched.map((matched) => `${matched.skill_name} L${matched.level}`).join(", ")
-                            : "매칭 스킬 없음"}
+                            : "직접 매칭 Skill 없음"}
                         </div>
                       </div>
                     ))}

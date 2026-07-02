@@ -38,6 +38,32 @@ export interface AssistantDataSlot {
   note: string;
 }
 
+export interface AssistantDashboardMetric {
+  label: string;
+  value: string;
+  note?: string;
+}
+
+export interface AssistantDashboardBar {
+  label: string;
+  value: number;
+  displayValue: string;
+}
+
+export interface AssistantDashboardInsight {
+  title: string;
+  detail: string;
+}
+
+export interface AssistantDashboard {
+  title: string;
+  subtitle: string;
+  metrics: AssistantDashboardMetric[];
+  teamAverages: AssistantDashboardBar[];
+  topMembers: AssistantDashboardBar[];
+  insights: AssistantDashboardInsight[];
+}
+
 export interface AssistantResponse {
   answer: string;
   filters: SearchFilters;
@@ -51,4 +77,5 @@ export interface AssistantResponse {
   docEvidence: AssistantDocEvidence[];
   dataSlots: AssistantDataSlot[];
   followUpSuggestions: string[];
+  dashboard?: AssistantDashboard;
 }

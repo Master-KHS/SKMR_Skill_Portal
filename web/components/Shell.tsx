@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -29,15 +29,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <img
             src="/assets/skill-logo.png"
             alt="Skill logo"
-            className="h-24 w-24 shrink-0 object-contain"
+            className="h-28 w-28 shrink-0 object-contain"
           />
           <div>
-            <div className="text-[16px] font-extrabold tracking-tight text-text-main leading-tight">
-              Skill 기반 인재관리
-              <br />
-              에이전트
+            <div className="text-[17px] font-extrabold tracking-tight text-text-main leading-tight">
+              <span className="block whitespace-nowrap">Skill 기반</span>
+              <span className="block whitespace-nowrap">인재관리 Agent</span>
             </div>
-            <div className="text-[11px] text-text-muted mt-1">Talent Management</div>
+            <div className="text-[11px] text-text-muted mt-1">Diagnosis + AI Talent Search</div>
           </div>
         </div>
 
@@ -72,18 +71,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="px-5 py-3 border-t border-border-soft text-[10px] uppercase tracking-wider text-text-muted">
-          prototype · <span className="text-sk-red font-bold">BUILD R12 (2026-07-01)</span>
+          prototype <span className="text-sk-red font-bold">BUILD R12 (2026-07-01)</span>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 shrink-0 bg-white border-b border-border-soft flex items-center justify-between px-6">
-          <div className="flex min-w-[220px] items-center gap-2 text-sm">
+          <div className="flex min-w-[320px] items-center gap-2 text-sm">
             <span className="h-7 w-[2px] shrink-0 bg-sk-red inline-block" />
-            <span className="leading-tight text-text-muted">
-              <span className="block whitespace-nowrap">Skill 기반 인재관리</span>
-              <span className="block whitespace-nowrap">시스템</span>
-            </span>
+            <span className="whitespace-nowrap text-text-muted">Skill 기반 인재관리 Agent</span>
           </div>
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-sm">

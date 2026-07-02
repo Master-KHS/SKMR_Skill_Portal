@@ -25,7 +25,7 @@ set "EXISTING_APP="
 for /f %%V in ('powershell -NoProfile -Command "$busy = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue; if ($busy) { try { $resp = Invoke-WebRequest -UseBasicParsing http://127.0.0.1:3000/ -TimeoutSec 3; if ($resp.StatusCode -eq 200) { '1' } } catch {} }"') do set "EXISTING_APP=%%V"
 
 if "%EXISTING_APP%"=="1" (
-  echo Existing SKMR Skill Agent instance detected at http://localhost:3000/
+  echo Existing Skill based Talent Management Agent instance detected at http://localhost:3000/
   start "" http://localhost:3000/
   exit /b 0
 )
@@ -39,7 +39,7 @@ if not "%PORT%"=="3000" (
 start "" powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 6; Start-Process 'http://localhost:%PORT%/'"
 
 echo ================================================
-echo  SKMR Skill Agent running at http://localhost:%PORT%/
+echo  Skill based Talent Management Agent running at http://localhost:%PORT%/
 echo  mode: dev
 echo  source: %CD%
 echo  close this window to stop
@@ -50,3 +50,4 @@ set WATCHPACK_POLLING=true
 call npm run dev -- --hostname 0.0.0.0 --port %PORT%
 
 pause
+

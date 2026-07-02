@@ -1,12 +1,10 @@
-// 공용 UI 프리미티브 — 각진(라운드 없음) 디자인. SK Red 브랜드 + Orange 액션.
-// 상태는 색+텍스트 라벨을 항상 함께.
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export function PageHeader({ title, desc }: { title: string; desc?: string }) {
   return (
     <div className="mb-6 border border-border-soft bg-bg-main/70 px-5 py-4">
       <div className="mb-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-text-muted">
-        Skill Portal
+        Skill 기반 인재관리 Agent
       </div>
       <h1 className="text-2xl font-extrabold tracking-tight text-text-main">{title}</h1>
       {desc && <p className="mt-1.5 text-sm leading-relaxed text-text-muted">{desc}</p>}
@@ -46,7 +44,6 @@ const TONE: Record<Tone, string> = {
   neutral: "border-border-soft text-text-muted bg-white",
 };
 
-// 색만으로 상태 전달 금지 — label 텍스트 필수.
 export function Badge({ tone, label }: { tone: Tone; label: string }) {
   return (
     <span className={`inline-block border px-2 py-0.5 text-xs font-semibold ${TONE[tone]}`}>
@@ -78,7 +75,6 @@ export function Stat({
   );
 }
 
-// 주요 실행 버튼 — Orange
 export function PrimaryButton({
   children,
   ...props

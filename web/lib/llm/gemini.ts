@@ -1,6 +1,4 @@
-// Gemini REST 연동 (google generativelanguage API).
-// 키: 환경변수 GEMINI_API_KEY. 모델: GEMINI_MODEL (기본 gemini-2.0-flash).
-import type { LlmProvider, LlmMessage } from "./provider";
+import type { LlmMessage, LlmProvider } from "./provider";
 
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
@@ -9,19 +7,15 @@ export class GeminiProvider implements LlmProvider {
 
   private model = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
 
-  private async call(
-    system: string,
-    messages: LlmMessage[],
-    jsonMode: boolean
-  ): Promise<string> {
+  private async call(system: string, messages: LlmMessage[], jsonMode: boolean): Promise<string> {
     const key = process.env.GEMINI_API_KEY;
-    if (!key) throw new Error("GEMINI_API_KEY 미설정");
+    if (!key) throw new Error("GEMINI_API_KEY가 설정되어 있지 않습니다.");
 
     const body = {
       systemInstruction: { parts: [{ text: system }] },
-      contents: messages.map((m) => ({
-        role: m.role,
-        parts: [{ text: m.text }],
+      contents: messages.map((message) => ({
+        role: message.role,
+        parts: [{ text: message.text }],
       })),
       generationConfig: {
         temperature: 0.2,
@@ -39,9 +33,10 @@ export class GeminiProvider implements LlmProvider {
       const detail = await res.text();
       throw new Error(`Gemini API 오류 ${res.status}: ${detail.slice(0, 300)}`);
     }
+
     const data = await res.json();
     const text: string =
-      data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? "").join("") ?? "";
+      data?.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text ?? "").join("") ?? "";
     return text.trim();
   }
 

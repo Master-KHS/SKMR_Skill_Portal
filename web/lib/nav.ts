@@ -36,8 +36,9 @@ export const NAV_ITEMS: NavItem[] = [
   v("committee", "Committee", "Assessment", [F, F, F, T, T, F, F]),
   v("skill-profile", "최종 결과 확인", "Assessment", [T, T, T, T, T, T, F]),
 
-  v("dashboard", "진단 결과 대시보드", "Reporting", [T, T, T, T, T, T, T]),
+  v("dashboard", "Dashboard", "Reporting", [T, T, T, T, T, T, T]),
   v("talent-search", "Talent Search", "Reporting", [F, T, T, T, T, T, T]),
+  v("skill-insight", "Skill Insight", "Reporting", [F, T, T, T, T, T, T]),
 ];
 
 function v(

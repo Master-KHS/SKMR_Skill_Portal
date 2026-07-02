@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import "./globals.css";
 import { PersonaProvider } from "@/components/PersonaContext";
 import { Shell } from "@/components/Shell";
 
 export const metadata: Metadata = {
-  title: "SKMR Skill Agent",
-  description: "SK머티리얼즈 Skill 관리 시스템",
+  title: "Skill 기반 인재관리 Agent",
+  description: "Skill 기반 진단 관리 시스템과 AI 인재검색 에이전트",
 };
 
 export default function RootLayout({
