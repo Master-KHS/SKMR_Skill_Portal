@@ -166,7 +166,7 @@ export function SkillInsightClient({ members, skills, profiles }: Props) {
     <div>
       <PageHeader
         title="Skill Insight"
-        desc="자연어 질문을 기반으로 내부 Skill Profile을 집계해 조직별 평균, 상위 보유자, 관련 Skill 범위를 보여줍니다."
+        desc="자연어 질문으로 Skill Profile을 분석해 조직별 평균, 상위 보유자, 관련 Skill 범위를 대시보드 형태로 보여줍니다."
       />
 
       <div className="grid gap-4 lg:grid-cols-[1.05fr,0.95fr]">

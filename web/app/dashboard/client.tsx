@@ -101,7 +101,7 @@ export function DashboardClient() {
 
   return (
     <div>
-      <PageHeader title="진단 결과 확인" desc="전사 Skill 현황과 우선 육성 Gap을 요약합니다." />
+      <PageHeader title="Dashboard" desc="정형화된 Skill 진단 결과, 조직별 평균, 핵심 Skill Gap, 상위 보유자를 한 화면에서 확인합니다." />
 
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">

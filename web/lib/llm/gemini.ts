@@ -1,6 +1,7 @@
 import type { LlmMessage, LlmProvider } from "./provider";
 
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+let quotaBlockedUntil = 0;
 
 export class GeminiProvider implements LlmProvider {
   name = "gemini";
@@ -9,7 +10,8 @@ export class GeminiProvider implements LlmProvider {
 
   private async call(system: string, messages: LlmMessage[], jsonMode: boolean): Promise<string> {
     const key = process.env.GEMINI_API_KEY;
-    if (!key) throw new Error("GEMINI_API_KEY가 설정되어 있지 않습니다.");
+    if (!key) throw new Error("GEMINI_KEY_MISSING");
+    if (Date.now() < quotaBlockedUntil) throw new Error("GEMINI_QUOTA_BLOCKED");
 
     const body = {
       systemInstruction: { parts: [{ text: system }] },
@@ -19,19 +21,33 @@ export class GeminiProvider implements LlmProvider {
       })),
       generationConfig: {
         temperature: 0.2,
+        maxOutputTokens: 700,
         ...(jsonMode ? { responseMimeType: "application/json" } : {}),
       },
     };
 
-    const res = await fetch(`${API_BASE}/${this.model}:generateContent?key=${key}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE}/${this.model}:generateContent?key=${key}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!res.ok) {
-      const detail = await res.text();
-      throw new Error(`Gemini API 오류 ${res.status}: ${detail.slice(0, 300)}`);
+      if (res.status === 429) {
+        quotaBlockedUntil = Date.now() + 10 * 60 * 1000;
+        throw new Error("GEMINI_QUOTA_EXCEEDED");
+      }
+      if (res.status === 400) throw new Error("GEMINI_BAD_REQUEST");
+      if (res.status === 401 || res.status === 403) throw new Error("GEMINI_AUTH_FAILED");
+      throw new Error(`GEMINI_HTTP_${res.status}`);
     }
 
     const data = await res.json();

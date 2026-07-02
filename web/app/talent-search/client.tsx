@@ -85,7 +85,7 @@ export function TalentSearchClient({ facets }: { facets: Facets }) {
 
   return (
     <div>
-      <PageHeader title="Talent Search" desc="다양한 조건 필터로 인재를 검색합니다." />
+      <PageHeader title="Talent Search" desc="스킬, 조직, R/L, 직책, 직종 조건을 직접 선택해 후보자를 검색합니다." />
 
       <Card title="검색 조건" className="mb-4">
         <div className="grid grid-cols-5 gap-3 mb-4">
