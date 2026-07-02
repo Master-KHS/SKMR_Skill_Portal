@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { PageHeader, Card, Badge } from "@/components/ui";
+import { PageHeader, Card, Badge, Stat } from "@/components/ui";
 
 interface TeamSkill {
   skill_id: number;
@@ -22,7 +22,7 @@ interface Dash {
   recent: { assessed_date: string; stage: string; proposed_level: number | null; confirmed_level: number | null; name: string; skill_name: string }[];
 }
 
-const STAGE_LABEL: Record<string, string> = { self: "Self", leader: "Leader", calibration: "Calibration", committee: "Committee" };
+type DashboardTab = "overview" | "gap";
 
 function SectionHeader({ title }: { title: string }) {
   return (
@@ -30,6 +30,29 @@ function SectionHeader({ title }: { title: string }) {
       <span className="h-4 w-1.5 bg-sk-red inline-block" />
       <h2 className="text-[15px] font-bold text-text-main">{title}</h2>
     </div>
+  );
+}
+
+function TabButton({
+  active,
+  children,
+  onClick,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={`border px-4 py-2 text-sm font-semibold ${
+        active
+          ? "border-sk-red bg-sk-red/[0.06] text-sk-red"
+          : "border-border-soft bg-white text-text-muted hover:text-text-main"
+      }`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -41,6 +64,7 @@ function pctColor(p: number) {
 
 export function DashboardClient() {
   const [d, setD] = useState<Dash | null>(null);
+  const [tab, setTab] = useState<DashboardTab>("overview");
 
   useEffect(() => {
     fetch("/api/dashboard").then((r) => r.json()).then(setD);
@@ -48,208 +72,247 @@ export function DashboardClient() {
 
   if (!d) return <div className="text-sm text-text-muted">불러오는 중…</div>;
 
-  const funnelMax = Math.max(...d.funnel.map((f) => f.cnt), 1);
   const subMax = 4;
+  const coreGapCount = d.gaps.filter((gap) => gap.is_core && gap.gap > 0).length;
+  const criticalLowCount = d.critical.filter((skill) => skill.coverage < 50 || skill.avg_lv < 3).length;
+  const avgCoverage = d.teamStatus.length
+    ? Math.round(
+        d.teamStatus.reduce((sum, team) => {
+          if (!team.skills.length || !team.nTeam) return sum;
+          const teamCoverage =
+            team.skills.reduce((s, skill) => s + skill.holders / team.nTeam, 0) / team.skills.length;
+          return sum + teamCoverage * 100;
+        }, 0) / d.teamStatus.length
+      )
+    : 0;
 
   return (
     <div>
-      <PageHeader title="진단 결과 확인" desc="권한별 Skill 현황 통합 · 조회 범위: 전사" />
+      <PageHeader title="진단 결과 확인" desc="전사 Skill 현황과 우선 육성 Gap을 요약합니다." />
 
-      {/* KPI */}
+      <div className="mb-4 flex items-center gap-2">
+        <TabButton active={tab === "overview"} onClick={() => setTab("overview")}>
+          Overview
+        </TabButton>
+        <TabButton active={tab === "gap"} onClick={() => setTab("gap")}>
+          Gap / Profile
+        </TabButton>
+      </div>
+
       <div className="grid grid-cols-4 gap-4">
-        {[
-          { label: "구성원", value: d.kpi.members, unit: "명", accent: true },
-          { label: "등록 Skill", value: d.kpi.skills, unit: "개", accent: false },
-          { label: "평가 진행률", value: d.kpi.assessRate, unit: "%", accent: false },
-          { label: "Critical 보유율", value: d.kpi.criticalRate, unit: "%", accent: false },
-        ].map((k) => (
-          <div key={k.label} className={`bg-bg-surface border border-border-soft border-t-[3px] p-4 ${k.accent ? "border-t-sk-red" : "border-t-text-main/70"}`}>
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">{k.label}</div>
-            <div className="text-2xl font-extrabold text-text-main mt-1.5">
-              {k.value}
-              <span className="text-sm font-medium text-text-muted ml-0.5">{k.unit}</span>
+        <Stat label="평가 대상" value={`${d.kpi.members}명`} accent />
+        <Stat label="평가 진행률" value={`${d.kpi.assessRate}%`} />
+        <Stat label="Core Gap" value={`${coreGapCount}개`} />
+        <Stat label="Critical 위험" value={`${criticalLowCount}개`} />
+      </div>
+
+      {tab === "overview" ? (
+        <>
+          <div className="grid grid-cols-[1.2fr_0.8fr] gap-4">
+            <div>
+              <SectionHeader title="전사 필수 Skill 커버리지" />
+              <Card>
+                <div className="mb-4 flex items-end justify-between border-b border-border-soft pb-3">
+                  <div>
+                    <div className="text-xs font-semibold uppercase text-text-muted">평균 보유율</div>
+                    <div className={`mt-1 text-3xl font-extrabold ${pctColor(avgCoverage)}`}>{avgCoverage}%</div>
+                  </div>
+                  <div className="text-right text-xs text-text-muted">
+                    대상 {d.kpi.members}명 · 등록 Skill {d.kpi.skills}개
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {d.teamStatus.map((team) => {
+                    const coverAvg = team.skills.length
+                      ? Math.round(
+                          (team.skills.reduce((sum, skill) => sum + (team.nTeam ? skill.holders / team.nTeam : 0), 0) /
+                            team.skills.length) *
+                            100
+                        )
+                      : 0;
+                    return (
+                      <div key={team.team} className="grid grid-cols-[140px_1fr_56px] items-center gap-3">
+                        <div className="truncate text-xs font-semibold text-text-main">
+                          {team.team}
+                          <span className="ml-1 font-normal text-text-muted">{team.nTeam}명</span>
+                        </div>
+                        <div className="h-3 bg-bg-main">
+                          <div
+                            className="h-3 bg-[#0A2147]"
+                            style={{ width: `${Math.max(coverAvg, 2)}%` }}
+                          />
+                        </div>
+                        <div className={`text-right text-xs font-bold ${pctColor(coverAvg)}`}>{coverAvg}%</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            </div>
+
+            <div>
+              <SectionHeader title="상위 보유자 Top 5" />
+              <Card>
+                {d.topHolders.length === 0 ? (
+                  <div className="text-xs text-text-muted">표시할 보유자가 없습니다.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {d.topHolders.map((holder, index) => (
+                      <div key={holder.name} className="grid grid-cols-[24px_1fr_auto] items-center border border-border-soft px-3 py-2">
+                        <span className="text-sm font-semibold text-text-muted">{index + 1}</span>
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-semibold text-text-main">{holder.name}</div>
+                          <div className="truncate text-xs text-text-muted">
+                            {holder.team} · {holder.role_level}
+                          </div>
+                        </div>
+                        <div className="text-right text-xs">
+                          <div className="font-bold text-text-main">L{holder.avg_lv}</div>
+                          <div className="text-text-muted">{holder.n_skills}개</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* 조직별 필수 스킬 현황 */}
-      <SectionHeader title="조직별 필수 스킬 현황" />
-      <div className="grid grid-cols-2 gap-4">
-        {d.teamStatus.map((t) => {
-          const coverAvg = t.skills.length
-            ? Math.round((t.skills.reduce((s, x) => s + (t.nTeam ? x.holders / t.nTeam : 0), 0) / t.skills.length) * 100)
-            : 0;
-          return (
-          <Card key={t.team}>
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-border-soft">
-              <div className="font-bold text-text-main">
-                {t.team} <span className="text-xs text-text-muted font-normal">· {t.nTeam}명</span>
-              </div>
-              <div className="text-right">
-                <span className={`text-lg font-extrabold ${pctColor(coverAvg)}`}>{coverAvg}%</span>
-                <span className="text-[10px] text-text-muted ml-1">평균 보유율</span>
-              </div>
-            </div>
-            {t.skills.length === 0 ? (
-              <div className="text-xs text-text-muted">매핑된 필수 스킬이 없습니다.</div>
-            ) : (
-              <div>
-                {t.skills.map((s) => {
-                  const cover = t.nTeam ? s.holders / t.nTeam : 0;
-                  const coverPct = Math.round(cover * 100);
-                  const coverColor = cover < 0.3 ? "#EA002C" : cover < 0.6 ? "#F59E0B" : "#16A34A";
-                  const met = s.avg_lv >= s.target_level;
-                  return (
-                    <div key={s.skill_id} className="py-2 border-b border-border-soft last:border-0">
-                      <div className="flex justify-between items-center text-xs mb-1.5">
-                        <span className="text-text-main truncate pr-2">
-                          {s.is_core
-                            ? <span className="inline-block bg-sk-red text-white px-1.5 py-0.5 text-[9px] font-bold mr-1.5 align-middle">CORE</span>
-                            : <span className="inline-block border border-border-soft text-text-muted px-1.5 py-0.5 text-[9px] mr-1.5 align-middle">일반</span>}
-                          #{String(s.skill_id).padStart(3, "0")} {s.skill_name.slice(0, 20)}
-                        </span>
-                        <span className="shrink-0 flex items-center gap-1.5">
-                          <span className="text-text-muted">평균 L{s.avg_lv}/L{s.target_level}</span>
-                          {met
-                            ? <span className="text-success text-[9px] font-bold border border-success px-1">레벨달성</span>
-                            : <span className="text-[#9A6500] text-[9px] font-bold border border-warning px-1">레벨미달</span>}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-[#E1E7EF] h-2.5">
-                          <div className="h-2.5" style={{ width: `${Math.max(coverPct, 2)}%`, background: coverColor }} />
-                        </div>
-                        <span className="text-[11px] font-semibold w-16 text-right" style={{ color: coverColor }}>
-                          보유 {s.holders}/{t.nTeam}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </Card>
-          );
-        })}
-      </div>
-
-      {/* Funnel + Top holders */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <SectionHeader title="평가 진행 Funnel" />
+          <SectionHeader title="Sub-family별 평균 Level" />
           <Card>
             <div className="space-y-2">
-              {d.funnel.map((f) => (
-                <div key={f.stage} className="flex items-center gap-2">
-                  <span className="w-24 text-xs text-text-muted">{STAGE_LABEL[f.stage]}</span>
-                  <div className="flex-1 bg-bg-main h-5">
-                    <div className="bg-navy h-5 bg-[#0A2147] flex items-center justify-end pr-2" style={{ width: `${Math.max((f.cnt / funnelMax) * 100, 3)}%` }}>
-                      <span className="text-white text-[10px] font-bold">{f.cnt}</span>
-                    </div>
+              {d.subAvg.map((skillFamily) => (
+                <div key={skillFamily.sub_family_name} className="grid grid-cols-[180px_1fr_56px] items-center gap-3">
+                  <span className="truncate text-right text-xs text-text-main">{skillFamily.sub_family_name}</span>
+                  <div className="h-4 bg-bg-main">
+                    <div className="h-4 bg-[#0A2147]" style={{ width: `${(skillFamily.avg_lv / subMax) * 100}%` }} />
                   </div>
+                  <span className="text-xs font-semibold text-text-muted">L{skillFamily.avg_lv}</span>
                 </div>
               ))}
             </div>
           </Card>
-        </div>
-        <div>
-          <SectionHeader title="상위 보유자 Top 5" />
-          <Card>
-            {d.topHolders.length === 0 ? (
-              <div className="text-xs text-text-muted">표시할 보유자가 없습니다.</div>
-            ) : (
-              <div className="space-y-1.5">
-                {d.topHolders.map((h, i) => (
-                  <div key={h.name} className="flex items-center border border-border-soft px-2.5 py-1.5">
-                    <span className="w-5 text-text-muted font-semibold text-sm">{i + 1}</span>
-                    <div className="flex-1">
-                      <b className="text-text-main">{h.name}</b>
-                      <span className="text-xs text-text-muted ml-1.5">{h.team} · {h.role_level}</span>
-                    </div>
-                    <div className="text-right text-xs">
-                      <b className="text-text-main">L{h.avg_lv}</b>
-                      <span className="text-text-muted"> · {h.n_skills}개</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        </div>
-      </div>
 
-      {/* Sub-family 평균 */}
-      <SectionHeader title="Sub-family별 평균 Level" />
-      <Card>
-        <div className="space-y-1.5">
-          {d.subAvg.map((s) => (
-            <div key={s.sub_family_name} className="flex items-center gap-2">
-              <span className="w-40 text-xs text-text-main text-right pr-2">{s.sub_family_name}</span>
-              <div className="flex-1 bg-bg-main h-4">
-                <div className="bg-[#0A2147] h-4" style={{ width: `${(s.avg_lv / subMax) * 100}%` }} />
-              </div>
-              <span className="w-14 text-xs text-text-muted">L{s.avg_lv}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* 부족 Skill Top 5 */}
-      <SectionHeader title="부족 Skill Top 5 — 우선 육성 대상" />
-      <div className="grid grid-cols-5 gap-3">
-        {d.gaps.map((g) => (
-          <div key={g.skill_id} className="bg-bg-surface border border-border-soft p-3">
-            <div className="text-[11px] text-text-muted">
-              {g.is_core && <span className="text-sk-red font-bold mr-1">CORE</span>}#{String(g.skill_id).padStart(3, "0")}
-            </div>
-            <div className="text-[13px] font-semibold text-text-main my-1.5 leading-tight min-h-[34px]">{g.skill_name.slice(0, 28)}</div>
-            <div className="text-xs text-text-main">요구 <b>L{g.target_level}</b> · 현재 <b>L{g.avg_cur}</b></div>
-            <div className="text-[11px] text-text-muted mt-1">Gap <b className="text-sk-red">+{g.gap}</b> · 보유 {g.n_holders}명</div>
-          </div>
-        ))}
-      </div>
-      <p className="text-xs text-text-muted mt-2">우선도 = Gap × (1 + Scarcity) × Core 가중치(1.5) 기준 정렬</p>
-
-      {/* Critical 현황 */}
-      <SectionHeader title="전사 Critical Skill 현황" />
-      {d.critical.length === 0 ? (
-        <Card><div className="text-sm text-text-muted">Critical Skill로 지정된 항목이 없습니다. (Skill Library에서 지정)</div></Card>
-      ) : (
-        <div className="grid grid-cols-4 gap-3">
-          {d.critical.map((c) => (
-            <div key={c.skill_id} className="bg-bg-surface border border-border-soft p-3">
-              <Badge tone="danger" label="CRITICAL" />
-              <div className="text-[13px] font-semibold text-text-main my-1.5">#{String(c.skill_id).padStart(3, "0")} {c.skill_name.slice(0, 22)}</div>
-              <div className="text-xs text-text-main">보유 {c.holders}명 · 평균 L{c.avg_lv} · Coverage {c.coverage}%</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 최근 평가 활동 */}
-      <SectionHeader title="최근 평가 활동" />
-      <Card>
-        {d.recent.length === 0 ? (
-          <div className="text-xs text-text-muted">평가 활동이 없습니다.</div>
-        ) : (
-          <div className="space-y-1.5">
-            {d.recent.map((r, i) => {
-              const lv = r.confirmed_level ?? r.proposed_level;
-              return (
-                <div key={i} className="border-l-[3px] border-[#0A2147] pl-2.5 py-0.5">
-                  <div className="text-[11px] text-text-muted">
-                    {r.assessed_date} · <span className="bg-[#0A2147] text-white px-1.5 py-0.5 text-[10px]">{STAGE_LABEL[r.stage] ?? r.stage}</span>
-                  </div>
-                  <div className="text-[13px] text-text-main">
-                    <b>{r.name}</b> · {r.skill_name.slice(0, 30)} → <b>L{lv}</b>
-                  </div>
+          <SectionHeader title="긴급 육성 Gap" />
+          <div className="grid grid-cols-5 gap-3">
+            {d.gaps.map((gap) => (
+              <div key={gap.skill_id} className="bg-bg-surface border border-border-soft border-t-[3px] border-t-sk-red p-3">
+                <div className="text-[11px] text-text-muted">
+                  {gap.is_core && <span className="text-sk-red font-bold mr-1">CORE</span>}#
+                  {String(gap.skill_id).padStart(3, "0")}
                 </div>
+                <div className="my-1.5 min-h-[34px] text-[13px] font-semibold leading-tight text-text-main">
+                  {gap.skill_name.slice(0, 28)}
+                </div>
+                <div className="text-xs text-text-main">
+                  요구 <b>L{gap.target_level}</b> · 현재 <b>L{gap.avg_cur}</b>
+                </div>
+                <div className="mt-1 text-[11px] text-text-muted">
+                  Gap <b className="text-sk-red">+{gap.gap}</b> · 보유 {gap.n_holders}명
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <SectionHeader title="조직별 필수 Skill 상세" />
+          <div className="grid grid-cols-2 gap-4">
+            {d.teamStatus.map((team) => {
+              const coverAvg = team.skills.length
+                ? Math.round(
+                    (team.skills.reduce((sum, skill) => sum + (team.nTeam ? skill.holders / team.nTeam : 0), 0) /
+                      team.skills.length) *
+                      100
+                  )
+                : 0;
+              return (
+                <Card key={team.team}>
+                  <div className="mb-3 flex items-center justify-between border-b border-border-soft pb-2">
+                    <div className="font-bold text-text-main">
+                      {team.team} <span className="text-xs font-normal text-text-muted">· {team.nTeam}명</span>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-lg font-extrabold ${pctColor(coverAvg)}`}>{coverAvg}%</span>
+                      <span className="ml-1 text-[10px] text-text-muted">평균 보유율</span>
+                    </div>
+                  </div>
+                  {team.skills.length === 0 ? (
+                    <div className="text-xs text-text-muted">매핑된 필수 스킬이 없습니다.</div>
+                  ) : (
+                    <div>
+                      {team.skills.map((skill) => {
+                        const cover = team.nTeam ? skill.holders / team.nTeam : 0;
+                        const coverPct = Math.round(cover * 100);
+                        const coverColor = cover < 0.3 ? "#EA002C" : cover < 0.6 ? "#F59E0B" : "#16A34A";
+                        const met = skill.avg_lv >= skill.target_level;
+                        return (
+                          <div key={skill.skill_id} className="border-b border-border-soft py-2 last:border-0">
+                            <div className="mb-1.5 flex items-center justify-between text-xs">
+                              <span className="truncate pr-2 text-text-main">
+                                {skill.is_core ? (
+                                  <span className="mr-1.5 inline-block bg-sk-red px-1.5 py-0.5 align-middle text-[9px] font-bold text-white">
+                                    CORE
+                                  </span>
+                                ) : (
+                                  <span className="mr-1.5 inline-block border border-border-soft px-1.5 py-0.5 align-middle text-[9px] text-text-muted">
+                                    일반
+                                  </span>
+                                )}
+                                #{String(skill.skill_id).padStart(3, "0")} {skill.skill_name.slice(0, 24)}
+                              </span>
+                              <span className="flex shrink-0 items-center gap-1.5">
+                                <span className="text-text-muted">평균 L{skill.avg_lv}/L{skill.target_level}</span>
+                                {met ? (
+                                  <Badge tone="success" label="달성" />
+                                ) : (
+                                  <Badge tone="warning" label="미달" />
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="h-2.5 flex-1 bg-[#E1E7EF]">
+                                <div
+                                  className="h-2.5"
+                                  style={{ width: `${Math.max(coverPct, 2)}%`, background: coverColor }}
+                                />
+                              </div>
+                              <span className="w-16 text-right text-[11px] font-semibold" style={{ color: coverColor }}>
+                                {skill.holders}/{team.nTeam}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </Card>
               );
             })}
           </div>
-        )}
-      </Card>
+
+          <SectionHeader title="전사 Critical Skill 현황" />
+          {d.critical.length === 0 ? (
+            <Card>
+              <div className="text-sm text-text-muted">Critical Skill로 지정된 항목이 없습니다.</div>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-4 gap-3">
+              {d.critical.map((critical) => (
+                <div key={critical.skill_id} className="bg-bg-surface border border-border-soft p-3">
+                  <Badge tone="danger" label="CRITICAL" />
+                  <div className="my-1.5 text-[13px] font-semibold text-text-main">
+                    #{String(critical.skill_id).padStart(3, "0")} {critical.skill_name.slice(0, 22)}
+                  </div>
+                  <div className="text-xs text-text-main">
+                    보유 {critical.holders}명 · 평균 L{critical.avg_lv} · Coverage {critical.coverage}%
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

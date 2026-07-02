@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { usePersona } from "@/components/PersonaContext";
 import { PageHeader, Card, Stat, Badge } from "@/components/ui";
 
 interface Candidate {
@@ -11,6 +12,7 @@ interface Candidate {
 
 // Narrative 작성 — 원본과 동일: Calibration Lv4 후보(승격자)만 대상, Skill 단위로 묶어 카드로 표시.
 export function NarrativeClient() {
+  const { persona, currentMember, loadingMembers } = usePersona();
   const [all, setAll] = useState<Candidate[]>([]);
   const [onlyPending, setOnlyPending] = useState(true);
   const [keyword, setKeyword] = useState("");
@@ -20,9 +22,14 @@ export function NarrativeClient() {
   const [msg, setMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const data = await fetch("/api/narrative").then((r) => r.json());
+    if (loadingMembers) return;
+    const params = new URLSearchParams({
+      persona,
+      actor_id: currentMember?.employee_id ?? "",
+    });
+    const data = await fetch(`/api/narrative?${params.toString()}`).then((r) => r.json());
     setAll(data.candidates ?? []);
-  }, []);
+  }, [currentMember?.employee_id, loadingMembers, persona]);
   useEffect(() => { load(); }, [load]);
 
   const nTotal = all.length;
@@ -51,7 +58,12 @@ export function NarrativeClient() {
     const res = await fetch("/api/narrative", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ assessment_id: aid, narrative }),
+      body: JSON.stringify({
+        assessment_id: aid,
+        narrative,
+        persona,
+        actor_id: currentMember?.employee_id ?? "",
+      }),
     });
     const data = await res.json();
     setSaving(null);
@@ -85,7 +97,9 @@ export function NarrativeClient() {
       </Card>
       {msg && <div className="mb-4 border border-success bg-success/[0.06] p-2 text-sm text-success">{msg}</div>}
 
-      {all.length === 0 ? (
+      {loadingMembers ? (
+        <Card><div className="text-sm text-text-muted">권한 매핑 인원을 불러오는 중입니다.</div></Card>
+      ) : all.length === 0 ? (
         <Card><div className="text-sm text-success">Lv4 후보자가 없습니다 — Calibration에서 후보 승격되어야 표시됩니다.</div></Card>
       ) : groups.length === 0 ? (
         <Card><div className="text-sm text-text-muted">조건에 맞는 후보가 없습니다.</div></Card>

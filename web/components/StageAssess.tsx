@@ -36,13 +36,20 @@ function levelLabel(level: number | null | undefined) {
 }
 
 export function StageAssess({ title, desc, stage, members, confirmLabel, scope }: Props) {
-  const { persona, currentMember } = usePersona();
+  const { persona, currentMember, loadingMembers } = usePersona();
+  const requiresMappedMember =
+    (scope === "team" && persona === "team_leader") ||
+    (scope === "division" && (persona === "calibration" || persona === "team_leader"));
 
   const isLocked =
     (scope === "team" && persona === "team_leader" && !!currentMember) ||
     (scope === "division" && (persona === "calibration" || persona === "team_leader") && !!currentMember);
 
   const scopedMembers = useMemo(() => {
+    if (requiresMappedMember && !currentMember) {
+      return [];
+    }
+
     if (scope === "team" && persona === "team_leader" && currentMember) {
       return members.filter((m) => m.team === currentMember.team && (stage !== "leader" || m.id !== currentMember.employee_id));
     }
@@ -52,7 +59,7 @@ export function StageAssess({ title, desc, stage, members, confirmLabel, scope }
     }
 
     return members;
-  }, [currentMember, members, persona, scope, stage]);
+  }, [currentMember, members, persona, requiresMappedMember, scope, stage]);
 
   const [memberId, setMemberId] = useState(scopedMembers[0]?.id ?? "");
   const [rows, setRows] = useState<Row[]>([]);
@@ -69,7 +76,7 @@ export function StageAssess({ title, desc, stage, members, confirmLabel, scope }
   }, [memberId, scopedMembers]);
 
   const load = useCallback(async () => {
-    if (!memberId || !currentMember?.employee_id) {
+    if (loadingMembers || !memberId || !currentMember?.employee_id) {
       setRows([]);
       setEdits({});
       return;
@@ -91,7 +98,7 @@ export function StageAssess({ title, desc, stage, members, confirmLabel, scope }
     setRows(data.rows ?? []);
     setEdits({});
     setMsg(null);
-  }, [currentMember?.employee_id, memberId, stage]);
+  }, [currentMember?.employee_id, loadingMembers, memberId, stage]);
 
   useEffect(() => {
     load();
@@ -187,7 +194,7 @@ export function StageAssess({ title, desc, stage, members, confirmLabel, scope }
             className="border border-border-soft bg-white px-3 py-1.5 text-sm"
             value={memberId}
             onChange={(event) => setMemberId(event.target.value)}
-            disabled={scopedMembers.length === 0}
+            disabled={loadingMembers || scopedMembers.length === 0}
           >
             {scopedMembers.map((member) => (
               <option key={member.id} value={member.id}>
@@ -208,6 +215,12 @@ export function StageAssess({ title, desc, stage, members, confirmLabel, scope }
         </div>
 
         <div className="mt-3 text-xs text-text-muted">{stageHint}</div>
+
+        {loadingMembers && (
+          <div className="mt-3 border border-border-soft bg-white p-2 text-xs text-text-muted">
+            권한 매핑 인원을 불러오는 중입니다.
+          </div>
+        )}
 
         {scopedMembers.length === 0 && (
           <div className="mt-3 border border-warning bg-warning/[0.08] p-2 text-xs text-[#9A6500]">

@@ -95,18 +95,44 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <span className="text-text-muted text-xs">사람</span>
               {members.length === 0 ? (
                 <span className="text-xs text-warning border border-warning px-2 py-1.5">매핑된 인원 없음</span>
+              ) : persona === "team_leader" ? (
+                <div className="flex max-w-[620px] items-center gap-1.5 overflow-x-auto">
+                  {members.map((m) => {
+                    const active = currentMember?.employee_id === m.employee_id;
+                    return (
+                      <button
+                        key={m.employee_id}
+                        className={`shrink-0 border px-2.5 py-1.5 text-xs font-semibold ${
+                          active
+                            ? "border-sk-red bg-sk-red/[0.06] text-sk-red"
+                            : "border-border-soft bg-white text-text-muted hover:text-text-main"
+                        }`}
+                        onClick={() => setCurrentMemberId(m.employee_id)}
+                        title={`${m.name} (${m.team ?? m.division ?? "-"} · ${m.role_level ?? "-"})`}
+                      >
+                        {m.name}
+                        <span className="ml-1 font-normal">· {m.team ?? m.division ?? "-"}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               ) : (
-                <select
-                  value={currentMember?.employee_id ?? ""}
-                  onChange={(e) => setCurrentMemberId(e.target.value)}
-                  className="border border-border-soft bg-white px-2.5 py-1.5 text-sm text-text-main focus:border-sk-red focus:outline-none"
-                >
-                  {members.map((m) => (
-                    <option key={m.employee_id} value={m.employee_id}>
-                      {m.name} ({m.team ?? m.division} · {m.role_level})
-                    </option>
-                  ))}
-                </select>
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={currentMember?.employee_id ?? ""}
+                    onChange={(e) => setCurrentMemberId(e.target.value)}
+                    className="min-w-56 border border-border-soft bg-white px-2.5 py-1.5 text-sm text-text-main focus:border-sk-red focus:outline-none"
+                  >
+                    {members.map((m) => (
+                      <option key={m.employee_id} value={m.employee_id}>
+                        {m.name} ({m.team ?? m.division} · {m.role_level})
+                      </option>
+                    ))}
+                  </select>
+                  <span className="border border-border-soft bg-bg-main px-2 py-1.5 text-xs text-text-muted">
+                    {members.length}명
+                  </span>
+                </div>
               )}
             </label>
           </div>

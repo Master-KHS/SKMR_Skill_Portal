@@ -43,9 +43,13 @@ function Radar({ data }: { data: { sub_family_name: string; avg_lv: number }[] }
 
 // 원본 skill_profile.py 범위 규칙: employee→본인만, team_leader→본인 팀, 그 외(hr_admin 등)→전체 자유 선택.
 export function SkillProfileClient({ members }: { members: MemberOption[] }) {
-  const { persona, currentMember } = usePersona();
+  const { persona, currentMember, loadingMembers } = usePersona();
 
   const visible = useMemo(() => {
+    if ((persona === "employee" || persona === "team_leader") && !currentMember) {
+      return [];
+    }
+
     if (persona === "employee" && currentMember) {
       return members.filter((m) => m.id === currentMember.employee_id);
     }
@@ -65,10 +69,15 @@ export function SkillProfileClient({ members }: { members: MemberOption[] }) {
   const [d, setD] = useState<Data | null>(null);
 
   const load = useCallback(async () => {
-    if (!memberId) return;
-    const data = await fetch(`/api/member-profile?id=${memberId}`).then((r) => r.json());
+    if (loadingMembers || !memberId) return;
+    const params = new URLSearchParams({
+      id: memberId,
+      persona,
+      actor_id: currentMember?.employee_id ?? "",
+    });
+    const data = await fetch(`/api/member-profile?${params.toString()}`).then((r) => r.json());
     setD(data);
-  }, [memberId]);
+  }, [currentMember?.employee_id, loadingMembers, memberId, persona]);
   useEffect(() => { load(); }, [load]);
 
   const avg = d?.profile.length ? Math.round((d.profile.reduce((s, r) => s + r.current_level, 0) / d.profile.length) * 100) / 100 : 0;
@@ -84,14 +93,15 @@ export function SkillProfileClient({ members }: { members: MemberOption[] }) {
         {persona === "employee" ? (
           <span className="text-sm font-semibold">{visible[0]?.label ?? "-"}</span>
         ) : (
-          <select className="border border-border-soft bg-white px-3 py-1.5 text-sm" value={memberId} onChange={(e) => setMemberId(e.target.value)}>
+          <select className="border border-border-soft bg-white px-3 py-1.5 text-sm" value={memberId} onChange={(e) => setMemberId(e.target.value)} disabled={loadingMembers || visible.length === 0}>
             {visible.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
           </select>
         )}
         {d?.member && <span className="ml-3 text-xs text-text-muted">{d.member.division} · {d.member.team} · {d.member.role_level}</span>}
+        {loadingMembers && <span className="ml-3 text-xs text-text-muted">권한 매핑 인원을 불러오는 중입니다.</span>}
       </Card>
 
-      {!d ? <div className="text-sm text-text-muted">불러오는 중…</div> : (
+      {!d ? <div className="text-sm text-text-muted">{loadingMembers ? "권한 범위를 불러오는 중…" : "불러오는 중…"}</div> : (
         <>
           <div className="grid grid-cols-4 gap-4 mb-4">
             <Stat label="보유 Skill" value={`${d.profile.length}개`} accent />

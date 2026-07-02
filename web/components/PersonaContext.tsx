@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import type { PersonaCode } from "@/lib/types";
 
 export interface CurrentMember {
@@ -34,6 +34,7 @@ export function PersonaProvider({ children }: { children: React.ReactNode }) {
   const [members, setMembers] = useState<CurrentMember[]>([]);
   const [currentMember, setCurrentMemberState] = useState<CurrentMember | null>(null);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const loadSeq = useRef(0);
 
   useEffect(() => {
     const saved = localStorage.getItem("persona") as PersonaCode | null;
@@ -42,17 +43,20 @@ export function PersonaProvider({ children }: { children: React.ReactNode }) {
 
   // 페르소나(권한)가 바뀔 때마다 그 권한에 매핑된 사람 목록을 다시 불러옴 (원본: get_members_for_persona)
   const loadMembers = useCallback(async (p: PersonaCode) => {
+    const seq = loadSeq.current + 1;
+    loadSeq.current = seq;
     setLoadingMembers(true);
     try {
       const res = await fetch(`/api/persona-members?persona=${p}`);
       const data = await res.json();
+      if (seq !== loadSeq.current) return;
       const list: CurrentMember[] = data.members ?? [];
       setMembers(list);
       const savedId = localStorage.getItem(`current_member_${p}`);
       const found = list.find((m) => m.employee_id === savedId);
       setCurrentMemberState(found ?? list[0] ?? null);
     } finally {
-      setLoadingMembers(false);
+      if (seq === loadSeq.current) setLoadingMembers(false);
     }
   }, []);
 

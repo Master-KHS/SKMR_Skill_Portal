@@ -23,8 +23,8 @@ interface SqliteDb {
   prepare(sql: string): SqliteStmt;
 }
 
-const DB_DIR = path.join(process.cwd(), "data");
-const DB_PATH = path.join(DB_DIR, "skmr.db");
+export const DB_DIR = path.join(process.cwd(), "data");
+export const DB_PATH = path.join(DB_DIR, "skmr.db");
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS skill_family (
@@ -236,9 +236,77 @@ export function resetToSeed() {
   seedTable(db, "skill_profile", s.skill_profile);
   seedTable(db, "evidence", s.evidence);
   seedTable(db, "evidence_skill_link", s.evidence_skill_link);
+  if (membersXlsxExists()) {
+    applyMembersToDb(db, readMembersFromXlsx());
+  }
+}
+
+function replaceTable(db: SqliteDb, table: string, rows: Row[]) {
+  db.exec(`DELETE FROM ${table}`);
+  if (!rows?.length) return;
+  const cols = Object.keys(rows[0]);
+  const placeholders = cols.map(() => "?").join(",");
+  const stmt = db.prepare(`INSERT INTO ${table} (${cols.join(",")}) VALUES (${placeholders})`);
+  for (const row of rows) {
+    stmt.run(...cols.map((col) => row[col] ?? null));
+  }
+}
+
+function upsertSeedRows(db: SqliteDb, table: string, rows: Row[]) {
+  if (!rows?.length) return;
+  const cols = Object.keys(rows[0]);
+  const placeholders = cols.map(() => "?").join(",");
+  const stmt = db.prepare(`INSERT OR REPLACE INTO ${table} (${cols.join(",")}) VALUES (${placeholders})`);
+  for (const row of rows) {
+    stmt.run(...cols.map((col) => row[col] ?? null));
+  }
 }
 
 // 트랜잭션 헬퍼 (node:sqlite에는 db.transaction이 없어 BEGIN/COMMIT로 구현).
+export function seedTaxonomyFromSeed() {
+  const db = getDb();
+  const s = seed as unknown as Record<string, Row[]>;
+  tx(() => {
+    upsertSeedRows(db, "skill_family", s.skill_family);
+    upsertSeedRows(db, "sub_skill_family", s.sub_skill_family);
+    upsertSeedRows(db, "skill", s.skill);
+    upsertSeedRows(db, "level_criteria", s.level_criteria);
+  });
+}
+
+export function seedRequiredFromSeed() {
+  const db = getDb();
+  const s = seed as unknown as Record<string, Row[]>;
+  tx(() => {
+    upsertSeedRows(db, "required_skill", s.required_skill);
+  });
+}
+
+export function seedProfilesFromSeed(force = false) {
+  const db = getDb();
+  const s = seed as unknown as Record<string, Row[]>;
+  tx(() => {
+    if (force) db.exec("DELETE FROM skill_profile");
+    upsertSeedRows(db, "skill_profile", s.skill_profile);
+  });
+  if (membersXlsxExists()) {
+    applyMembersToDb(db, readMembersFromXlsx());
+  }
+}
+
+export function seedEvidenceFromSeed(force = false) {
+  const db = getDb();
+  const s = seed as unknown as Record<string, Row[]>;
+  tx(() => {
+    if (force) {
+      replaceTable(db, "evidence_skill_link", []);
+      replaceTable(db, "evidence", []);
+    }
+    upsertSeedRows(db, "evidence", s.evidence);
+    upsertSeedRows(db, "evidence_skill_link", s.evidence_skill_link);
+  });
+}
+
 export function tx(fn: () => void) {
   const db = getDb();
   db.exec("BEGIN");

@@ -14,8 +14,50 @@ interface Candidate {
   self_lv: number | null; leader_lv: number | null;
 }
 
-export async function GET() {
-  const candidates = query<Candidate>(
+interface AccessRow {
+  employee_id: string;
+  persona_role: string | null;
+  team: string | null;
+  division: string | null;
+}
+
+function getActor(actorId: string) {
+  return query<AccessRow>(
+    `SELECT employee_id, persona_role, team, division
+     FROM member
+     WHERE employee_id = ?`,
+    [actorId]
+  )[0] ?? null;
+}
+
+function assertNarrativeAccess(persona: string, actor: AccessRow | null, candidate: Pick<Candidate, "member_id" | "team" | "division">) {
+  if (!actor) {
+    throw new Error("Invalid actor.");
+  }
+
+  if (persona === "hr_admin" || persona === "hr_viewer" || persona === "committee" || persona === "executive") {
+    return;
+  }
+
+  if (persona === "calibration") {
+    if (!actor.division || actor.division !== candidate.division) {
+      throw new Error("Narrative access is limited to the actor's division.");
+    }
+    return;
+  }
+
+  if (persona === "team_leader") {
+    if (!actor.team || actor.team !== candidate.team) {
+      throw new Error("Narrative access is limited to the actor's team.");
+    }
+    return;
+  }
+
+  throw new Error("Narrative access is not allowed for this persona.");
+}
+
+function getCandidates() {
+  return query<Candidate & { self_lv_c: number | null; self_lv_p: number | null }>(
     `WITH calib_done AS (
        SELECT member_id, skill_id, MAX(assessment_id) AS aid,
               MAX(proposed_level) AS calib_lv, MAX(narrative) AS narrative
@@ -43,16 +85,54 @@ export async function GET() {
      ORDER BY s.skill_id, m.name`
   ).map((r) => ({
     ...r,
-    self_lv: (r as unknown as { self_lv_c: number | null; self_lv_p: number | null }).self_lv_c ??
-      (r as unknown as { self_lv_p: number | null }).self_lv_p ?? null,
+    self_lv: r.self_lv_c ?? r.self_lv_p ?? null,
   }));
+}
+
+export async function GET(req: NextRequest) {
+  const persona = req.nextUrl.searchParams.get("persona") ?? "hr_admin";
+  const actorId = req.nextUrl.searchParams.get("actor_id");
+  const actor = actorId ? getActor(actorId) : null;
+
+  const candidates = getCandidates().filter((candidate) => {
+    try {
+      if (!actorId) {
+        return persona === "hr_admin";
+      }
+      assertNarrativeAccess(persona, actor, candidate);
+      return true;
+    } catch {
+      return false;
+    }
+  });
 
   return NextResponse.json({ candidates });
 }
 
 export async function POST(req: NextRequest) {
-  const { assessment_id, narrative } = (await req.json()) as { assessment_id: number; narrative: string };
+  const { assessment_id, narrative, persona, actor_id } = (await req.json()) as {
+    assessment_id: number;
+    narrative: string;
+    persona?: string;
+    actor_id?: string;
+  };
   if (!assessment_id) return NextResponse.json({ error: "assessment_id 필요" }, { status: 400 });
+
+  const actor = actor_id ? getActor(actor_id) : null;
+  const candidate = getCandidates().find((item) => item.aid === assessment_id);
+  if (!candidate) {
+    return NextResponse.json({ error: "대상 assessment를 찾을 수 없습니다." }, { status: 404 });
+  }
+
+  try {
+    assertNarrativeAccess(persona ?? "hr_admin", actor, candidate);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Forbidden" },
+      { status: 403 }
+    );
+  }
+
   run(`UPDATE assessment SET narrative=? WHERE assessment_id=?`, [narrative.trim(), assessment_id]);
   return NextResponse.json({ ok: true });
 }

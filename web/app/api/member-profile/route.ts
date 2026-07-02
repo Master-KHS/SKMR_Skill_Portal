@@ -5,13 +5,82 @@ import { query } from "@/lib/db";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+interface AccessRow {
+  employee_id: string;
+  persona_role: string | null;
+  team: string | null;
+  division: string | null;
+}
+
+function getActor(actorId: string) {
+  return query<AccessRow>(
+    `SELECT employee_id, persona_role, team, division
+     FROM member
+     WHERE employee_id = ?`,
+    [actorId]
+  )[0] ?? null;
+}
+
+function assertProfileAccess(
+  persona: string,
+  actor: AccessRow | null,
+  member: Pick<AccessRow, "employee_id" | "team" | "division"> | null
+) {
+  if (!member) {
+    throw new Error("Member not found.");
+  }
+
+  if (persona === "hr_admin" || persona === "hr_viewer" || persona === "committee" || persona === "executive") {
+    return;
+  }
+
+  if (!actor) {
+    throw new Error("Invalid actor.");
+  }
+
+  if (persona === "employee") {
+    if (actor.employee_id !== member.employee_id) {
+      throw new Error("Employees can only view their own profile.");
+    }
+    return;
+  }
+
+  if (persona === "team_leader") {
+    if (!actor.team || actor.team !== member.team) {
+      throw new Error("Team leaders can only view profiles in their team.");
+    }
+    return;
+  }
+
+  if (persona === "calibration") {
+    if (!actor.division || actor.division !== member.division) {
+      throw new Error("Calibration participants can only view profiles in their division.");
+    }
+    return;
+  }
+
+  throw new Error("Profile access is not allowed for this persona.");
+}
+
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
+  const persona = req.nextUrl.searchParams.get("persona") ?? "hr_admin";
+  const actorId = req.nextUrl.searchParams.get("actor_id");
   if (!id) return NextResponse.json({ error: "id 필요" }, { status: 400 });
 
   const member = query<{ employee_id: string; name: string; team: string; division: string; role_level: string }>(
     `SELECT employee_id, name, team, division, role_level FROM member WHERE employee_id=?`, [id]
   )[0];
+
+  try {
+    assertProfileAccess(persona, actorId ? getActor(actorId) : null, member ?? null);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Forbidden" },
+      { status: 403 }
+    );
+  }
+
   const team = member?.team ?? "";
 
   const profile = query(

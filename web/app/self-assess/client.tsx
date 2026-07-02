@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
-import { PageHeader, Card, Badge } from "@/components/ui";
+
+import { useCallback, useEffect, useState } from "react";
 import { EvidenceBlock } from "@/components/EvidenceBlock";
 import { usePersona } from "@/components/PersonaContext";
+import { Badge, Card, PageHeader } from "@/components/ui";
 
 interface Row {
   skill_id: number;
@@ -12,6 +13,8 @@ interface Row {
   current_level: number;
   target_level: number | null;
   is_critical: number;
+  self_level: number | null;
+  req_is_core: number;
 }
 
 const LEVEL_NAMES: Record<number, string> = {
@@ -21,14 +24,13 @@ const LEVEL_NAMES: Record<number, string> = {
   4: "L4 Jedi Master",
 };
 
-// 자가 진단 — 원본 Streamlit과 동일하게 "현재 로그인된 사람"(상단 페르소나의 2단계에서 고른 사람)
-// 본인만 진단한다. 다른 사람을 골라볼 수 있는 드롭다운은 없음.
 export function SelfAssessClient() {
   const { currentMember } = usePersona();
   const [rows, setRows] = useState<Row[]>([]);
   const [edits, setEdits] = useState<Record<number, number>>({});
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
+  const [onlyPending, setOnlyPending] = useState(true);
 
   const load = useCallback(async () => {
     if (!currentMember) return;
@@ -44,7 +46,7 @@ export function SelfAssessClient() {
   }, [load]);
 
   function setLevel(skill_id: number, level: number) {
-    setEdits((e) => ({ ...e, [skill_id]: level }));
+    setEdits((current) => ({ ...current, [skill_id]: level }));
   }
 
   async function save() {
@@ -63,25 +65,26 @@ export function SelfAssessClient() {
     const data = await res.json();
     setSaving(false);
     if (data.ok) {
-      setSavedMsg(`${data.saved}건 저장 완료 (${data.date}) — DB에 영구 반영되었습니다.`);
+      setSavedMsg(`${data.saved}건 제출 완료 (${data.date})`);
       load();
     }
   }
 
   const dirtyCount = Object.keys(edits).length;
+  const viewRows = onlyPending ? rows.filter((row) => row.self_level == null) : rows;
 
   const groups = new Map<string, Row[]>();
-  for (const r of rows) {
-    const key = `${r.family_name} / ${r.sub_family_name}`;
-    (groups.get(key) ?? groups.set(key, []).get(key)!).push(r);
+  for (const row of viewRows) {
+    const key = `${row.family_name} / ${row.sub_family_name}`;
+    (groups.get(key) ?? groups.set(key, []).get(key)!).push(row);
   }
 
   if (!currentMember) {
     return (
       <div className="max-w-5xl">
-        <PageHeader title="자가 진단" desc="본인 보유 Skill 레벨을 진단하여 저장합니다" />
+        <PageHeader title="자기 진단" desc="본인 보유 Skill 수준을 진단합니다" />
         <div className="border border-warning bg-warning/[0.08] p-3 text-sm text-[#9A6500]">
-          현재 페르소나에 매핑된 인원이 없습니다. 상단 &lsquo;사람&rsquo; 선택을 확인하세요.
+          현재 페르소나에 매핑된 구성원이 없습니다.
         </div>
       </div>
     );
@@ -89,33 +92,42 @@ export function SelfAssessClient() {
 
   return (
     <div className="max-w-5xl">
-      <PageHeader title="자가 진단" desc="본인 보유 Skill 레벨을 진단하여 저장합니다 (로컬 DB 영구 저장)" />
+      <PageHeader title="자기 진단" desc="Required Skill 기준으로 자기평가를 제출합니다" />
 
       <Card className="mb-4">
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm text-text-muted">평가 대상</span>
           <span className="text-sm font-semibold text-text-main">
-            {currentMember.name} <span className="text-text-muted font-normal">({currentMember.team ?? currentMember.division} · {currentMember.role_level})</span>
+            {currentMember.name} <span className="font-normal text-text-muted">({currentMember.team ?? currentMember.division} / {currentMember.role_level})</span>
           </span>
-          <span className="text-xs text-text-muted">보유 Skill {rows.length}개</span>
+          <span className="text-xs text-text-muted">대상 Skill {rows.length}개</span>
+          <label className="ml-2 flex items-center gap-2 text-xs text-text-muted">
+            <input type="checkbox" checked={onlyPending} onChange={(e) => setOnlyPending(e.target.checked)} />
+            미제출만 보기
+          </label>
           <div className="ml-auto flex items-center gap-2">
             {dirtyCount > 0 && <Badge tone="orange" label={`변경 ${dirtyCount}건`} />}
             <button
-              className="bg-sk-orange text-white px-4 py-1.5 text-sm font-bold disabled:opacity-40"
+              className="bg-sk-orange px-4 py-1.5 text-sm font-bold text-white disabled:opacity-40"
               onClick={save}
               disabled={saving || dirtyCount === 0}
             >
-              {saving ? "저장 중…" : "진단 저장"}
+              {saving ? "제출 중.." : "자기평가 제출"}
             </button>
           </div>
         </div>
         {savedMsg && (
           <div className="mt-3 border border-success bg-success/[0.06] p-2 text-sm text-success">
-            <span className="font-semibold">저장 완료 · </span>
             {savedMsg}
           </div>
         )}
       </Card>
+
+      {viewRows.length === 0 && (
+        <Card className="mb-4">
+          <div className="text-sm text-text-muted">현재 조건에서 표시할 Skill이 없습니다.</div>
+        </Card>
+      )}
 
       {[...groups.entries()].map(([group, items]) => (
         <Card key={group} title={group} className="mb-4">
@@ -123,43 +135,37 @@ export function SelfAssessClient() {
             <thead>
               <tr className="border-b-2 border-border-soft text-left text-text-muted">
                 <th className="py-2 pr-3">Skill</th>
-                <th className="py-2 pr-3 w-24">목표</th>
-                <th className="py-2 w-56">현재 레벨 (진단)</th>
+                <th className="w-24 py-2 pr-3">목표</th>
+                <th className="w-56 py-2">자기평가</th>
               </tr>
             </thead>
             <tbody>
-              {items.map((r) => {
-                const cur = edits[r.skill_id] ?? r.current_level;
-                const changed = r.skill_id in edits && edits[r.skill_id] !== r.current_level;
+              {items.map((row) => {
+                const value = edits[row.skill_id] ?? row.current_level;
+                const changed = row.skill_id in edits && edits[row.skill_id] !== row.current_level;
                 return (
-                  <tr key={r.skill_id} className="border-b border-border-soft">
+                  <tr key={row.skill_id} className="border-b border-border-soft">
                     <td className="py-2 pr-3">
-                      {r.skill_name}
-                      {r.is_critical ? (
-                        <span className="ml-2 align-middle">
-                          <Badge tone="danger" label="Critical" />
-                        </span>
-                      ) : null}
+                      {row.skill_name}
+                      {row.req_is_core ? <span className="ml-2 align-middle"><Badge tone="danger" label="CORE" /></span> : null}
+                      {row.is_critical ? <span className="ml-2 align-middle"><Badge tone="danger" label="Critical" /></span> : null}
                     </td>
-                    <td className="py-2 pr-3 text-text-muted">
-                      {r.target_level ? `L${r.target_level}` : "-"}
-                    </td>
+                    <td className="py-2 pr-3 text-text-muted">{row.target_level ? `L${row.target_level}` : "-"}</td>
                     <td className="py-2">
+                      {row.self_level != null && <div className="mb-1 text-xs text-success">제출됨 L{row.self_level}</div>}
                       <select
-                        className={`border px-2 py-1 text-sm ${
-                          changed ? "border-sk-orange" : "border-border-soft"
-                        }`}
-                        value={cur}
-                        onChange={(e) => setLevel(r.skill_id, Number(e.target.value))}
+                        className={`border px-2 py-1 text-sm ${changed ? "border-sk-orange" : "border-border-soft"}`}
+                        value={value}
+                        onChange={(e) => setLevel(row.skill_id, Number(e.target.value))}
                       >
-                        {[1, 2, 3, 4].map((l) => (
-                          <option key={l} value={l}>
-                            {LEVEL_NAMES[l]}
+                        {[1, 2, 3, 4].map((level) => (
+                          <option key={level} value={level}>
+                            {LEVEL_NAMES[level]}
                           </option>
                         ))}
                       </select>
                       <div className="mt-1">
-                        <EvidenceBlock memberId={currentMember.employee_id} skillId={r.skill_id} />
+                        <EvidenceBlock memberId={currentMember.employee_id} skillId={row.skill_id} />
                       </div>
                     </td>
                   </tr>
