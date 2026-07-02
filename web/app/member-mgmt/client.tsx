@@ -14,6 +14,7 @@ const XLS_COLS: [keyof Member, string][] = [
   ["division", "담당"],
   ["team", "팀"],
   ["role_level", "R/L"],
+  ["role_tenure", "R/L 연차"],
   ["position", "직책"],
   ["job_type", "직종"],
   ["persona_role", "페르소나"],
@@ -75,6 +76,7 @@ export function MemberMgmtClient() {
         division: "",
         team: "",
         role_level: "L3",
+        role_tenure: 1,
         position: "팀원",
         job_type: "사무직",
         persona_role: "employee",
@@ -372,6 +374,7 @@ export function MemberMgmtClient() {
                 <th className="py-2 pr-2">담당</th>
                 <th className="py-2 pr-2">팀</th>
                 <th className="py-2 pr-2">R/L</th>
+                <th className="py-2 pr-2">R/L 연차</th>
                 <th className="py-2 pr-2">직책</th>
                 <th className="py-2 pr-2">직종</th>
                 <th className="py-2 pr-2">페르소나</th>
@@ -432,6 +435,16 @@ export function MemberMgmtClient() {
                         <option key={value}>{value}</option>
                       ))}
                     </select>
+                  </td>
+                  <td className="py-1 pr-2">
+                    <input
+                      className={inputClassName}
+                      type="number"
+                      min={0}
+                      value={row.role_tenure ?? ""}
+                      readOnly={!isEditor}
+                      onChange={(event) => updateRow(index, "role_tenure", event.target.value)}
+                    />
                   </td>
                   <td className="py-1 pr-2">
                     <select

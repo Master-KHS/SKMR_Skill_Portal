@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS level_criteria (
 );
 CREATE TABLE IF NOT EXISTS member (
   employee_id TEXT PRIMARY KEY, name TEXT NOT NULL, corporation TEXT, division TEXT,
-  team TEXT, role_level TEXT, position TEXT, job_type TEXT, persona_role TEXT, extra_attrs TEXT
+  team TEXT, role_level TEXT, role_tenure INTEGER, position TEXT, job_type TEXT, persona_role TEXT, extra_attrs TEXT
 );
 CREATE TABLE IF NOT EXISTS required_skill (
   org_or_individual TEXT, target_id TEXT, skill_id INTEGER, target_level INTEGER,
@@ -84,6 +84,13 @@ CREATE TABLE IF NOT EXISTS reference_doc (
 type Row = Record<string, unknown>;
 let _db: SqliteDb | null = null;
 
+function ensureColumn(db: SqliteDb, table: string, column: string, definition: string) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((col) => col.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
 function seedTable(db: SqliteDb, table: string, rows: Row[]) {
   if (!rows?.length) return;
   const existing = db.prepare(`SELECT COUNT(*) c FROM ${table}`).get() as { c: number };
@@ -108,6 +115,7 @@ export function getDb(): SqliteDb {
   db.exec("PRAGMA journal_mode = WAL");
   db.exec("PRAGMA foreign_keys = ON");
   db.exec(SCHEMA);
+  ensureColumn(db, "member", "role_tenure", "INTEGER");
 
   const s = seed as unknown as Record<string, Row[]>;
   seedTable(db, "skill_family", s.skill_family);
@@ -148,17 +156,17 @@ function applyMembersToDb(db: SqliteDb, members: Member[]) {
       if (!keepIds.has(id)) db.prepare("DELETE FROM member WHERE employee_id=?").run(id);
     }
     const ins = db.prepare(
-      `INSERT INTO member (employee_id, name, corporation, division, team, role_level, position, job_type, persona_role, extra_attrs)
-       VALUES (?,?,?,?,?,?,?,?,?,NULL)
+      `INSERT INTO member (employee_id, name, corporation, division, team, role_level, role_tenure, position, job_type, persona_role, extra_attrs)
+       VALUES (?,?,?,?,?,?,?,?,?,?,NULL)
        ON CONFLICT(employee_id) DO UPDATE SET
          name=excluded.name, corporation=excluded.corporation, division=excluded.division,
-         team=excluded.team, role_level=excluded.role_level, position=excluded.position,
+         team=excluded.team, role_level=excluded.role_level, role_tenure=excluded.role_tenure, position=excluded.position,
          job_type=excluded.job_type, persona_role=excluded.persona_role`
     );
     for (const m of members) {
       ins.run(
         m.employee_id, m.name, m.corporation ?? null, m.division ?? null, m.team ?? null,
-        m.role_level ?? null, m.position ?? null, m.job_type ?? null, m.persona_role ?? null
+        m.role_level ?? null, m.role_tenure ?? null, m.position ?? null, m.job_type ?? null, m.persona_role ?? null
       );
     }
     db.exec("COMMIT");

@@ -6,6 +6,7 @@ export interface Member {
   division: string | null;
   team: string | null;
   role_level: string | null;
+  role_tenure: number | null;
   position: string | null;
   job_type: string | null;
   persona_role: string | null;
