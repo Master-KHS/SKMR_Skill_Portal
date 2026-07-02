@@ -102,8 +102,16 @@ export async function GET(req: NextRequest) {
   ).map((r) => ({ sub_family_name: r.sub_family_name, avg_lv: Math.round(r.avg_lv * 100) / 100 }));
 
   // 요구 Skill (전사+팀+개인승인) vs 보유 → Gap
-  const gaps = query<{ skill_id: number; skill_name: string; target_level: number; is_core: number; current_level: number | null }>(
-    `SELECT rq.skill_id, s.skill_name, rq.target_level, rq.is_core, sp.current_level
+  const gaps = query<{
+    skill_id: number;
+    skill_name: string;
+    family_name: string;
+    sub_family_name: string;
+    target_level: number;
+    is_core: number;
+    current_level: number | null;
+  }>(
+    `SELECT rq.skill_id, s.skill_name, f.family_name, sf.sub_family_name, rq.target_level, rq.is_core, sp.current_level
      FROM (
        SELECT skill_id, MAX(target_level) target_level, MAX(is_core) is_core FROM required_skill
        WHERE (org_or_individual='company' AND target_id='ALL')
@@ -112,6 +120,8 @@ export async function GET(req: NextRequest) {
        GROUP BY skill_id
      ) rq
      JOIN skill s ON rq.skill_id=s.skill_id
+     JOIN sub_skill_family sf ON s.sub_family_id=sf.sub_family_id
+     JOIN skill_family f ON sf.family_id=f.family_id
      LEFT JOIN skill_profile sp ON sp.member_id=? AND sp.skill_id=rq.skill_id
      ORDER BY rq.is_core DESC, rq.skill_id`,
     [team, id, id]
