@@ -1,13 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Badge } from "@/components/ui";
 import type { AssistantResponse, SearchFilters } from "@/lib/assistant-types";
 
 const EXAMPLES = [
-  "GC 분석 경험이 있는 후보를 찾아줘",
-  "OLED 소재 설계가 가능한 인재를 추천해줘",
-  "Photo Resist 평가 경험자를 보여줘",
+  "GC 분석 스킬 L3 이상 보유자를 찾아줘",
+  "OLED 소재 설계가 가능한 후보를 보여줘",
+  "Photo Resist 평가 경험자를 추천해줘",
 ];
 
 function filterEntries(filters: SearchFilters) {
@@ -51,7 +50,7 @@ export function FloatingAssistant() {
         body: JSON.stringify({ question: trimmed }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "AI 인재검색에 실패했습니다.");
+      if (!res.ok) throw new Error(data.error ?? "AI 인재검색 호출에 실패했습니다.");
       setResponse(data);
     } catch (err) {
       setError((err as Error).message);
@@ -78,190 +77,137 @@ export function FloatingAssistant() {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 flex max-h-[calc(100vh-4rem)] flex-col border border-[#F4D7B8] bg-white shadow-[0_18px_50px_rgba(0,0,0,0.22)] ${
-        expanded ? "h-[78vh] w-[880px]" : "h-[620px] w-[520px]"
+      className={`fixed bottom-4 right-4 z-50 border border-sk-orange/30 bg-[#FFF8F1] shadow-2xl ${
+        expanded ? "h-[82vh] w-[760px]" : "h-[620px] w-[500px]"
       }`}
     >
-      <div className="flex items-center justify-between border-b border-[#F4D7B8] bg-[#FFF8F1] px-4 py-3">
-        <div className="flex items-center gap-3">
-          <img src="/assets/chatbot-robot.png" alt="AI 인재검색 챗봇" className="h-12 w-12 object-contain mix-blend-multiply" />
-          <div>
-            <div className="text-sm font-extrabold text-text-main">AI 인재검색 챗봇</div>
-            <div className="text-xs text-text-muted">Skill Profile 기반 후보 추천</div>
-          </div>
+      <div className="flex items-center gap-3 border-b border-sk-orange/25 bg-[#FFF3E5] px-4 py-3">
+        <img src="/assets/chatbot-robot.png" alt="" className="h-11 w-11 object-contain mix-blend-multiply" />
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-extrabold text-text-main">AI 인재검색 챗봇</div>
+          <div className="text-xs text-text-muted">Skill Profile 기반 후보 추천</div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            className="border border-[#F4D7B8] bg-white px-2 py-1 text-xs font-semibold text-[#C45E00]"
-            onClick={() => setExpanded((value) => !value)}
-          >
-            {expanded ? "축소" : "확대"}
-          </button>
-          <button
-            className="border border-[#F4D7B8] bg-white px-2 py-1 text-xs text-text-muted"
-            onClick={() => setOpen(false)}
-          >
-            닫기
-          </button>
-        </div>
+        <button
+          className="border border-sk-orange/40 bg-white px-3 py-1.5 text-xs font-bold text-[#C45E00]"
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? "축소" : "확대"}
+        </button>
+        <button
+          className="border border-sk-orange/40 bg-white px-3 py-1.5 text-xs font-bold text-[#C45E00]"
+          onClick={() => setOpen(false)}
+        >
+          닫기
+        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-white p-4">
-        <div className="space-y-4">
-          <BotBubble>
-            Skill 기반으로 인재를 추천해드립니다. 스킬, 팀, R/L, 직책, 경험 키워드를 자연어로 입력하세요.
-          </BotBubble>
+      <div className="flex h-[calc(100%-64px)] flex-col">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4">
+          <div className="border border-sk-orange/25 bg-white px-4 py-3 text-sm leading-relaxed text-text-main">
+            <div className="font-bold">Skill 기반으로 인재를 추천해드립니다.</div>
+            <div className="mt-1 text-text-muted">
+              스킬, 팀, R/L, 직책, 경험 키워드를 자연어로 입력하세요.
+            </div>
+          </div>
 
-          {lastQuestion && <UserBubble>{lastQuestion}</UserBubble>}
-          {loading && <BotBubble>내부 Skill Profile과 Raw Data를 확인하는 중입니다...</BotBubble>}
-          {error && <div className="border border-sk-red bg-sk-red/[0.06] p-3 text-sm text-sk-red">{error}</div>}
+          {lastQuestion && (
+            <div className="ml-auto max-w-[86%] bg-sk-orange px-4 py-3 text-sm font-semibold text-white">
+              {lastQuestion}
+            </div>
+          )}
+
+          {loading && (
+            <div className="border border-border-soft bg-white px-4 py-3 text-sm text-text-muted">
+              후보 데이터와 Skill Profile을 확인하는 중입니다...
+            </div>
+          )}
+
+          {error && (
+            <div className="border border-sk-red bg-white px-4 py-3 text-sm leading-relaxed text-sk-red">
+              {error}
+            </div>
+          )}
 
           {response && (
-            <>
-              <BotBubble>
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      tone={
-                        response.verification === "pass"
-                          ? "success"
-                          : response.verification === "fail"
-                            ? "danger"
-                            : "warning"
-                      }
-                      label={
-                        response.verification === "pass"
-                          ? "근거 확인"
-                          : response.verification === "fail"
-                            ? "후보 없음"
-                            : "검토 필요"
-                      }
-                    />
-                    <Badge tone="info" label={`추천 후보 ${response.totalCount}명`} />
-                    {!response.grounded && <Badge tone="warning" label="조건 해석 약함" />}
-                  </div>
-                  {response.interpretedIntent && (
-                    <div className="text-xs text-text-muted">해석: {response.interpretedIntent}</div>
-                  )}
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed">{response.answer}</div>
-                </div>
-              </BotBubble>
+            <div className="space-y-3">
+              <div className="border border-border-soft bg-white px-4 py-3">
+                <div className="text-sm font-extrabold text-text-main">분석 요약</div>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-main">{response.answer}</p>
+              </div>
 
-              <Panel title="해석된 조건">
-                {summary.length === 0 ? (
-                  <div className="text-sm text-text-muted">구조화된 조건을 충분히 추출하지 못했습니다.</div>
-                ) : (
-                  <div className="grid gap-2 text-sm">
+              {summary.length > 0 && (
+                <div className="border border-border-soft bg-white px-4 py-3">
+                  <div className="mb-2 text-xs font-extrabold uppercase tracking-wide text-text-muted">적용 조건</div>
+                  <div className="flex flex-wrap gap-2">
                     {summary.map(([label, value]) => (
-                      <div key={label} className="flex justify-between gap-4 border-b border-border-soft pb-2 last:border-0">
-                        <span className="text-text-muted">{label}</span>
-                        <span className="text-right font-semibold text-text-main">{value}</span>
-                      </div>
+                      <span key={`${label}-${value}`} className="border border-sk-orange/30 bg-[#FFF8F1] px-2 py-1 text-xs">
+                        <b>{label}</b> {value}
+                      </span>
                     ))}
                   </div>
-                )}
-              </Panel>
+                </div>
+              )}
 
-              <Panel title={`추천 인재 ${response.results.length}명`}>
-                {response.results.length === 0 ? (
-                  <div className="text-sm text-text-muted">현재 조건에 맞는 후보가 없습니다.</div>
-                ) : (
-                  <div className="space-y-2">
-                    {response.results.slice(0, expanded ? 12 : 6).map((row) => (
-                      <div key={row.employee_id} className="border border-border-soft bg-white p-3 text-sm">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="font-extrabold text-text-main">{row.name}</div>
-                            <div className="mt-0.5 text-xs text-text-muted">
-                              {row.division ?? "-"} / {row.team ?? "-"} · {row.role_level ?? "-"} / {row.position ?? "-"}
-                            </div>
-                          </div>
-                          <div className="text-right text-xs text-text-muted">
-                            Skill {row.n_skills}
-                            <br />
-                            Avg L{row.avg_level}
+              {response.results.length > 0 && (
+                <div className="border border-border-soft bg-white">
+                  <div className="border-b border-border-soft px-4 py-2 text-sm font-extrabold text-text-main">
+                    추천 후보 {response.totalCount}명
+                  </div>
+                  <div className="divide-y divide-border-soft">
+                    {response.results.slice(0, 5).map((row) => (
+                      <div key={row.employee_id} className="px-4 py-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="font-bold text-text-main">{row.name}</div>
+                          <div className="text-xs text-text-muted">
+                            {row.team ?? "-"} · {row.role_level ?? "-"} · 평균 L{row.avg_level.toFixed(1)}
                           </div>
                         </div>
-                        <div className="mt-2 text-xs leading-relaxed text-text-muted">
-                          {row.matched.length > 0
-                            ? row.matched.map((matched) => `${matched.skill_name} L${matched.level}`).join(", ")
-                            : "직접 매칭 Skill 없음"}
+                        <div className="mt-1 text-xs text-text-muted">
+                          {row.matched.map((skill) => `${skill.skill_name} L${skill.level.toFixed(1)}`).join(", ")}
                         </div>
                       </div>
                     ))}
                   </div>
-                )}
-              </Panel>
-            </>
+                </div>
+              )}
+            </div>
           )}
         </div>
-      </div>
 
-      <div className="border-t border-[#F4D7B8] bg-[#FFF8F1] p-3">
-        <div className="flex gap-2">
-          <input
-            className="min-w-0 flex-1 border border-[#F4D7B8] bg-white px-3 py-2 text-sm outline-none focus:border-sk-orange"
-            placeholder="예: OLED 소재 설계 후보 추천"
-            value={question}
-            onChange={(event) => setQuestion(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") ask(question);
+        <div className="border-t border-sk-orange/25 bg-[#FFF8F1] p-3">
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {EXAMPLES.map((example) => (
+              <button
+                key={example}
+                className="border border-sk-orange/30 bg-white px-2 py-1 text-[11px] text-text-muted hover:text-text-main"
+                onClick={() => {
+                  setQuestion(example);
+                  void ask(example);
+                }}
+              >
+                {example}
+              </button>
+            ))}
+          </div>
+          <form
+            className="flex gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void ask(question);
             }}
-          />
-          <button
-            className="bg-sk-orange px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-            onClick={() => ask(question)}
-            disabled={loading}
           >
-            질문
-          </button>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {EXAMPLES.map((example) => (
-            <button
-              key={example}
-              className="border border-[#F4D7B8] bg-white px-2 py-1 text-[11px] text-text-muted hover:border-sk-orange"
-              onClick={() => {
-                setQuestion(example);
-                ask(example);
-              }}
-            >
-              {example}
+            <input
+              className="min-w-0 flex-1 border border-sk-orange/30 bg-white px-3 py-2 text-sm outline-none focus:border-sk-orange"
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              placeholder="찾고 싶은 인재 조건을 입력하세요"
+            />
+            <button className="bg-sk-orange px-4 py-2 text-sm font-extrabold text-white" disabled={loading}>
+              질문
             </button>
-          ))}
+          </form>
         </div>
       </div>
-    </div>
-  );
-}
-
-function BotBubble({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex justify-start">
-      <div className="max-w-[88%] border border-[#F4D7B8] bg-[#FFF8F1] px-4 py-3 text-sm leading-relaxed text-text-main">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function UserBubble({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex justify-end">
-      <div className="max-w-[88%] border border-sk-orange bg-sk-orange px-4 py-3 text-sm leading-relaxed text-white">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function Panel({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="border border-[#F4D7B8] bg-white">
-      <div className="border-b border-[#F4D7B8] bg-[#FFF8F1] px-3 py-2 text-xs font-extrabold text-text-main">
-        {title}
-      </div>
-      <div className="p-3">{children}</div>
     </div>
   );
 }
