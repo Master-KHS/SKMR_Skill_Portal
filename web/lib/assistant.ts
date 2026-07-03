@@ -401,17 +401,58 @@ async function buildGeminiNote(question: string, candidates: CandidateScore[]): 
 }
 
 function buildMemberAcademic(candidate: CandidateScore): AssistantMemberAcademic {
+  const hasNamedAcademicMatch = ACADEMIC_MATCH_NAMES.has(candidate.row.name);
   return {
     title: "논문/학력 데이터",
-    note: ACADEMIC_MATCH_NAMES.has(candidate.row.name)
-      ? "현재 연동된 학력 데이터와 실명 기반 참고 범위를 표시합니다. 외부 논문 근거는 실제 검색 연동 시에만 확정 근거로 사용합니다."
-      : "현재 연동된 학력 데이터 범위를 표시합니다. 실명 또는 학교명 매칭이 불완전한 경우 외부 학술 근거는 제외하고 Skill/Profile 기준으로 해석합니다.",
+    note: "개인 조회에서는 Skill 요약과 분리하여 학력, 논문, 연구실 이력 관련 근거를 별도 탭에서 관리합니다.",
     items: [
       { label: "이름", value: candidate.row.name },
       { label: "직무", value: candidate.raw.education?.job || "미연결" },
       { label: "최종학력", value: candidate.raw.education?.education || "미연결" },
       { label: "학교", value: candidate.raw.education?.school || "미연결" },
       { label: "전공", value: candidate.raw.education?.major || "미연결" },
+    ],
+    sections: [
+      {
+        title: "학력 정보",
+        status: candidate.raw.education ? "ready" : "pending",
+        note: "현재 연결된 내부 raw data 기준입니다.",
+        items: [
+          { label: "직무", value: candidate.raw.education?.job || "미연결" },
+          { label: "최종학력", value: candidate.raw.education?.education || "미연결" },
+          { label: "학교", value: candidate.raw.education?.school || "미연결" },
+          { label: "전공", value: candidate.raw.education?.major || "미연결" },
+        ],
+      },
+      {
+        title: "논문 메타데이터",
+        status: hasNamedAcademicMatch ? "needs_approval" : "pending",
+        note: hasNamedAcademicMatch
+          ? "실제 외부 논문/Scholar 검색 연동 전 단계입니다. 승인 후 논문명, 저자, 학회/저널, 연도, 키워드를 채웁니다."
+          : "실명/학교명 기준 외부 검색 정합성 검토가 필요합니다. 승인 후 외부 연동 범위를 확정합니다.",
+        items: [
+          { label: "연동 상태", value: hasNamedAcademicMatch ? "승인 후 외부 검색 가능" : "정합성 검토 필요" },
+          { label: "현재 메타", value: "미수집" },
+        ],
+      },
+      {
+        title: "연구실 이력",
+        status: hasNamedAcademicMatch ? "needs_approval" : "pending",
+        note: "논문뿐 아니라 연구실/랩/공개 연구 프로필 이력도 동일 탭에서 관리합니다.",
+        items: [
+          { label: "연동 상태", value: hasNamedAcademicMatch ? "승인 후 외부 검색 가능" : "정합성 검토 필요" },
+          { label: "현재 이력", value: "미수집" },
+        ],
+      },
+      {
+        title: "외부 검색 상태",
+        status: "needs_approval",
+        note: "Google Scholar, 논문 DB, 연구실 공개 페이지 조회는 사용자 승인 후 실행합니다.",
+        items: [
+          { label: "검색 범위", value: "논문 / 연구실 / 공개 프로필" },
+          { label: "실행 조건", value: "사용자 승인 필요" },
+        ],
+      },
     ],
   };
 }

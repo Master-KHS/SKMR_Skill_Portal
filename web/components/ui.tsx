@@ -2,10 +2,7 @@
 
 export function PageHeader({ title, desc }: { title: string; desc?: string }) {
   return (
-    <div className="mb-6 border border-border-soft bg-bg-main/70 px-5 py-4">
-      <div className="mb-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-text-muted">
-        Skill 기반 인재관리 Agent
-      </div>
+    <div className="mb-5 border border-border-soft bg-bg-main/70 px-6 py-5">
       <h1 className="text-2xl font-extrabold tracking-tight text-text-main">{title}</h1>
       {desc && <p className="mt-1.5 text-sm leading-relaxed text-text-muted">{desc}</p>}
     </div>
@@ -45,11 +42,7 @@ const TONE: Record<Tone, string> = {
 };
 
 export function Badge({ tone, label }: { tone: Tone; label: string }) {
-  return (
-    <span className={`inline-block border px-2 py-0.5 text-xs font-semibold ${TONE[tone]}`}>
-      {label}
-    </span>
-  );
+  return <span className={`inline-block border px-2 py-0.5 text-xs font-semibold ${TONE[tone]}`}>{label}</span>;
 }
 
 export function Stat({
@@ -62,29 +55,18 @@ export function Stat({
   accent?: boolean;
 }) {
   return (
-    <div
-      className={`bg-bg-surface border border-border-soft border-t-[3px] p-4 ${
-        accent ? "border-t-sk-red" : "border-t-text-main/70"
-      }`}
-    >
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
-        {label}
-      </div>
-      <div className="text-2xl font-extrabold text-text-main mt-1.5">{value}</div>
+    <div className={`bg-bg-surface border border-border-soft border-t-[3px] p-4 ${accent ? "border-t-sk-red" : "border-t-text-main/70"}`}>
+      <div className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">{label}</div>
+      <div className="mt-1.5 text-2xl font-extrabold text-text-main">{value}</div>
     </div>
   );
 }
 
-export function PrimaryButton({
-  children,
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+export function PrimaryButton({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       {...props}
-      className={`bg-sk-orange text-white px-5 py-2 text-sm font-bold disabled:opacity-50 hover:brightness-95 ${
-        props.className ?? ""
-      }`}
+      className={`bg-sk-orange px-5 py-2 text-sm font-bold text-white disabled:opacity-50 hover:brightness-95 ${props.className ?? ""}`}
     >
       {children}
     </button>

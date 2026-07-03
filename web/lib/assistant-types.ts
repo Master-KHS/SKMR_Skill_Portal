@@ -71,6 +71,12 @@ export interface AssistantMemberAcademic {
   title: string;
   note: string;
   items: { label: string; value: string }[];
+  sections?: {
+    title: string;
+    status: "ready" | "pending" | "needs_approval";
+    note?: string;
+    items: { label: string; value: string }[];
+  }[];
 }
 
 export interface AssistantResponse {

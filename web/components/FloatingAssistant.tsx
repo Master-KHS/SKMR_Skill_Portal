@@ -234,6 +234,29 @@ export function FloatingAssistant() {
                           </div>
                         ))}
                       </div>
+                      {response.memberAcademic.sections && response.memberAcademic.sections.length > 0 && (
+                        <div className="mt-4 space-y-3">
+                          {response.memberAcademic.sections.map((section) => (
+                            <div key={section.title} className="border border-border-soft bg-white">
+                              <div className="flex items-center justify-between gap-3 border-b border-border-soft px-3 py-2">
+                                <div className="text-sm font-bold text-text-main">{section.title}</div>
+                                <div className="text-[11px] font-bold text-text-muted uppercase">{section.status}</div>
+                              </div>
+                              <div className="px-3 py-3">
+                                {section.note && <div className="mb-2 text-xs leading-relaxed text-text-muted">{section.note}</div>}
+                                <div className="grid gap-2">
+                                  {section.items.map((item) => (
+                                    <div key={`${section.title}-${item.label}`} className="grid grid-cols-[96px_1fr] gap-3 bg-[#FFF8F1] px-3 py-2">
+                                      <div className="text-xs font-bold text-text-muted">{item.label}</div>
+                                      <div className="text-sm text-text-main">{item.value}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
