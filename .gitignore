@@ -4,6 +4,9 @@ venv/
 __pycache__/
 *.pyc
 data/*.db
+web/data/skmr.db
+web/data/skmr.db-shm
+web/data/skmr.db-wal
 .streamlit/secrets.toml
 web/devserver.out.log
 web/devserver.err.log

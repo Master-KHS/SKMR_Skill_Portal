@@ -3,11 +3,20 @@ cd /d "%~dp0"
 setlocal
 
 set "TARGET=http://127.0.0.1:3000"
+set "CLOUDFLARED_EXE=C:\Program Files (x86)\cloudflared\cloudflared.exe"
 
 echo ================================================
 echo  SKMR Skill Agent tunnel launcher
 echo  target: %TARGET%
 echo ================================================
+
+if exist "%CLOUDFLARED_EXE%" (
+  echo cloudflared detected.
+  echo Starting public tunnel...
+  echo Share the https://*.trycloudflare.com URL shown below.
+  "%CLOUDFLARED_EXE%" tunnel --url %TARGET%
+  goto :eof
+)
 
 where cloudflared >nul 2>&1
 if not errorlevel 1 (
