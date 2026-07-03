@@ -9,6 +9,8 @@ export interface SearchFilters {
   team?: string;
   job_type?: string;
   role_level?: string;
+  role_level_min?: string;
+  role_level_max?: string;
   position?: string;
   skills?: SkillCondition[];
 }
@@ -65,6 +67,12 @@ export interface AssistantDashboard {
   insights: AssistantDashboardInsight[];
 }
 
+export interface AssistantMemberAcademic {
+  title: string;
+  note: string;
+  items: { label: string; value: string }[];
+}
+
 export interface AssistantResponse {
   answer: string;
   filters: SearchFilters;
@@ -79,4 +87,5 @@ export interface AssistantResponse {
   dataSlots: AssistantDataSlot[];
   followUpSuggestions: string[];
   dashboard?: AssistantDashboard;
+  memberAcademic?: AssistantMemberAcademic;
 }

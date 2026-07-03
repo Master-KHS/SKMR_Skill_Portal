@@ -23,6 +23,8 @@ function filterEntries(filters: SearchFilters) {
     filters.team ? ["팀", filters.team] : null,
     filters.job_type ? ["직종", filters.job_type] : null,
     filters.role_level ? ["R/L", filters.role_level] : null,
+    filters.role_level_max ? ["R/L 최대", filters.role_level_max] : null,
+    filters.role_level_min ? ["R/L 최소", filters.role_level_min] : null,
     filters.position ? ["직책", filters.position] : null,
     (filters.skills?.length ?? 0) > 0
       ? ["Skill", filters.skills!.map((skill) => `#${skill.skill_id} L${skill.min_level}+`).join(", ")]
@@ -33,6 +35,7 @@ function filterEntries(filters: SearchFilters) {
 export function FloatingAssistant() {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [activeMemberTab, setActiveMemberTab] = useState<"skill" | "academic">("skill");
   const [question, setQuestion] = useState("");
   const [lastQuestion, setLastQuestion] = useState("");
   const [loading, setLoading] = useState(false);
@@ -112,6 +115,7 @@ export function FloatingAssistant() {
     setLoading(true);
     setError(null);
     setResponse(null);
+    setActiveMemberTab("skill");
     setLastQuestion(trimmed);
 
     try {
@@ -201,7 +205,41 @@ export function FloatingAssistant() {
 
           {response && (
             <div className="space-y-3">
-              {response.dashboard && (
+              {response.filters.member_name && response.memberAcademic && (
+                <div className="border border-sk-orange/25 bg-white">
+                  <div className="flex border-b border-border-soft">
+                    <button
+                      className={`px-4 py-2 text-sm font-bold ${activeMemberTab === "skill" ? "bg-[#FFF3E5] text-text-main" : "text-text-muted"}`}
+                      onClick={() => setActiveMemberTab("skill")}
+                      type="button"
+                    >
+                      Skill 요약
+                    </button>
+                    <button
+                      className={`px-4 py-2 text-sm font-bold ${activeMemberTab === "academic" ? "bg-[#FFF3E5] text-text-main" : "text-text-muted"}`}
+                      onClick={() => setActiveMemberTab("academic")}
+                      type="button"
+                    >
+                      {response.memberAcademic.title}
+                    </button>
+                  </div>
+                  {activeMemberTab === "academic" && (
+                    <div className="px-4 py-3">
+                      <div className="text-xs leading-relaxed text-text-muted">{response.memberAcademic.note}</div>
+                      <div className="mt-3 grid gap-2">
+                        {response.memberAcademic.items.map((item) => (
+                          <div key={item.label} className="grid grid-cols-[96px_1fr] gap-3 border border-border-soft bg-[#FFF8F1] px-3 py-2">
+                            <div className="text-xs font-bold text-text-muted">{item.label}</div>
+                            <div className="text-sm text-text-main">{item.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {response.dashboard && activeMemberTab === "skill" && (
                 <div className="border border-sk-orange/25 bg-white px-4 py-3">
                   <div className="text-sm font-extrabold text-text-main">{response.dashboard.title}</div>
                   <div className="mt-1 text-xs text-text-muted">{response.dashboard.subtitle}</div>
@@ -252,12 +290,14 @@ export function FloatingAssistant() {
                 </div>
               )}
 
-              <div className="border border-border-soft bg-white px-4 py-3">
-                <div className="text-sm font-extrabold text-text-main">분석 요약</div>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-main">{response.answer}</p>
-              </div>
+              {activeMemberTab === "skill" && (
+                <div className="border border-border-soft bg-white px-4 py-3">
+                  <div className="text-sm font-extrabold text-text-main">분석 요약</div>
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-main">{response.answer}</p>
+                </div>
+              )}
 
-              {summary.length > 0 && (
+              {summary.length > 0 && activeMemberTab === "skill" && (
                 <div className="border border-border-soft bg-white px-4 py-3">
                   <div className="mb-2 text-xs font-extrabold uppercase tracking-wide text-text-muted">적용 조건</div>
                   <div className="flex flex-wrap gap-2">
@@ -270,7 +310,7 @@ export function FloatingAssistant() {
                 </div>
               )}
 
-              {response.results.length > 0 && (
+              {response.results.length > 0 && activeMemberTab === "skill" && (
                 <div className="border border-border-soft bg-white">
                   <div className="border-b border-border-soft px-4 py-2 text-sm font-extrabold text-text-main">
                     {response.filters.member_name ? "조회 결과" : `추천 후보 ${response.totalCount}명`}
@@ -295,7 +335,7 @@ export function FloatingAssistant() {
                 </div>
               )}
 
-              {response.docEvidence.length > 0 && (
+              {response.docEvidence.length > 0 && activeMemberTab === "skill" && (
                 <div className="border border-border-soft bg-white px-4 py-3">
                   <div className="mb-2 text-sm font-extrabold text-text-main">근거 데이터</div>
                   <div className="space-y-2">
@@ -311,7 +351,7 @@ export function FloatingAssistant() {
                 </div>
               )}
 
-              {response.followUpSuggestions.length > 0 && (
+              {response.followUpSuggestions.length > 0 && activeMemberTab === "skill" && (
                 <div className="border border-border-soft bg-white px-4 py-3">
                   <div className="mb-2 text-xs font-extrabold uppercase tracking-wide text-text-muted">다음 질문</div>
                   <div className="flex flex-wrap gap-2">
