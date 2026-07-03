@@ -154,5 +154,7 @@ ${resultContext || "(없음)"}`;
     docEvidence: [],
     dataSlots: [],
     followUpSuggestions: [],
+    requestedCount: top.length,
+    candidateCards: [],
   };
 }

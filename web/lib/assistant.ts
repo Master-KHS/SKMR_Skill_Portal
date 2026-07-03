@@ -4,8 +4,10 @@ import { getMembers, getSkillProfiles, getSkills } from "./data";
 import { getProvider, isLlmConfigured } from "./llm/provider";
 import { getRawDataSummary, type PiTaskProfile } from "./assistant-raw-data";
 import type {
+  AssistantCandidateCard,
   AssistantDashboard,
   AssistantDocEvidence,
+  AssistantExternalSearchPlan,
   AssistantMemberAcademic,
   AssistantResponse,
   SearchFilters,
@@ -52,10 +54,45 @@ const K = {
 };
 
 const ACADEMIC_MATCH_NAMES = new Set([K.imGayoung, K.kimSunjae]);
+const DOMAIN_KEYWORDS = [
+  "skill",
+  "스킬",
+  "인재",
+  "후보",
+  "추천",
+  "탐색",
+  "검색",
+  "역량",
+  "레벨",
+  "level",
+  "kpi",
+  "과제",
+  "논문",
+  "연구실",
+  "학력",
+  "팀",
+  "직무",
+  "직책",
+  "rl",
+  "l3",
+  "l4",
+  "l5",
+  "gc",
+  "oled",
+  "photo",
+  "resist",
+  "박막",
+  "씬필름",
+  "도판트",
+];
 
 function includesAny(text: string, keywords: string[]): boolean {
   const lower = text.toLowerCase();
   return keywords.some((keyword) => lower.includes(keyword.toLowerCase()));
+}
+
+function isTalentSearchQuestion(question: string): boolean {
+  return includesAny(question, DOMAIN_KEYWORDS);
 }
 
 function minLevelFromQuestion(question: string): number {
@@ -67,6 +104,18 @@ function roleLevelRank(roleLevel: string | null | undefined): number {
   if (!roleLevel) return 999;
   const match = roleLevel.match(/L\s*(\d+)/i);
   return match ? Number(match[1]) : 999;
+}
+
+function parseRequestedCount(question: string): number {
+  const explicit = question.match(/(\d+)\s*명/);
+  if (explicit) {
+    const value = Number(explicit[1]);
+    if (Number.isFinite(value) && value > 0) return Math.min(value, 10);
+  }
+  if (includesAny(question, ["한 명", "1명", "1명만", "1명만 추천", "1명 추천"])) return 1;
+  if (includesAny(question, ["두 명", "2명"])) return 2;
+  if (includesAny(question, ["세 명", "3명"])) return 3;
+  return 5;
 }
 
 function expandKeywords(question: string): string[] {
@@ -255,7 +304,58 @@ function formatCandidate(candidate: CandidateScore, rank: number): string {
     .join(" / ");
   const reviewText = raw.reviews.length ? raw.reviews.map((review) => `${review.year} ${review.rating}`).join(", ") : "평가 데이터 없음";
 
-  return `${rank}. ${row.name} / ${row.team ?? "-"} / ${education}\n- Skill 근거: ${skillText}\n- KPI 과제 근거: ${taskText || "매칭 KPI 과제 없음"}\n- 평가 흐름: ${reviewText}\n- 발령 이력: ${raw.latestAppointment ? `${raw.latestAppointment.date} ${raw.latestAppointment.type} -> ${raw.latestAppointment.afterOrg}` : "발령 데이터 없음"}`;
+  return `${rank}. ${row.name} (${row.employee_id}) / ${row.division ?? "-"} / ${row.team ?? "-"} / ${row.position ?? "-"} / ${row.role_level ?? "-"}\n- 직무/학력: ${education}\n- Skill 근거: ${skillText}\n- KPI 과제 근거: ${taskText || "매칭 KPI 과제 없음"}\n- 평가 흐름: ${reviewText}\n- 발령 이력: ${raw.latestAppointment ? `${raw.latestAppointment.date} ${raw.latestAppointment.type} -> ${raw.latestAppointment.afterOrg}` : "발령 데이터 없음"}`;
+}
+
+function getExternalStatus(candidate: CandidateScore): AssistantCandidateCard["externalStatus"] {
+  if (ACADEMIC_MATCH_NAMES.has(candidate.row.name)) return "ready_for_approval";
+  if (candidate.raw.education?.school || candidate.raw.education?.major) return "needs_identity_match";
+  return "internal_only";
+}
+
+function getExternalStatusNote(candidate: CandidateScore): string {
+  const status = getExternalStatus(candidate);
+  if (status === "ready_for_approval") {
+    return "승인 후 외부조회 단계로 넘길 수 있지만, 현재 실행 환경에서는 자동 수집이 정책상 차단될 수 있습니다.";
+  }
+  if (status === "needs_identity_match") {
+    return "내부 학력 정보는 있으나 실명/외부 공개 정보 정합성 확인이 먼저 필요합니다.";
+  }
+  return "현재는 내부 Skill, KPI 과제, 평가 이력 중심으로만 근거를 제공합니다.";
+}
+
+function buildCandidateCards(candidates: CandidateScore[]): AssistantCandidateCard[] {
+  return candidates.map((candidate, index) => {
+    const { row, raw, piHits } = candidate;
+    const matchedSkills = row.matched.length
+      ? row.matched.map((skill) => `${skill.skill_name} L${skill.level.toFixed(1)}`)
+      : ["직접 매칭 Skill 없음"];
+    const kpiEvidence = (piHits.length ? piHits : raw.piTasks.slice(0, 2))
+      .slice(0, 2)
+      .map((task) => `${task.year} ${task.task}`);
+    const strengthSummary =
+      row.matched.length > 0
+        ? `매칭 Skill ${row.matched.length}개와 KPI 과제 ${Math.max(piHits.length, 1)}건이 직접 연결됩니다.`
+        : piHits.length > 0
+          ? `직접 매칭 Skill은 약하지만 KPI 과제 ${piHits.length}건이 질문 키워드와 연결됩니다.`
+          : "평균 Skill Level과 직무/학력 정보를 중심으로 후보에 포함되었습니다.";
+
+    return {
+      employee_id: row.employee_id,
+      rank: index + 1,
+      name: row.name,
+      team: row.team,
+      role_level: row.role_level,
+      position: row.position,
+      avg_level: row.avg_level,
+      score: Math.round(candidate.score),
+      matchedSkills,
+      kpiEvidence,
+      strengthSummary,
+      externalStatus: getExternalStatus(candidate),
+      externalNote: getExternalStatusNote(candidate),
+    };
+  });
 }
 
 function buildDocEvidence(candidates: CandidateScore[]): AssistantDocEvidence[] {
@@ -279,12 +379,12 @@ function buildDocEvidence(candidates: CandidateScore[]): AssistantDocEvidence[] 
   });
 }
 
-function buildFollowUps(filters: SearchFilters, unresolvedSkills: string[], results: SearchResultRow[]): string[] {
+function buildFollowUps(filters: SearchFilters, unresolvedSkills: string[], results: SearchResultRow[], requestedCount: number): string[] {
   if (filters.member_name) {
     return [
       `${filters.member_name}의 상위 Skill 5개를 표로 정리해줘.`,
-      `${filters.member_name}의 보유 Skill 전체를 레벨순으로 다시 보여줘.`,
-      `${filters.member_name}와 같은 팀에서 유사 Skill 보유자를 찾아줘.`,
+      `${filters.member_name}의 보유 Skill 전체를 레벨순으로 보여줘.`,
+      `${filters.member_name}와 유사한 Skill 구성을 가진 후보 2명을 찾아줘.`,
     ];
   }
 
@@ -292,12 +392,13 @@ function buildFollowUps(filters: SearchFilters, unresolvedSkills: string[], resu
   if (unresolvedSkills.length > 0) suggestions.push(`Skill Library에 없는 키워드입니다: ${unresolvedSkills.join(", ")}`);
   if (!filters.team) suggestions.push("팀 조건을 추가하면 후보를 더 좁힐 수 있습니다.");
   if (results.length === 0) suggestions.push("Skill Level 조건을 낮추거나 기술 키워드를 바꿔 다시 검색해보세요.");
-  if (filters.skills?.length) suggestions.push("추천 후보의 KPI 과제 근거를 더 자세히 비교해줘.");
-  suggestions.push("후보별 Skill/KPI 과제/평가 근거를 표로 비교해줘.");
+  if (results.length > 0 && requestedCount < 5) suggestions.push(`같은 조건으로 ${Math.min(requestedCount + 2, 5)}명까지 다시 추천해줘.`);
+  if (filters.skills?.length) suggestions.push("추천 후보의 KPI 과제 근거를 비교해줘.");
+  suggestions.push("후보별 Skill, KPI 과제, 평가 근거를 비교해줘.");
   return suggestions.slice(0, 3);
 }
 
-function buildAssistantDashboard(question: string, candidates: CandidateScore[], filters: SearchFilters): AssistantDashboard {
+function buildAssistantDashboard(question: string, candidates: CandidateScore[], filters: SearchFilters, requestedCount: number): AssistantDashboard {
   const piEvidenceCount = candidates.reduce((sum, candidate) => sum + candidate.piHits.length, 0);
   const avgLevel = candidates.length
     ? Math.round((candidates.reduce((sum, candidate) => sum + candidate.row.avg_level, 0) / candidates.length) * 10) / 10
@@ -341,7 +442,7 @@ function buildAssistantDashboard(question: string, candidates: CandidateScore[],
     title: filters.member_name ? "구성원 Skill 요약" : "AI 인재추천 요약",
     subtitle: `"${question}" 기준 내부 Skill/Raw Data 매칭 결과`,
     metrics: [
-      { label: filters.member_name ? "조회 대상" : "추천 후보", value: filters.member_name ? "1명" : `${candidates.length}명`, note: filters.member_name ? "이름 직접 조회" : "점수순 정렬" },
+      { label: filters.member_name ? "조회 대상" : "추천 후보", value: filters.member_name ? "1명" : `${candidates.length}명`, note: filters.member_name ? "이름 직접 조회" : `요청 ${requestedCount}명 기준` },
       { label: "후보 평균 Level", value: `L${avgLevel}`, note: "보유 Skill 평균" },
       { label: "KPI 과제 근거", value: `${piEvidenceCount}건`, note: "키워드 직접 매칭" },
     ],
@@ -356,7 +457,33 @@ function buildAssistantDashboard(question: string, candidates: CandidateScore[],
         title: "추천 기준",
         detail: "Skill Level, KPI 과제 키워드, 직무/학력, 최근 평가/발령 이력을 함께 점수화했습니다.",
       },
+      {
+        title: "외부 근거 정책",
+        detail: "논문, Google Scholar, 연구실 이력은 승인 후 외부조회 단계로 넘깁니다. 다만 현재 실행 환경에서는 자동 수집이 제한될 수 있어 내부 근거가 우선입니다.",
+      },
     ],
+  };
+}
+
+function buildExternalSearchPlan(candidates: CandidateScore[]): AssistantExternalSearchPlan {
+  const readyCandidates = candidates
+    .filter((candidate) => getExternalStatus(candidate) === "ready_for_approval")
+    .map((candidate) => candidate.row.name);
+  const blockedCandidates = candidates
+    .filter((candidate) => getExternalStatus(candidate) !== "ready_for_approval")
+    .map((candidate) => candidate.row.name);
+
+  return {
+    status: readyCandidates.length === 0 ? "internal_only" : blockedCandidates.length === 0 ? "needs_approval" : "partially_ready",
+    note:
+      readyCandidates.length === 0
+        ? "현재 후보는 외부 논문/연구실 조회보다 내부 Skill·KPI·평가 근거 중심으로 해석하는 단계입니다."
+        : blockedCandidates.length === 0
+          ? "현재 후보는 승인 후 외부조회 단계로 넘길 수 있습니다. 다만 현재 실행 환경에서는 자동 수집이 정책상 제한될 수 있습니다."
+          : "일부 후보만 외부조회 준비 상태입니다. 나머지는 실명/학교명 정합성 검토가 먼저 필요합니다.",
+    scopes: ["논문 메타데이터", "Google Scholar", "연구실/랩 이력", "공개 프로필"],
+    readyCandidates,
+    blockedCandidates,
   };
 }
 
@@ -400,6 +527,53 @@ async function buildGeminiNote(question: string, candidates: CandidateScore[]): 
   }
 }
 
+function getCandidatesByIds(candidateIds: string[]): CandidateScore[] {
+  const memberSet = new Set(candidateIds);
+  const members = getMembers().filter((member) => memberSet.has(member.employee_id));
+  const profiles = getSkillProfiles();
+  const skills = getSkills();
+  const skillsById = new Map(skills.map((skill) => [skill.skill_id, skill]));
+  const statByMember = new Map<string, { n: number; sum: number }>();
+
+  for (const profile of profiles) {
+    const stat = statByMember.get(profile.member_id) ?? { n: 0, sum: 0 };
+    stat.n += 1;
+    stat.sum += profile.current_level;
+    statByMember.set(profile.member_id, stat);
+  }
+
+  return members.map((member) => {
+    const raw = getRawDataSummary(member.employee_id);
+    const memberProfiles = profiles.filter((profile) => profile.member_id === member.employee_id);
+    const stat = statByMember.get(member.employee_id) ?? { n: 0, sum: 0 };
+    const row: SearchResultRow = {
+      employee_id: member.employee_id,
+      name: member.name,
+      division: member.division,
+      team: member.team,
+      role_level: member.role_level,
+      position: member.position,
+      job_type: member.job_type,
+      n_skills: stat.n,
+      avg_level: stat.n ? Math.round((stat.sum / stat.n) * 100) / 100 : 0,
+      matched: memberProfiles
+        .sort((a, b) => b.current_level - a.current_level)
+        .slice(0, 5)
+        .map((profile) => ({
+          skill_id: profile.skill_id,
+          skill_name: skillsById.get(profile.skill_id)?.skill_name ?? `#${profile.skill_id}`,
+          level: profile.current_level,
+        })),
+    };
+    return { row, score: 0, raw, piHits: raw.piTasks.slice(0, 2) };
+  });
+}
+
+export async function runAssistantGeminiSupplement(question: string, candidateIds: string[]): Promise<string> {
+  const candidates = getCandidatesByIds(candidateIds).slice(0, 3);
+  return buildGeminiNote(question, candidates);
+}
+
 function buildMemberAcademic(candidate: CandidateScore): AssistantMemberAcademic {
   const hasNamedAcademicMatch = ACADEMIC_MATCH_NAMES.has(candidate.row.name);
   return {
@@ -428,11 +602,12 @@ function buildMemberAcademic(candidate: CandidateScore): AssistantMemberAcademic
         title: "논문 메타데이터",
         status: hasNamedAcademicMatch ? "needs_approval" : "pending",
         note: hasNamedAcademicMatch
-          ? "실제 외부 논문/Scholar 검색 연동 전 단계입니다. 승인 후 논문명, 저자, 학회/저널, 연도, 키워드를 채웁니다."
-          : "실명/학교명 기준 외부 검색 정합성 검토가 필요합니다. 승인 후 외부 연동 범위를 확정합니다.",
+          ? "외부조회 승인 대상입니다. 다만 현재 실행 환경에서는 자동 수집이 차단될 수 있어 직접 조회 링크 기반으로 확인합니다."
+          : "실명/학교명 기준 외부 검색 정합성 검토가 필요합니다. 이후 직접 조회 범위를 확정합니다.",
         items: [
-          { label: "연동 상태", value: hasNamedAcademicMatch ? "승인 후 외부 검색 가능" : "정합성 검토 필요" },
+          { label: "연동 상태", value: hasNamedAcademicMatch ? "승인 후 직접 조회" : "정합성 검토 필요" },
           { label: "현재 메타", value: "미수집" },
+          { label: "예정 필드", value: "논문명 / 저자 / 학회·저널 / 연도 / 키워드" },
         ],
       },
       {
@@ -440,17 +615,18 @@ function buildMemberAcademic(candidate: CandidateScore): AssistantMemberAcademic
         status: hasNamedAcademicMatch ? "needs_approval" : "pending",
         note: "논문뿐 아니라 연구실/랩/공개 연구 프로필 이력도 동일 탭에서 관리합니다.",
         items: [
-          { label: "연동 상태", value: hasNamedAcademicMatch ? "승인 후 외부 검색 가능" : "정합성 검토 필요" },
+          { label: "연동 상태", value: hasNamedAcademicMatch ? "승인 후 직접 조회" : "정합성 검토 필요" },
           { label: "현재 이력", value: "미수집" },
+          { label: "예정 필드", value: "연구실 / 지도교수 / 연구주제 / 공개 프로필" },
         ],
       },
       {
         title: "외부 검색 상태",
         status: "needs_approval",
-        note: "Google Scholar, 논문 DB, 연구실 공개 페이지 조회는 사용자 승인 후 실행합니다.",
+        note: "Google Scholar, 논문 DB, 연구실 공개 페이지 조회는 사용자 승인 후 직접 조회 링크 기준으로 진행합니다.",
         items: [
           { label: "검색 범위", value: "논문 / 연구실 / 공개 프로필" },
-          { label: "실행 조건", value: "사용자 승인 필요" },
+          { label: "실행 조건", value: "사용자 승인 + 직접 조회" },
         ],
       },
     ],
@@ -472,14 +648,61 @@ function buildIndividualAnswer(question: string, candidate: CandidateScore): str
     ? summary.allSkills.map((skill) => `${skill.skill_name} L${skill.level.toFixed(1)}`).join(", ")
     : "보유 Skill 데이터 없음";
 
-  return `구성원 Skill 요약\n\n1. 조회 해석\n"${question}" 질문을 특정 구성원 조회로 해석했습니다. 해당 구성원의 Skill Profile, 평가, 발령 이력을 함께 확인했습니다.\n\n2. 구성원 요약\n- 대상: ${candidate.row.name} / ${candidate.row.team ?? "-"} / ${candidate.row.role_level ?? "-"} / ${candidate.row.position ?? "-"}\n- 직무/학력: ${education}\n- 보유 Skill: ${summary.totalSkills}개, 평균 L${summary.avgLevel.toFixed(2)}\n- 상위 Skill: ${topSkills}\n- 보유 Skill 전체: ${skillList}\n- 평가 흐름: ${reviews}\n- 최근 발령: ${candidate.raw.latestAppointment ? `${candidate.raw.latestAppointment.date} ${candidate.raw.latestAppointment.type} -> ${candidate.raw.latestAppointment.afterOrg}` : "발령 데이터 없음"}\n\n3. 해석 메모\n현재 응답은 추천이 아니라 개인 Skill 현황 조회입니다. 강점은 보유 Skill Level 상위 항목 기준으로 해석했습니다.`;
+  return `구성원 Skill 요약\n\n1. 조회 해석\n"${question}" 질문을 개인 Skill 조회로 해석했습니다.\n\n2. 핵심 요약\n- 대상: ${candidate.row.name} (${candidate.row.employee_id}) / ${candidate.row.division ?? "-"} / ${candidate.row.team ?? "-"} / ${candidate.row.position ?? "-"} / ${candidate.row.role_level ?? "-"}\n- 직무/학력: ${education}\n- 보유 Skill: ${summary.totalSkills}개, 평균 L${summary.avgLevel.toFixed(1)}\n- 상위 Skill: ${topSkills}\n\n3. 근거\n- 보유 Skill 전체: ${skillList}\n- 평가 흐름: ${reviews}\n- 최근 발령: ${candidate.raw.latestAppointment ? `${candidate.raw.latestAppointment.date} ${candidate.raw.latestAppointment.type} -> ${candidate.raw.latestAppointment.afterOrg}` : "발령 데이터 없음"}\n\n4. 메모\n강점은 보유 Skill Level 상위 항목과 최근 평가 흐름 기준으로 정리했습니다. 논문, Google Scholar, 연구실 이력은 승인 후 직접 조회 링크로만 보강합니다.`;
+}
+
+function buildRecommendationAnswer(question: string, candidates: CandidateScore[], requestedCount: number): string {
+  const top = candidates.slice(0, requestedCount);
+  return `Skill 기반 인재추천\n\n1. 검색 해석\n"${question}" 질문을 인재추천 요청으로 해석했습니다. 구성원 마스터, 직무/학력, 3개년 KPI 과제, 평가, 발령, Skill Level Profile을 함께 확인했습니다.\n\n2. 추천 결과\n요청 기준 ${requestedCount}명 추천입니다.\n${top.map((candidate, index) => formatCandidate(candidate, index + 1)).join("\n\n")}\n\n3. 외부 근거 상태\n외부 논문, Google Scholar, 연구실 이력은 승인 후 직접 조회 단계로만 보강합니다. 내부 Skill, KPI 과제, 평가, 발령 이력이 현재 확정 근거입니다.\n\n4. 보강 상태\nGemini 요약은 별도 비동기 보강으로 불러옵니다.`;
 }
 
 export async function runAssistant(question: string): Promise<AssistantResponse> {
+  if (!isTalentSearchQuestion(question)) {
+    return {
+      answer:
+        "해당 질문은 답변이 어렵습니다. AI Talent Search는 인재검색, Skill, KPI 과제, 팀/직무 적합도, 개인 Skill 조회와 관련된 질문만 답변합니다.",
+      filters: {},
+      interpretedIntent: "도메인 외 질문",
+      unresolvedSkills: [],
+      results: [],
+      totalCount: 0,
+      sources: [],
+      verification: "review",
+      grounded: false,
+      docEvidence: [],
+      dataSlots: getAssistantDataSlots(),
+      followUpSuggestions: [
+        "OLED 소재 설계가 가능한 후보 3명을 보여줘.",
+        "김선재의 보유 Skill과 강점을 보여줘.",
+        "GC 분석 Skill L3 이상 보유자를 찾아줘.",
+      ],
+      requestedCount: 0,
+      candidateCards: [],
+      dashboard: {
+        title: "AI Talent Search 안내",
+        subtitle: "지원 범위 밖 질문은 응답하지 않습니다.",
+        metrics: [
+          { label: "지원 범위", value: "Skill / 인재검색", note: "팀, 직무, KPI 과제 포함" },
+          { label: "외부조회 가능", value: "2명", note: "임가영, 김선재만 실명/학교명 정합성 확보" },
+          { label: "상태", value: "질문 재입력 필요", note: "도메인 내 질문으로 다시 요청" },
+        ],
+        teamAverages: [],
+        topMembers: [],
+        insights: [
+          {
+            title: "질문 범위 제한",
+            detail: "인재추천, Skill 조회, 팀/직무 적합도, KPI 과제 근거와 무관한 질문은 답변하지 않습니다.",
+          },
+        ],
+      },
+    };
+  }
+
   const { conditions, unresolved, keywords } = buildConditions(question);
   const filters = buildFilters(question, conditions);
+  const requestedCount = filters.member_name ? 1 : parseRequestedCount(question);
   const effectiveUnresolved = filters.member_name ? [] : unresolved;
-  const candidates = scoreCandidates(filters, keywords).slice(0, 8);
+  const candidates = scoreCandidates(filters, keywords).slice(0, Math.max(requestedCount, 5));
   const results = candidates.map((candidate) => candidate.row);
   const grounded =
     keywords.length > 0 ||
@@ -487,32 +710,33 @@ export async function runAssistant(question: string): Promise<AssistantResponse>
     Boolean(filters.division || filters.team || filters.role_level || filters.role_level_min || filters.role_level_max || filters.position || filters.job_type);
 
   const verification: "pass" | "fail" | "review" = !grounded ? "review" : results.length > 0 ? "pass" : "fail";
-  const geminiNote = await buildGeminiNote(question, candidates);
+  const candidateCards = buildCandidateCards(candidates.slice(0, requestedCount));
+  const externalSearchPlan = buildExternalSearchPlan(candidates.slice(0, requestedCount));
 
   const answer =
     results.length === 0
-      ? `Skill 기반 인재추천\n\n질문: ${question}\n현재 내부 데이터 조건에 맞는 후보가 없습니다.\n\n다음 조치: Skill Level 조건을 낮추거나 팀/직무 조건을 완화해 다시 검색하는 것이 좋습니다.\n\nGemini 보강: ${geminiNote}`
+      ? `Skill 기반 인재추천\n\n질문: ${question}\n현재 내부 데이터 조건에 맞는 후보가 없습니다.\n\n다음 조치: Skill Level 조건을 낮추거나 팀/직무 조건을 완화해 다시 검색하는 것이 좋습니다.\n\nGemini 보강: 필요 시 별도 비동기 보강으로 호출합니다.`
       : filters.member_name && candidates[0]
-        ? `${buildIndividualAnswer(question, candidates[0])}\n\nGemini 보강: ${geminiNote}`
-        : `Skill 기반 인재추천\n\n1. 검색 해석\n"${question}" 질문을 인재추천 요청으로 해석했습니다. 구성원 마스터, 직무/학력, 3개년 KPI 과제, 평가, 발령, Skill Level Profile을 함께 확인했습니다.\n\n2. 추천 후보\n${candidates
-          .slice(0, 5)
-          .map((candidate, index) => formatCandidate(candidate, index + 1))
-          .join("\n\n")}\n\n3. Gemini 보강\n${geminiNote}`;
+        ? `${buildIndividualAnswer(question, candidates[0])}\n\nGemini 보강: 필요 시 별도 비동기 보강으로 호출합니다.`
+        : buildRecommendationAnswer(question, candidates, requestedCount);
 
   return {
     answer,
     filters,
     interpretedIntent: `기술 키워드: ${keywords.slice(0, 8).join(", ") || "미확인"}`,
     unresolvedSkills: effectiveUnresolved,
-    results,
-    totalCount: candidates.length,
+    results: results.slice(0, requestedCount),
+    totalCount: Math.min(candidates.length, requestedCount),
     sources: results.map((row) => ({ employee_id: row.employee_id, name: row.name, team: row.team })),
     verification,
     grounded,
     docEvidence: buildDocEvidence(candidates),
     dataSlots: getAssistantDataSlots(),
-    followUpSuggestions: buildFollowUps(filters, effectiveUnresolved, results),
-    dashboard: buildAssistantDashboard(question, candidates, filters),
+    followUpSuggestions: buildFollowUps(filters, effectiveUnresolved, results, requestedCount),
+    requestedCount,
+    candidateCards,
+    externalSearchPlan: filters.member_name ? undefined : externalSearchPlan,
+    dashboard: buildAssistantDashboard(question, candidates.slice(0, requestedCount), filters, requestedCount),
     memberAcademic: filters.member_name && candidates[0] ? buildMemberAcademic(candidates[0]) : undefined,
   };
 }

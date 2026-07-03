@@ -67,6 +67,70 @@ export interface AssistantDashboard {
   insights: AssistantDashboardInsight[];
 }
 
+export interface AssistantCandidateCard {
+  employee_id: string;
+  rank: number;
+  name: string;
+  team: string | null;
+  role_level: string | null;
+  position: string | null;
+  avg_level: number;
+  score: number;
+  matchedSkills: string[];
+  kpiEvidence: string[];
+  strengthSummary: string;
+  externalStatus: "ready_for_approval" | "needs_identity_match" | "internal_only";
+  externalNote: string;
+}
+
+export interface AssistantExternalSearchPlan {
+  status: "needs_approval" | "partially_ready" | "internal_only";
+  note: string;
+  scopes: string[];
+  readyCandidates: string[];
+  blockedCandidates: string[];
+}
+
+export interface AssistantExternalPaper {
+  title: string;
+  authors: string;
+  venue: string;
+  year: string;
+  keywords: string[];
+  source: string;
+}
+
+export interface AssistantExternalLab {
+  lab: string;
+  professor: string;
+  focus: string;
+  source: string;
+}
+
+export interface AssistantExternalLink {
+  label: string;
+  url: string;
+}
+
+export interface AssistantExternalCandidateResult {
+  employee_id: string;
+  name: string;
+  status: "success" | "needs_identity_match" | "not_found" | "policy_blocked" | "error";
+  note: string;
+  searchQueries: string[];
+  papers: AssistantExternalPaper[];
+  labs: AssistantExternalLab[];
+  links?: AssistantExternalLink[];
+}
+
+export interface AssistantExternalSearchResponse {
+  status: "success" | "partial" | "error";
+  searchedAt: string;
+  scope: string[];
+  note?: string;
+  results: AssistantExternalCandidateResult[];
+}
+
 export interface AssistantMemberAcademic {
   title: string;
   note: string;
@@ -92,6 +156,9 @@ export interface AssistantResponse {
   docEvidence: AssistantDocEvidence[];
   dataSlots: AssistantDataSlot[];
   followUpSuggestions: string[];
+  requestedCount: number;
+  candidateCards: AssistantCandidateCard[];
+  externalSearchPlan?: AssistantExternalSearchPlan;
   dashboard?: AssistantDashboard;
   memberAcademic?: AssistantMemberAcademic;
 }

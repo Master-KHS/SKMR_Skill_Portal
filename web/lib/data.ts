@@ -16,30 +16,45 @@ function toPlain<T>(rows: T[]): T[] {
   return rows.map((row) => ({ ...(row as object) } as T));
 }
 
+let membersCache: Member[] | null = null;
+let skillsCache: Skill[] | null = null;
+let skillProfilesCache: SkillProfile[] | null = null;
+let subFamiliesCache: SubSkillFamily[] | null = null;
+let familiesCache: SkillFamily[] | null = null;
+let levelCriteriaCache: LevelCriteria[] | null = null;
+let requiredSkillsCache: RequiredSkill[] | null = null;
+
 export function getMembers(): Member[] {
-  return toPlain(query<Member>("SELECT * FROM member ORDER BY employee_id"));
+  if (!membersCache) membersCache = toPlain(query<Member>("SELECT * FROM member ORDER BY employee_id"));
+  return membersCache;
 }
 
 export function getSkills(): Skill[] {
-  return toPlain(query<Skill>("SELECT * FROM skill ORDER BY skill_id"));
+  if (!skillsCache) skillsCache = toPlain(query<Skill>("SELECT * FROM skill ORDER BY skill_id"));
+  return skillsCache;
 }
 
 export function getSkillProfiles(): SkillProfile[] {
-  return toPlain(query<SkillProfile>("SELECT * FROM skill_profile"));
+  if (!skillProfilesCache) skillProfilesCache = toPlain(query<SkillProfile>("SELECT * FROM skill_profile"));
+  return skillProfilesCache;
 }
 
 export function getSubFamilies(): SubSkillFamily[] {
-  return toPlain(query<SubSkillFamily>("SELECT * FROM sub_skill_family"));
+  if (!subFamiliesCache) subFamiliesCache = toPlain(query<SubSkillFamily>("SELECT * FROM sub_skill_family"));
+  return subFamiliesCache;
 }
 
 export function getFamilies(): SkillFamily[] {
-  return toPlain(query<SkillFamily>("SELECT * FROM skill_family"));
+  if (!familiesCache) familiesCache = toPlain(query<SkillFamily>("SELECT * FROM skill_family"));
+  return familiesCache;
 }
 
 export function getLevelCriteria(): LevelCriteria[] {
-  return toPlain(query<LevelCriteria>("SELECT * FROM level_criteria"));
+  if (!levelCriteriaCache) levelCriteriaCache = toPlain(query<LevelCriteria>("SELECT * FROM level_criteria"));
+  return levelCriteriaCache;
 }
 
 export function getRequiredSkills(): RequiredSkill[] {
-  return toPlain(query<RequiredSkill>("SELECT * FROM required_skill"));
+  if (!requiredSkillsCache) requiredSkillsCache = toPlain(query<RequiredSkill>("SELECT * FROM required_skill"));
+  return requiredSkillsCache;
 }

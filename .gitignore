@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 data/*.db
 .streamlit/secrets.toml
+web/devserver.out.log
+web/devserver.err.log
+web/data/~$*.xlsx

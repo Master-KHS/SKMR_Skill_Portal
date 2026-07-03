@@ -24,7 +24,7 @@ function pctTone(value: number) {
   return "danger";
 }
 
-function LevelScaleBar({ current, target, pct }: { current: number; target: number; pct?: number }) {
+function LevelScaleBar({ current, target }: { current: number; target: number; pct?: number }) {
   const currentPct = Math.min(100, Math.max(0, (current / 4) * 100));
   const targetPct = Math.min(100, Math.max(0, (target / 4) * 100));
   const gapWidth = Math.max(0, targetPct - currentPct);
@@ -60,9 +60,7 @@ function LevelScaleBar({ current, target, pct }: { current: number; target: numb
       </div>
       <div className="mt-1.5 flex justify-between text-[11px] font-semibold text-text-muted">
         <span>현재 L{current.toFixed(1)}</span>
-        <span className="text-[#C45E00]">
-          Gap +{Math.max(target - current, 0).toFixed(1)} · 요구 L{target.toFixed(1)}
-        </span>
+        <span className="text-[#C45E00]">Gap +{Math.max(target - current, 0).toFixed(1)} · 요구 L{target.toFixed(1)}</span>
       </div>
     </div>
   );
@@ -89,15 +87,12 @@ export function TeamReportClient() {
   }, [data, team]);
 
   if (!data || !report?.required) {
-    return <div className="text-sm text-text-muted">리포트 데이터를 불러오는 중입니다...</div>;
+    return <div className="text-sm text-text-muted">조직별 리포트 데이터를 불러오는 중입니다...</div>;
   }
 
   const gapCount = report.required.skills.filter((skill) => (skill.metPct ?? 0) < 90).length;
   const coreSkills = report.required.skills.filter((skill) => skill.is_core);
-  const avgCore =
-    coreSkills.length === 0
-      ? 0
-      : coreSkills.reduce((sum, skill) => sum + skill.avg_lv, 0) / coreSkills.length;
+  const avgCore = coreSkills.length === 0 ? 0 : coreSkills.reduce((sum, skill) => sum + skill.avg_lv, 0) / coreSkills.length;
   const prioritySkills = [...report.required.skills]
     .map((skill) => ({ ...skill, gap: Math.max(skill.target_level - skill.avg_lv, 0) }))
     .filter((skill) => skill.gap > 0)
@@ -108,7 +103,7 @@ export function TeamReportClient() {
     <div>
       <PageHeader
         title="조직별 리포트"
-        desc="조직 단위 Required Skill 충족률, Core Skill 평균 Level, 우선 보완 Skill을 확인합니다."
+        desc="조직 단위 Required Skill 충족률과 Core Skill 평균 Level, 우선 보완 Skill을 확인합니다."
       />
 
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -137,14 +132,18 @@ export function TeamReportClient() {
 
       <Card title="조직별 육성 우선순위 Skill" className="mt-5">
         <div className="mb-3 text-xs leading-relaxed text-text-muted">
-          선택 조직의 Required/Core Skill 중 요구 Level 대비 현재 평균 Level이 낮은 항목입니다. Core Skill을 우선 표시하고, Gap이 큰 순서로 정렬합니다.
+          선택 조직의 Required/Core Skill 중 요구 Level 대비 현재 평균 Level 차이가 큰 항목입니다. Core Skill을 우선 표시하고, Gap 순으로 정렬합니다.
         </div>
         {prioritySkills.length === 0 ? (
-          <div className="text-sm text-text-muted">현재 선택 조직의 보완 필요 Skill이 없습니다.</div>
+          <div className="text-sm text-text-muted">현재 선택 조직은 보완이 필요한 Skill이 없습니다.</div>
         ) : (
           <div className="grid gap-2 lg:grid-cols-5">
             {prioritySkills.map((skill, index) => (
-              <div key={skill.skill_id} className="border border-border-soft border-t-[3px] bg-white p-3" style={{ borderTopColor: skill.is_core ? "#EA002C" : "#FF7A00" }}>
+              <div
+                key={skill.skill_id}
+                className="border border-border-soft border-t-[3px] bg-white p-3"
+                style={{ borderTopColor: skill.is_core ? "#EA002C" : "#FF7A00" }}
+              >
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <span className="text-sm font-extrabold text-sk-red">#{index + 1}</span>
                   {skill.is_core ? <Badge tone="danger" label="Core" /> : <Badge tone="neutral" label="Required" />}
@@ -171,17 +170,18 @@ export function TeamReportClient() {
             {report.required.skills.map((skill) => {
               const pct = Math.round(skill.metPct ?? 0);
               return (
-                <div key={skill.skill_id} className="grid grid-cols-[260px_1fr_150px] items-center gap-3 border border-border-soft bg-white px-3 py-2">
+                <div
+                  key={skill.skill_id}
+                  className="grid grid-cols-[260px_1fr_150px] items-center gap-3 border border-border-soft bg-white px-3 py-2"
+                >
                   <div className="min-w-0">
                     <div className="mb-1 flex items-center gap-2">
                       {skill.is_core ? <Badge tone="danger" label="Core" /> : <Badge tone="neutral" label="Required" />}
                       <span className="truncate font-bold text-text-main">{skill.skill_name}</span>
                     </div>
-                    <div className="text-xs text-text-muted">
-                      보유 {skill.holders}명 · 요구 L{skill.target_level.toFixed(1)}
-                    </div>
+                    <div className="text-xs text-text-muted">보유 {skill.holders}명 · 요구 L{skill.target_level.toFixed(1)}</div>
                   </div>
-                  <LevelScaleBar current={skill.avg_lv} target={skill.target_level} pct={pct} />
+                  <LevelScaleBar current={skill.avg_lv} target={skill.target_level} />
                   <div className="text-right">
                     <div className="text-lg font-extrabold text-text-main">L{skill.avg_lv.toFixed(1)}</div>
                     <div className="mt-1">
@@ -192,7 +192,7 @@ export function TeamReportClient() {
                     </div>
                   </div>
                 </div>
-                );
+              );
             })}
           </div>
         </Card>
