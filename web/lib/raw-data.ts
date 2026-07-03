@@ -19,7 +19,7 @@ export function getAssistantDataSlots(): AssistantDataSlot[] {
       key: "pi_tasks_3y",
       label: "pi_tasks_3y.xlsx",
       status: "ready",
-      note: "최근 3개년 PI/KPI 과제를 기술 키워드와 가장 직접적으로 연결하는 경험 근거로 사용합니다.",
+      note: "최근 3개년 KPI 과제를 기술 키워드와 가장 직접적으로 연결하는 경험 근거로 사용합니다.",
     },
     {
       key: "performance_reviews_3y",

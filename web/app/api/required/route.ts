@@ -7,6 +7,10 @@ export const dynamic = "force-dynamic";
 
 const MAX_INDIVIDUAL_REQUIRED_SKILLS = 5;
 
+function normalizeTargetLevel(level: number | null | undefined) {
+  return Math.max(1, Math.min(4, Math.round((level ?? 2) * 2) / 2));
+}
+
 type Persona =
   | "employee"
   | "team_leader"
@@ -178,7 +182,7 @@ export async function POST(req: NextRequest) {
           `INSERT OR REPLACE INTO required_skill
              (org_or_individual, target_id, skill_id, target_level, is_core, status)
            VALUES (?,?,?,?,?,'approved')`,
-          [org_kind, target_id, row.skill_id, row.target_level ?? 2, row.is_core ? 1 : 0]
+          [org_kind, target_id, row.skill_id, normalizeTargetLevel(row.target_level), row.is_core ? 1 : 0]
         );
       }
     });
@@ -203,7 +207,7 @@ export async function POST(req: NextRequest) {
             `INSERT OR REPLACE INTO required_skill
                (org_or_individual, target_id, skill_id, target_level, is_core, status)
              VALUES ('department', ?, ?, ?, ?, 'approved')`,
-            [team, item.skill_id, item.target_level, item.is_core ? 1 : 0]
+            [team, item.skill_id, normalizeTargetLevel(item.target_level), item.is_core ? 1 : 0]
           );
         }
       }
@@ -250,7 +254,7 @@ export async function POST(req: NextRequest) {
       `INSERT INTO required_skill
          (org_or_individual, target_id, skill_id, target_level, is_core, status)
        VALUES ('individual', ?, ?, ?, 0, ?)`,
-      [member_id, skill_id, target_level ?? 2, status]
+      [member_id, skill_id, normalizeTargetLevel(target_level), status]
     );
     return NextResponse.json({ ok: true, status });
   }

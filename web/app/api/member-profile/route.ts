@@ -109,11 +109,16 @@ export async function GET(req: NextRequest) {
     sub_family_name: string;
     target_level: number;
     is_core: number;
+    has_individual: number;
     current_level: number | null;
   }>(
-    `SELECT rq.skill_id, s.skill_name, f.family_name, sf.sub_family_name, rq.target_level, rq.is_core, sp.current_level
+    `SELECT rq.skill_id, s.skill_name, f.family_name, sf.sub_family_name, rq.target_level, rq.is_core, rq.has_individual, sp.current_level
      FROM (
-       SELECT skill_id, MAX(target_level) target_level, MAX(is_core) is_core FROM required_skill
+       SELECT skill_id,
+              MAX(target_level) target_level,
+              MAX(is_core) is_core,
+              MAX(CASE WHEN org_or_individual='individual' THEN 1 ELSE 0 END) has_individual
+       FROM required_skill
        WHERE (org_or_individual='company' AND target_id='ALL')
           OR (org_or_individual='department' AND target_id=?)
           OR (org_or_individual='individual' AND target_id=? AND status='approved')

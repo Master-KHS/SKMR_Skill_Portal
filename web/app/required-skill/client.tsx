@@ -36,11 +36,64 @@ interface Data {
   };
 }
 
+interface DashboardData {
+  teamCoreStatus: {
+    team: string;
+    nTeam: number;
+    skills: { skill_id: number; skill_name: string; target_level: number; avg_lv: number; holders: number }[];
+  }[];
+}
+
 type Tab = "company" | "department" | "individual";
+
+function levelColor(level: number) {
+  if (level >= 3) return "#16A34A";
+  if (level >= 2.5) return "#2563EB";
+  if (level >= 2) return "#F59E0B";
+  return "#EA002C";
+}
+
+function LevelScale({ current, target }: { current: number; target: number }) {
+  const currentPct = Math.min(100, Math.max(0, (current / 4) * 100));
+  const targetPct = Math.min(100, Math.max(0, (target / 4) * 100));
+  const gapWidth = Math.max(0, targetPct - currentPct);
+
+  return (
+    <div className="pt-4">
+      <div className="relative mb-1 h-4">
+        {[1, 2, 3, 4].map((mark) => (
+          <div
+            key={mark}
+            className="absolute top-0 -translate-x-1/2 text-[10px] font-extrabold text-text-muted"
+            style={{ left: `${(mark / 4) * 100}%` }}
+          >
+            {mark}
+          </div>
+        ))}
+      </div>
+      <div className="relative h-2.5 bg-white">
+        {[1, 2, 3, 4].map((mark) => (
+          <div
+            key={mark}
+            className="absolute top-[-5px] h-5 w-px bg-border-soft"
+            style={{ left: `${(mark / 4) * 100}%` }}
+          />
+        ))}
+        <div className="absolute left-0 top-0 h-2.5" style={{ width: `${currentPct}%`, background: levelColor(current) }} />
+        {gapWidth > 0 && <div className="absolute top-0 h-2.5 bg-[#B8C0CC]" style={{ left: `${currentPct}%`, width: `${gapWidth}%` }} />}
+      </div>
+      <div className="mt-1.5 flex justify-between text-[11px] font-semibold text-text-muted">
+        <span>현재 L{current.toFixed(1)}</span>
+        <span>요구 L{target.toFixed(1)}</span>
+      </div>
+    </div>
+  );
+}
 
 export function RequiredSkillClient() {
   const { persona, currentMember } = usePersona();
   const [data, setData] = useState<Data | null>(null);
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [tab, setTab] = useState<Tab>("company");
   const [team, setTeam] = useState("");
   const [member, setMember] = useState("");
@@ -51,8 +104,12 @@ export function RequiredSkillClient() {
       persona,
       actor_id: currentMember?.employee_id ?? "",
     });
-    const d = (await fetch(`/api/required?${params.toString()}`).then((r) => r.json())) as Data;
+    const [d, dash] = await Promise.all([
+      fetch(`/api/required?${params.toString()}`).then((r) => r.json()) as Promise<Data>,
+      fetch("/api/dashboard").then((r) => r.json()) as Promise<DashboardData>,
+    ]);
     setData(d);
+    setDashboard(dash);
     setTeam((prev) => prev || d.teams[0] || "");
     setMember((prev) => prev || d.members[0]?.employee_id || "");
   }, [currentMember?.employee_id, persona]);
@@ -136,6 +193,8 @@ export function RequiredSkillClient() {
 
       {msg && <div className="mb-3 border border-success bg-success/[0.06] p-2 text-sm text-success">{msg}</div>}
 
+      <RequiredStatusPanel data={data} dashboard={dashboard} tab={tab} team={team} member={member} />
+
       {tab === "company" && (
         <ScopeEditor
           title="전사 공통 필요 Skill"
@@ -191,6 +250,107 @@ export function RequiredSkillClient() {
           post={post}
         />
       )}
+    </div>
+  );
+}
+
+function RequiredStatusPanel({
+  data,
+  dashboard,
+  tab,
+  team,
+  member,
+}: {
+  data: Data;
+  dashboard: DashboardData | null;
+  tab: Tab;
+  team: string;
+  member: string;
+}) {
+  if (tab === "company") {
+    const rows = data.rows.filter((row) => row.org_or_individual === "company" && row.target_id === "ALL" && row.status === "approved");
+    const coreCount = rows.filter((row) => row.is_core).length;
+    const avgTarget = rows.length ? rows.reduce((sum, row) => sum + row.target_level, 0) / rows.length : 0;
+
+    return (
+      <div className="mb-4 grid gap-3 md:grid-cols-3">
+        <Card>
+          <div className="text-xs font-bold text-text-muted">전사 필수 Skill</div>
+          <div className="mt-1 text-2xl font-extrabold text-text-main">{rows.length}개</div>
+        </Card>
+        <Card>
+          <div className="text-xs font-bold text-text-muted">Core 지정</div>
+          <div className="mt-1 text-2xl font-extrabold text-text-main">{coreCount}개</div>
+        </Card>
+        <Card>
+          <div className="text-xs font-bold text-text-muted">평균 요구 Level</div>
+          <div className="mt-1 text-2xl font-extrabold text-text-main">L{avgTarget.toFixed(1)}</div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (tab === "department") {
+    const core = dashboard?.teamCoreStatus.find((row) => row.team === team);
+    const avgCurrent = core?.skills.length
+      ? core.skills.reduce((sum, skill) => sum + skill.avg_lv, 0) / core.skills.length
+      : 0;
+
+    return (
+      <Card title={`${team || "조직"} Core Skill 평균 Level`} className="mb-4">
+        <div className="mb-3 grid gap-3 md:grid-cols-3">
+          <div className="border border-border-soft bg-bg-main/50 px-3 py-2">
+            <div className="text-xs font-bold text-text-muted">팀 인원</div>
+            <div className="mt-1 text-xl font-extrabold text-text-main">{core?.nTeam ?? 0}명</div>
+          </div>
+          <div className="border border-border-soft bg-bg-main/50 px-3 py-2">
+            <div className="text-xs font-bold text-text-muted">Core Skill</div>
+            <div className="mt-1 text-xl font-extrabold text-text-main">{core?.skills.length ?? 0}개</div>
+          </div>
+          <div className="border border-border-soft bg-bg-main/50 px-3 py-2">
+            <div className="text-xs font-bold text-text-muted">현재 평균 Level</div>
+            <div className="mt-1 text-xl font-extrabold text-text-main">L{avgCurrent.toFixed(1)}</div>
+          </div>
+        </div>
+        {!core || core.skills.length === 0 ? (
+          <div className="text-sm text-text-muted">등록된 조직 Core Skill이 없습니다.</div>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {core.skills.map((skill) => (
+              <div key={skill.skill_id} className="border border-border-soft bg-bg-main/40 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-bold text-text-main">{skill.skill_name}</div>
+                    <div className="text-xs text-text-muted">보유 {skill.holders}명</div>
+                  </div>
+                  <Badge tone={skill.avg_lv >= skill.target_level ? "success" : "warning"} label={skill.avg_lv >= skill.target_level ? "충족" : "보완"} />
+                </div>
+                <LevelScale current={skill.avg_lv} target={skill.target_level} />
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+    );
+  }
+
+  const mine = data.rows.filter((row) => row.org_or_individual === "individual" && row.target_id === member);
+  return (
+    <div className="mb-4 grid gap-3 md:grid-cols-3">
+      <Card>
+        <div className="text-xs font-bold text-text-muted">승인 개인 Skill</div>
+        <div className="mt-1 text-2xl font-extrabold text-text-main">{mine.filter((row) => row.status === "approved").length}개</div>
+      </Card>
+      <Card>
+        <div className="text-xs font-bold text-text-muted">승인 대기</div>
+        <div className="mt-1 text-2xl font-extrabold text-text-main">{mine.filter((row) => row.status === "pending").length}개</div>
+      </Card>
+      <Card>
+        <div className="text-xs font-bold text-text-muted">평균 요구 Level</div>
+        <div className="mt-1 text-2xl font-extrabold text-text-main">
+          L{mine.length ? (mine.reduce((sum, row) => sum + row.target_level, 0) / mine.length).toFixed(1) : "0.0"}
+        </div>
+      </Card>
     </div>
   );
 }

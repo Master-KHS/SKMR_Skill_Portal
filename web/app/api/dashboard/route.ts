@@ -180,46 +180,6 @@ export async function GET() {
     cnt: funnelMap.get(s) ?? 0,
   }));
 
-  // ---- 부족 Skill Top 5 (우선도 = Gap × (1+Scarcity) × Core가중) ----
-  const reqAll = query<{ skill_id: number; target_level: number; is_core: number }>(
-    `SELECT skill_id, MAX(target_level) target_level, MAX(is_core) is_core
-     FROM required_skill
-     WHERE org_or_individual IN ('company','department') GROUP BY skill_id`
-  );
-  const profAll = query<{ skill_id: number; avg_cur: number; n_holders: number }>(
-    `SELECT sp.skill_id, AVG(sp.current_level) avg_cur, COUNT(*) n_holders
-     FROM skill_profile sp JOIN member m ON sp.member_id=m.employee_id
-     WHERE m.job_type IN ${EVAL} GROUP BY sp.skill_id`
-  );
-  const skillNames = new Map(
-    query<{ skill_id: number; skill_name: string }>(`SELECT skill_id, skill_name FROM skill`).map((r) => [
-      r.skill_id,
-      r.skill_name,
-    ])
-  );
-  const profAllMap = new Map(profAll.map((p) => [p.skill_id, p]));
-  const gaps = reqAll
-    .map((r) => {
-      const p = profAllMap.get(r.skill_id);
-      const avgCur = p?.avg_cur ?? 0;
-      const nHolders = p?.n_holders ?? 0;
-      const gap = Math.max(r.target_level - avgCur, 0);
-      const scarcity = 1 - nHolders / (nMembers || 1);
-      const priority = gap * (1 + scarcity) * (r.is_core ? 1.5 : 1.0);
-      return {
-        skill_id: r.skill_id,
-        skill_name: skillNames.get(r.skill_id) ?? `#${r.skill_id}`,
-        target_level: r.target_level,
-        avg_cur: Math.round(avgCur * 10) / 10,
-        gap: Math.round(gap * 10) / 10,
-        is_core: !!r.is_core,
-        n_holders: nHolders,
-        priority,
-      };
-    })
-    .sort((a, b) => b.priority - a.priority)
-    .slice(0, 5);
-
   // ---- Critical Skill 현황 ----
   const critical = query<{ skill_id: number; skill_name: string; sub_family_name: string; holders: number; avg_lv: number }>(
     `SELECT s.skill_id, s.skill_name, sf.sub_family_name,
@@ -255,7 +215,6 @@ export async function GET() {
     teamCoreStatus,
     topHolders,
     funnel,
-    gaps,
     critical,
     recent,
   });

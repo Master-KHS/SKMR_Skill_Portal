@@ -4,6 +4,7 @@ export interface SkillCondition {
 }
 
 export interface SearchFilters {
+  member_name?: string;
   division?: string;
   team?: string;
   job_type?: string;

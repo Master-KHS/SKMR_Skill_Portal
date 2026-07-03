@@ -37,7 +37,6 @@ interface Dash {
     avg_lv: number;
     critical_held: number;
   }[];
-  gaps: { skill_id: number; skill_name: string; target_level: number; avg_cur: number; gap: number; is_core: boolean; n_holders: number }[];
   critical: { skill_id: number; skill_name: string; sub_family_name: string; holders: number; avg_lv: number; coverage: number }[];
 }
 
@@ -45,7 +44,7 @@ type DashboardTab = "overview" | "gap";
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <div className="mb-3 mt-7 border border-border-soft bg-bg-main/70 px-4 py-2.5">
+    <div className="mb-3 mt-7 border border-border-soft bg-white px-4 py-3 shadow-[0_1px_0_rgba(31,41,51,0.04)]">
       <h2 className="text-[15px] font-extrabold tracking-tight text-text-main">{title}</h2>
     </div>
   );
@@ -78,11 +77,24 @@ function barColor(p: number) {
   return "#EA002C";
 }
 
+function levelColor(level: number) {
+  if (level >= 3) return "#16A34A";
+  if (level >= 2) return "#F59E0B";
+  return "#EA002C";
+}
+
+function levelToneLabel(level: number) {
+  if (level >= 3) return "충족";
+  if (level >= 2) return "보완";
+  return "위험";
+}
+
 export function DashboardClient() {
   const [d, setD] = useState<Dash | null>(null);
   const [tab, setTab] = useState<DashboardTab>("overview");
   const [selectedCompanySkillId, setSelectedCompanySkillId] = useState<number | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [selectedGapTeam, setSelectedGapTeam] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/dashboard")
@@ -92,17 +104,27 @@ export function DashboardClient() {
 
   if (!d) return <div className="text-sm text-text-muted">불러오는 중...</div>;
 
-  const coreGapCount = d.gaps.filter((gap) => gap.is_core && gap.gap > 0).length;
-  const priorityGapCount = d.gaps.filter((gap) => gap.gap >= 0.5).length;
   const selectedCompanySkill =
     d.companySkillTeams.find((skill) => skill.skill_id === selectedCompanySkillId) ?? d.companySkillTeams[0];
   const selectedCoreTeam = d.teamCoreStatus.find((team) => team.team === selectedTeam) ?? d.teamCoreStatus[0];
+  const selectedGapStatus = d.teamStatus.find((team) => team.team === selectedGapTeam) ?? d.teamStatus[0];
+  const teamSkillGaps = [...(selectedGapStatus?.skills ?? [])]
+    .map((skill) => ({
+      ...skill,
+      gap: Math.max(skill.target_level - skill.avg_lv, 0),
+    }))
+    .sort((a, b) => Number(b.is_core) - Number(a.is_core) || b.gap - a.gap || a.skill_id - b.skill_id)
+    .slice(0, 5);
+  const coreGapCount = (selectedGapStatus?.skills ?? []).filter(
+    (skill) => skill.is_core && skill.target_level > skill.avg_lv
+  ).length;
+  const priorityGapCount = (selectedGapStatus?.skills ?? []).filter((skill) => skill.target_level - skill.avg_lv >= 0.5).length;
 
   return (
     <div>
       <PageHeader
-        title="전사 Dashboard"
-        desc="정형화된 Skill 진단 결과, 조직별 평균 Level, 요구 Level 충족률, 핵심 Skill Gap을 요약합니다."
+        title="전사 Skill Dashboard"
+        desc="평가 완료 기준의 Skill Level, 조직별 Core Skill 수준, 요구 Level 대비 Gap을 한눈에 확인합니다."
       />
 
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -125,13 +147,18 @@ export function DashboardClient() {
       <div className="grid grid-cols-4 gap-4">
         <Stat label="평가 대상" value={`${d.kpi.members}명`} accent />
         <Stat label="평가 진행률" value={`${d.kpi.assessRate}%`} />
-        <Stat label="Core Skill Gap" value={`${coreGapCount}개`} />
-        <Stat label="육성 우선 Skill" value={`${priorityGapCount}개`} />
+        <Stat label="선택 조직 Core Gap" value={`${coreGapCount}개`} />
+        <Stat label="선택 조직 보완 Skill" value={`${priorityGapCount}개`} />
       </div>
 
       {tab === "overview" ? (
         <>
-          <SectionHeader title="전사 / 조직 Core Skill Level" />
+          <SectionHeader title="전사 필수 Skill 및 조직 Core Skill" />
+          <div className="mb-3 flex flex-wrap gap-2 text-xs">
+            <span className="border border-success bg-success/[0.06] px-2 py-1 font-semibold text-success">초록: L3.0 이상</span>
+            <span className="border border-warning bg-warning/[0.08] px-2 py-1 font-semibold text-[#9A6500]">주황: L2.0~2.9</span>
+            <span className="border border-sk-red bg-sk-red/[0.06] px-2 py-1 font-semibold text-sk-red">빨강: L2.0 미만</span>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Card>
               <div className="mb-4 border-b border-border-soft pb-3">
@@ -156,7 +183,10 @@ export function DashboardClient() {
                     <div key={team.team} className="grid grid-cols-[130px_1fr_70px] items-center gap-3">
                       <div className="truncate text-xs font-semibold text-text-main">{team.team}</div>
                       <div className="h-3 bg-bg-main">
-                        <div className="h-3 bg-[#0A2147]" style={{ width: `${Math.max((team.avg_lv / 4) * 100, 2)}%` }} />
+                        <div
+                          className="h-3"
+                          style={{ width: `${Math.max((team.avg_lv / 4) * 100, 2)}%`, background: levelColor(team.avg_lv) }}
+                        />
                       </div>
                       <div className="text-right text-xs">
                         <div className="font-bold text-text-main">L{team.avg_lv}</div>
@@ -188,7 +218,7 @@ export function DashboardClient() {
               ) : (
                 <div className="space-y-2">
                   {selectedCoreTeam.skills.map((skill) => (
-                    <div key={skill.skill_id} className="border border-border-soft px-3 py-2">
+                    <div key={skill.skill_id} className="border border-border-soft bg-white px-3 py-2">
                       <div className="mb-1 flex items-center justify-between gap-3">
                         <div className="truncate text-xs font-semibold text-text-main">
                           #{String(skill.skill_id).padStart(3, "0")} {skill.skill_name}
@@ -197,11 +227,11 @@ export function DashboardClient() {
                       </div>
                       <div className="grid grid-cols-[1fr_76px] items-center gap-3">
                         <div className="h-3 bg-bg-main">
-                          <div className="h-3 bg-sk-red" style={{ width: `${Math.max((skill.avg_lv / 4) * 100, 2)}%` }} />
+                          <div className="h-3" style={{ width: `${Math.max((skill.avg_lv / 4) * 100, 2)}%`, background: levelColor(skill.avg_lv) }} />
                         </div>
                         <div className="text-right text-xs">
                           <div className="font-bold text-text-main">L{skill.avg_lv}</div>
-                          <div className="text-text-muted">{skill.holders}명</div>
+                          <div className="text-text-muted">{levelToneLabel(skill.avg_lv)}</div>
                         </div>
                       </div>
                     </div>
@@ -218,7 +248,11 @@ export function DashboardClient() {
             </div>
             <div className="grid grid-cols-5 gap-3">
               {d.topHolders.map((holder, index) => (
-                <div key={`${holder.name}-${index}`} className="border border-border-soft p-3">
+                <div
+                  key={`${holder.name}-${index}`}
+                  className="border border-border-soft border-t-[3px] bg-white p-3"
+                  style={{ borderTopColor: levelColor(holder.avg_lv) }}
+                >
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm font-extrabold text-sk-red">#{index + 1}</span>
                     <span className="border border-border-soft px-1.5 py-0.5 text-[10px] font-semibold text-text-muted">
@@ -241,10 +275,44 @@ export function DashboardClient() {
             </div>
           </Card>
 
-          <SectionHeader title="육성 우선 Skill Gap" />
+          <SectionHeader title="조직별 육성 우선 Skill Gap" />
+          <Card className="mb-3">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="text-sm font-semibold text-text-muted">조직 선택</span>
+              <select
+                className="min-w-56 border border-border-soft bg-white px-3 py-2 text-sm text-text-main outline-none focus:border-sk-red"
+                value={selectedGapStatus?.team ?? ""}
+                onChange={(event) => setSelectedGapTeam(event.target.value)}
+              >
+                {d.teamStatus.map((team) => (
+                  <option key={team.team} value={team.team}>
+                    {team.team} · {team.nTeam}명
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid gap-3 border-t border-border-soft pt-3 text-xs leading-relaxed text-text-muted md:grid-cols-3">
+              <div>
+                <b className="text-text-main">요구 Level</b>
+                <div>선택 조직에 적용되는 전사 필수 Skill + 해당 조직 Required/Core Skill의 목표 Level입니다.</div>
+              </div>
+              <div>
+                <b className="text-text-main">현재 Level</b>
+                <div>선택 조직 구성원이 보유한 해당 Skill의 현재 Level 평균입니다.</div>
+              </div>
+              <div>
+                <b className="text-text-main">Gap / 우선순위</b>
+                <div>요구 Level - 현재 평균 Level입니다. Core Skill을 먼저 보고, Gap이 큰 순서로 표시합니다.</div>
+              </div>
+            </div>
+          </Card>
           <div className="grid grid-cols-5 gap-3">
-            {d.gaps.map((gap) => (
-              <div key={gap.skill_id} className="border border-border-soft border-t-[3px] border-t-sk-red bg-bg-surface p-3">
+            {teamSkillGaps.map((gap) => (
+              <div
+                key={gap.skill_id}
+                className="border border-border-soft border-t-[3px] bg-bg-surface p-3"
+                style={{ borderTopColor: gap.is_core ? "#EA002C" : "#F59E0B" }}
+              >
                 <div className="text-[11px] text-text-muted">
                   {gap.is_core && <span className="mr-1 font-bold text-sk-red">CORE</span>}#{String(gap.skill_id).padStart(3, "0")}
                 </div>
@@ -252,10 +320,10 @@ export function DashboardClient() {
                   {gap.skill_name.slice(0, 30)}
                 </div>
                 <div className="text-xs text-text-main">
-                  요구 <b>L{gap.target_level}</b> · 현재 <b>L{gap.avg_cur}</b>
+                  요구 <b>L{gap.target_level}</b> · 현재 <b>L{gap.avg_lv}</b>
                 </div>
                 <div className="mt-1 text-[11px] text-text-muted">
-                  Gap <b className="text-sk-red">+{gap.gap}</b> · 보유 {gap.n_holders}명
+                  평균 Gap <b className="text-sk-red">+{Math.round(gap.gap * 10) / 10}</b> · 보유 {gap.holders}명
                 </div>
               </div>
             ))}
@@ -329,7 +397,11 @@ export function DashboardClient() {
           ) : (
             <div className="grid grid-cols-4 gap-3">
               {d.critical.map((critical) => (
-                <div key={critical.skill_id} className="border border-border-soft bg-bg-surface p-3">
+                <div
+                  key={critical.skill_id}
+                  className="border border-border-soft border-t-[3px] bg-bg-surface p-3"
+                  style={{ borderTopColor: levelColor(critical.avg_lv) }}
+                >
                   <Badge tone="danger" label="CRITICAL" />
                   <div className="my-1.5 text-[13px] font-semibold text-text-main">
                     #{String(critical.skill_id).padStart(3, "0")} {critical.skill_name.slice(0, 24)}

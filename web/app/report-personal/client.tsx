@@ -22,6 +22,7 @@ interface GapRow {
   sub_family_name: string;
   target_level: number;
   is_core: number;
+  has_individual?: number;
   current_level: number;
   gap: number;
 }
@@ -33,10 +34,67 @@ interface ReportData {
   gaps: GapRow[];
 }
 
+type DisplaySkillRow = {
+  skill_id: number;
+  skill_name: string;
+  family_name: string;
+  sub_family_name: string;
+  current_level: number;
+  target_level: number | null;
+  is_core: number;
+  has_individual: number;
+  gap: number | null;
+  source: "core" | "individual" | "required";
+};
+
 function toneByGap(gap: number) {
   if (gap <= 0) return "success";
   if (gap <= 0.5) return "warning";
   return "danger";
+}
+
+function LevelScaleBar({ current, target }: { current: number; target: number | null }) {
+  const currentPct = Math.min(100, Math.max(0, (current / 4) * 100));
+  const targetPct = target == null ? currentPct : Math.min(100, Math.max(0, (target / 4) * 100));
+  const gapLeft = Math.min(currentPct, targetPct);
+  const gapWidth = Math.max(0, targetPct - currentPct);
+
+  return (
+    <div className="pt-4">
+      <div className="relative mb-1.5 h-4">
+        {[1, 2, 3, 4].map((level) => (
+          <div
+            key={level}
+            className="absolute top-0 -translate-x-1/2 text-[11px] font-extrabold text-text-muted"
+            style={{ left: `${(level / 4) * 100}%` }}
+          >
+            {level}
+          </div>
+        ))}
+      </div>
+      <div className="relative h-6 bg-bg-main">
+        {[1, 2, 3, 4].map((level) => (
+          <div
+            key={level}
+            className="absolute top-[-6px] h-8 w-px bg-border-soft"
+            style={{ left: `${(level / 4) * 100}%` }}
+          />
+        ))}
+        <div className="absolute left-0 top-0 h-4.5 bg-sk-orange" style={{ width: `${currentPct}%`, height: 18 }} />
+        {gapWidth > 0 && (
+          <div className="absolute top-[18px] h-1.5 bg-[#FFD1A3]" style={{ left: `${gapLeft}%`, width: `${gapWidth}%` }} />
+        )}
+      </div>
+      <div className="mt-1.5 flex justify-between text-[11px] font-semibold text-text-muted">
+        <span>현재 L{current.toFixed(1)}</span>
+        {target == null ? (
+          <span className="text-[#C45E00]">개인 보유 Skill</span>
+        ) : (
+          <span className="text-[#C45E00]">보완 필요 L{Math.max(target - current, 0).toFixed(1)} · 요구 L{target.toFixed(1)}</span>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function Radar({ data }: { data: { sub_family_name: string; avg_lv: number }[] }) {
@@ -124,12 +182,37 @@ export function PersonalReportClient({ members }: { members: MemberOption[] }) {
     void load();
   }, [load]);
 
-  const requiredSkills = useMemo(
-    () => [...(data?.gaps ?? [])].sort((a, b) => b.current_level - a.current_level || b.is_core - a.is_core),
-    [data?.gaps]
-  );
-  const avgLevel = requiredSkills.length
-    ? requiredSkills.reduce((sum, row) => sum + row.current_level, 0) / requiredSkills.length
+  const displaySkills = useMemo<DisplaySkillRow[]>(() => {
+    const requiredRows: DisplaySkillRow[] = (data?.gaps ?? []).map((row) => ({
+      ...row,
+      target_level: row.target_level,
+      gap: row.gap,
+      has_individual: row.has_individual ?? 0,
+      source: row.is_core ? "core" : row.has_individual ? "individual" : "required",
+    }));
+    const requiredIds = new Set(requiredRows.map((row) => row.skill_id));
+    const profileRows: DisplaySkillRow[] = (data?.profile ?? [])
+      .filter((row) => !requiredIds.has(row.skill_id))
+      .map((row) => ({
+        skill_id: row.skill_id,
+        skill_name: row.skill_name,
+        family_name: row.family_name,
+        sub_family_name: row.sub_family_name,
+        current_level: row.current_level,
+        target_level: null,
+        is_core: 0,
+        has_individual: 1,
+        gap: null,
+        source: "individual",
+      }));
+    return [...requiredRows, ...profileRows].sort((a, b) => {
+      const sourceOrder = { core: 0, individual: 1, required: 2 };
+      return sourceOrder[a.source] - sourceOrder[b.source] || (b.gap ?? -1) - (a.gap ?? -1) || b.current_level - a.current_level;
+    });
+  }, [data?.gaps, data?.profile]);
+  const requiredSkills = displaySkills.filter((row) => row.source !== "individual" || row.target_level !== null);
+  const avgLevel = displaySkills.length
+    ? displaySkills.reduce((sum, row) => sum + row.current_level, 0) / displaySkills.length
     : 0;
   const radarData = useMemo(() => {
     const grouped = new Map<string, { sum: number; count: number }>();
@@ -143,8 +226,7 @@ export function PersonalReportClient({ members }: { members: MemberOption[] }) {
       avg_lv: Math.round((value.sum / value.count) * 10) / 10,
     }));
   }, [requiredSkills]);
-  const sortedGaps = [...(data?.gaps ?? [])].sort((a, b) => b.is_core - a.is_core || b.gap - a.gap);
-  const gapCount = sortedGaps.filter((row) => row.gap > 0).length;
+  const gapCount = requiredSkills.filter((row) => (row.gap ?? 0) > 0).length;
 
   return (
     <div>
@@ -185,75 +267,59 @@ export function PersonalReportClient({ members }: { members: MemberOption[] }) {
       ) : (
         <>
           <div className="grid gap-3 md:grid-cols-4">
-            <Stat label="요구 기준 보유 Skill" value={`${requiredSkills.filter((row) => row.current_level > 0).length}개`} accent />
+            <Stat label="전체 보유 Skill" value={`${displaySkills.filter((row) => row.current_level > 0).length}개`} accent />
             <Stat label="평균 Skill Level" value={`L${avgLevel.toFixed(1)}`} />
             <Stat label="요구 Skill" value={`${data.gaps.length}개`} />
             <Stat label="보완 필요 Gap" value={`${gapCount}개`} />
           </div>
 
-          <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_0.95fr]">
+          <div className="mt-5">
             <Card title="Sub-skill Family Radar">
               <Radar data={radarData} />
             </Card>
-
-            <Card title={`보유 Skill Level (요구 Skill 기준 · DB 전체 ${data.profile.length}개 별도 보관)`}>
-              <div className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
-                {requiredSkills.map((skill) => (
-                  <div key={skill.skill_id} className="border border-border-soft bg-bg-main/40 p-3">
-                    <div className="mb-2 flex items-start justify-between gap-3">
-                      <div>
-                        <div className="font-bold text-text-main">{skill.skill_name}</div>
-                        <div className="text-xs text-text-muted">
-                          {skill.family_name} · {skill.sub_family_name} · 요구 L{skill.target_level.toFixed(1)}
-                        </div>
-                      </div>
-                      <div className="text-xl font-extrabold text-sk-red">L{skill.current_level.toFixed(1)}</div>
-                    </div>
-                    <div className="h-2 bg-white">
-                      <div className="h-2 bg-sk-red" style={{ width: `${Math.min(100, (skill.current_level / 4) * 100)}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
           </div>
 
-          <Card title="요구 Skill Gap" className="mt-4">
-            <div className="grid gap-3 lg:grid-cols-2">
-              {sortedGaps.map((gap) => {
-                const currentPct = Math.min(100, (gap.current_level / Math.max(gap.target_level, 1)) * 100);
-                const gapPct = Math.min(100, (gap.gap / Math.max(gap.target_level, 1)) * 100);
+          <Card title="개인 Skill / Required Gap" className="mt-4">
+            <div className="mb-3 grid grid-cols-[260px_1fr_150px] gap-3 border-b border-border-soft pb-2 text-xs font-extrabold text-text-muted">
+              <div>Skill</div>
+              <div>현재 Level / 요구 Level</div>
+              <div className="text-right">Gap / 충족여부</div>
+            </div>
+            <div className="space-y-2">
+              {displaySkills.map((gap) => {
                 return (
-                  <div key={gap.skill_id} className="border border-border-soft bg-white p-4">
-                    <div className="mb-3 flex items-start justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          {gap.is_core ? <Badge tone="danger" label="Core" /> : <Badge tone="neutral" label="Required" />}
-                          <span className="font-extrabold text-text-main">{gap.skill_name}</span>
-                        </div>
-                        <div className="mt-1 text-xs text-text-muted">
-                          현재 L{gap.current_level.toFixed(1)} / 요구 L{gap.target_level.toFixed(1)}
-                        </div>
+                  <div key={gap.skill_id} className="grid grid-cols-[260px_1fr_150px] items-center gap-3 border border-border-soft bg-white px-3 py-2">
+                    <div className="min-w-0">
+                      <div className="mb-1 flex items-center gap-2">
+                        {gap.source === "core" ? (
+                          <Badge tone="danger" label="Core" />
+                        ) : gap.source === "individual" ? (
+                          <Badge tone="orange" label="Individual" />
+                        ) : gap.source === "required" ? (
+                          <Badge tone="neutral" label="Required" />
+                        ) : null}
+                        <span className="truncate font-extrabold text-text-main">{gap.skill_name}</span>
                       </div>
-                      <Badge tone={toneByGap(gap.gap)} label={gap.gap <= 0 ? "충족" : `Gap ${gap.gap.toFixed(1)}`} />
+                      <div className="text-xs leading-relaxed text-text-muted">
+                        {gap.family_name} · {gap.sub_family_name}
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-[12px] font-semibold text-text-muted">
-                        <span>현재 보유</span>
-                        <span>L{gap.current_level.toFixed(1)}</span>
+
+                    <LevelScaleBar current={gap.current_level} target={gap.target_level} />
+
+                    <div className="text-right">
+                      <div className="text-lg font-extrabold text-text-main">
+                        L{gap.current_level.toFixed(1)}
                       </div>
-                      <div className="relative h-3 bg-bg-main">
-                        <div className="h-3 bg-sk-red" style={{ width: `${currentPct}%` }} />
+                      <div className="mt-1">
+                        {gap.gap == null ? (
+                          <Badge tone="orange" label="Individual" />
+                        ) : (
+                          <Badge tone={toneByGap(gap.gap)} label={gap.gap <= 0 ? "충족" : `Gap ${gap.gap.toFixed(1)}`} />
+                        )}
                       </div>
-                      <div className="flex items-center justify-between text-[12px] font-semibold text-text-muted">
-                        <span>부족 Gap</span>
-                        <span>{gap.gap <= 0 ? "충족" : `-${gap.gap.toFixed(1)}`}</span>
-                      </div>
-                      <div className="relative h-3 bg-bg-main">
-                        <div
-                          className={`h-3 ${gap.gap <= 0 ? "bg-success" : "bg-warning"}`}
-                          style={{ width: `${gap.gap <= 0 ? 100 : gapPct}%` }}
-                        />
+                      <div className="mt-1 text-xs text-text-muted">
+                        {gap.target_level == null ? "요구 Level 없음" : `요구 L${gap.target_level.toFixed(1)}`}
                       </div>
                     </div>
                   </div>

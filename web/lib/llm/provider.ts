@@ -7,6 +7,7 @@ export interface LlmProvider {
   name: string;
   complete(system: string, messages: LlmMessage[]): Promise<string>;
   completeJson(system: string, messages: LlmMessage[]): Promise<string>;
+  completeGrounded?(system: string, messages: LlmMessage[]): Promise<string>;
 }
 
 import { GeminiProvider } from "./gemini";
